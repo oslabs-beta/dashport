@@ -1,17 +1,16 @@
 import { OakContext, UserProfile } from './types.ts';
 
 /**
- * Takes in the framework the developer wants to use for their SessionManager
+ * Takes in the framework to use for SessionManager
  * 
  * EXAMPLE:
  * 
  *   const sm = new SessionManager('oak');
  * 
- * When using an instance of SessionManager, developers should use
+ * When using an instance of SessionManager, only use
  *   sm.logIn();
  *   sm.logOut();
  *   sm.isAuthenticated();
- *   sm.serializeUser();
  * 
  * @param {string} framework - The name of the server framework to be used
  */
@@ -89,23 +88,6 @@ class SessionManager {
     }
 
     throw new Error('Name of framework passed in is not supported');
-  }
-
-  /**
-   * Takes in a serializer function created by the developer that will return a
-   * serialized ID
-   * 
-   * TODO: Edit serializeUser to take in an array containing multiple serializer
-   * functions 
-   * 
-   * @param {Function} serializer - A serialization function
-   * @param {...*} [args] - Optional arguments that will be passed into the
-   *   serializer
-   * @returns {*} A serialized ID (should be string but can be whatever
-   *   developer wants)
-   */
-  serializeUser(serializer: Function, ...args: any[]): any {
-    return serializer(...args);
   }
 }
 
