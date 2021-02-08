@@ -3,6 +3,7 @@
 import { Application, Session, send, join, log } from './deps.ts'
 import { html, ReactComponents } from './ssrConstants.tsx';
 import router from "./routes.ts";
+import Dashport from '../lib/dashport.ts'
 
 
 // import in Dashport and setup
@@ -10,15 +11,15 @@ import router from "./routes.ts";
 //server middlewares
 
 // SSR
-
 // session with Server Memory
 
 const port = 3000;
-const app = new Application();
-
+const app: Application = new Application();
+const dashport = new Dashport();
+app.use(dashport.initialize())
 
 // session with Redis Database
-const session = new Session({
+const session: Session = new Session({
   framework: "oak",
   store: "redis",
   hostname: "127.0.0.1",

@@ -1,6 +1,7 @@
-import { React } from "../../deps.ts"
 
-const NavBar: any = (props: any) => {
+import { React } from '../../deps.ts';
+
+const NavBar = () => {
   const [clicked, setClick] = (React as any).useState(false)
 
   const openLogin = () => {
@@ -10,8 +11,6 @@ const NavBar: any = (props: any) => {
       setClick(false)
     }
   }
-
-  
 
   return (
     <div>
