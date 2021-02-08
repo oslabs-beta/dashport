@@ -3,12 +3,17 @@ import { OakContext, UserProfile } from './types.ts';
 /**
  * Takes in the framework the developer wants to use for their SessionManager
  * 
- * When using an instance of SessionManager, developers should only use the 4
- * currently existing attributes below
- *   logIn
- *   logOut
- *   isAuthenticated
- *   serializeUser
+ * EXAMPLE:
+ * 
+ *   const sm = new SessionManager('oak');
+ * 
+ * When using an instance of SessionManager, developers should use
+ *   sm.logIn();
+ *   sm.logOut();
+ *   sm.isAuthenticated();
+ *   sm.serializeUser();
+ * 
+ * @param {string} framework - The name of the server framework to be used
  */
 class SessionManager {
   logIn: Function;
@@ -23,25 +28,19 @@ class SessionManager {
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will add an attribute onto the browser's http object. This
-   * will allow sessions to persist by checking if the attribute exists on the
-   * browser's http object
+   * function that will add a dashport.session object onto the browser's http 
+   * object. This will allow information across different requests to persist
    * 
    * TODO: Add other frameworks
    * 
    * @param {string} framework - Name of the framework the developer is using
-   * @returns {Function} The function that adds the Dashport session attribute
-   *   onto the browser's http object
+   * @returns {Function} The function that adds the dashport.session object onto
+   *   the browser's http object
    */
   _logInDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext, userInfo: UserProfile): void {
-        // magic (put persistent session info onto oak's context)
-        ctx.state.dashport.session = { 
-          // sessionID: ???
-          // userID: ???
-          // ???
-        };
+      return function(ctx: OakContext, serializedId: string): void {
+        ctx.state.dashport.session = { userId: serializedId };
       }
     }
 
@@ -50,37 +49,42 @@ class SessionManager {
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will ??? delete the session attribute from the browser's
-   * http object ???
+   * function that will delete the session object on the browser's http object
    * 
    * @param {string} framework - Name of the framework the developer is using
-   * @returns {Function} The function that ??? deletes the session attribute
-   *   from the browser's http object ???
+   * @returns {Function} The function that deletes the session object from the
+   *   browser's http object
    */
   _logOutDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext, userOrSessionId????: string): void {
-        // delete ctx.state.dashport.session???
+      return function(ctx: OakContext): void {
+        delete ctx.state.dashport.session
       }
     }
+
     throw new Error('Name of framework passed in is not supported');
   }
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will ??? check if the session exists on the browser's http
-   * object ??? or if there is a specific user/session ID, check if that matches
-   * ???
+   * function that will check if the userId passed in matches the session
+   * object's userId
    * 
    * TODO: Add other frameworks
    *  
    * @param {string} framework - Name of the framework the developer is using
-   * @returns {Function} Test
+   * @returns {Function} The function that checks if the userId passed in
+   *   matches the session object's userId
    */
   _isAuthenticatedDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext, userOrSessionId????: string): boolean {
-        // check if a user/session ID exists on context.state.dashport.session
+      return function(ctx: OakContext, serializedId: string): boolean {
+        if (ctx.state.dashport.session) {
+          if (serializedId === ctx.state.dashport.session.userId) return true;
+          return false;
+        }
+
+        return false;
       }
     }
 
