@@ -63,7 +63,6 @@ class SessionManager {
         // delete ctx.state.dashport.session???
       }
     }
-
     throw new Error('Name of framework passed in is not supported');
   }
 
@@ -89,23 +88,20 @@ class SessionManager {
   }
 
   /**
-   * Create a random n-digit serial number based on a default serializer we define 
+   * Takes in a serializer function created by the developer that will return a
+   * serialized ID
    * 
-   * TODO: Have an optional parameter to generate serialized IDs based on
-   * a serializer the developer passes in.
-   *  TODO: make multiple serializers possible
+   * TODO: Edit serializeUser to take in an array containing multiple serializer
+   * functions 
    * 
-   * @param {Array} [existingIds] - An optional array that contains existing IDs
-   *   so the serializer will generate a new ID if it already exists
-   * @returns {string} A random but unique serialized ID
+   * @param {Function} serializer - A serialization function
+   * @param {...*} [args] - Optional arguments that will be passed into the
+   *   serializer
+   * @returns {*} A serialized ID (should be string but can be whatever
+   *   developer wants)
    */
-  serializeUser(existingIds?: Array<any>): string {
-    // create a random n-digit ID
-
-    // if existingIds array exists, check if the array includes the generated ID
-    // if it does, generate a new one
-
-    // return the new ID
+  serializeUser(serializer: Function, ...args: any[]): any {
+    return serializer(...args);
   }
 }
 
