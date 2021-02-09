@@ -38,3 +38,7 @@ export interface UserProfile {
   };
   emails: Array<string>;
 }
+
+export interface Serializers {
+  [serializerName: string]: Function;
+}
