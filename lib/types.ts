@@ -19,8 +19,8 @@ export interface OakContext {
 
 /**
  * Different OAuths will return different user information in different
- * structures. Dashport breaks down and reconstructs the user info into the
- * standardized UserProfile below
+ * structures. Dashport strategies should break down and reconstruct the user
+ * info into the standardized UserProfile below
  */
 export interface UserProfile {
   // the ID Dashport has come up with for a user
