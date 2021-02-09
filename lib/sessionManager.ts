@@ -15,14 +15,14 @@ import { OakContext, UserProfile } from './types.ts';
  * @param {string} framework - The name of the server framework to be used
  */
 class SessionManager {
-  logIn: Function;
-  logOut: Function;
-  isAuthenticated: Function;
+  public logIn: Function;
+  public logOut: Function;
+  public isAuthenticated: Function;
   
   constructor(framework: string): void {
-    this.logIn = _logInDecider(framework);
-    this.logOut = _logOutDecider(framework);
-    this.isAuthenticated = _isAuthenticatedDecider(framework);
+    this.logIn = this._logInDecider(framework);
+    this.logOut = this._logOutDecider(framework);
+    this.isAuthenticated = this._isAuthenticatedDecider(framework);
   }
 
   /**
@@ -39,7 +39,7 @@ class SessionManager {
   _logInDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext, serializedId: string): void {
-        ctx.state.dashport.session = { userId: serializedId };
+        ctx.state._dashport.session = { userId: serializedId };
       }
     }
 
@@ -57,7 +57,7 @@ class SessionManager {
   _logOutDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext): void {
-        delete ctx.state.dashport.session
+        delete ctx.state._dashport.session
       }
     }
 
@@ -78,8 +78,8 @@ class SessionManager {
   _isAuthenticatedDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext, serializedId: string): boolean {
-        if (ctx.state.dashport.session) {
-          if (serializedId === ctx.state.dashport.session.userId) return true;
+        if (ctx.state._dashport.session) {
+          if (serializedId === ctx.state._dashport.session.userId) return true;
           return false;
         }
 
