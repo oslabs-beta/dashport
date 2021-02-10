@@ -1,7 +1,7 @@
 import { Router } from './deps.ts';
 import User from "./models/userModel.ts";
 
-const router: Router = new Router();
+const router: any = new Router();
 
 
 export default router;
