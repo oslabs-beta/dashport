@@ -39,6 +39,18 @@ export interface UserProfile {
   emails: Array<string>;
 }
 
+/**
+ * The _serializers object on Dashport that contains serializer functions
+ */
 export interface Serializers {
   [serializerName: string]: Function;
+}
+
+/**
+ * The _strategies object on Dashport that contains strategy classes
+ * 
+ * TODO: Make this work ???
+ */
+export interface Strategies {
+  [stratName: string]: any; // Is this how to do it???????
 }
