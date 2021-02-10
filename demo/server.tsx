@@ -15,20 +15,20 @@ import Dashport from '../lib/dashport.ts'
 
 const port = 3000;
 const app: Application = new Application();
-const dashport = new Dashport();
-app.use(dashport.initialize())
+const dashport = new Dashport('oak');
+// app.use(dashport.initialize())
 
 // session with Redis Database
-const session: Session = new Session({
-  framework: "oak",
-  store: "redis",
-  hostname: "127.0.0.1",
-  port: 6379,
-});
+// const session: Session = new Session({
+//   framework: "oak",
+//   store: "redis",
+//   hostname: "127.0.0.1",
+//   port: 6379,
+// });
 
 // Initialize Session
-await session.init();
-app.use(session.use()(session));
+// await session.init();
+// app.use(session.use()(session));
 
 // Initialize Session
 
@@ -54,13 +54,32 @@ app.use(session.use()(session));
 
 
 // Initialize Dashport fater sesssion
-
 // router
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-//Error handler
-app.use(async (ctx, next) => {
+///////////////////////////////////////////// Testing out dashport.authenticate
+// class AlvinTest {
+//   async authorize(ctx: any, next: any) {
+//     ctx.state._dashingportingtest = { 'test': 'hey' }
+//     await next();
+//   }
+// }
+
+// dashport.addStrategy('AlvinTest', new AlvinTest());
+
+// router.get('/test', 
+//   dashport.test,
+//   dashport.authenticate('google'),
+//   dashport.test,
+//   (ctx: any, next: any) => {
+//     ctx.response.body = 'Hello World';
+//   }
+// )
+////////////////////////////////////////////////////////////
+
+//Error handling
+app.use(async (ctx: any, next: any) => {
   try{
     await next();
   } catch (error) {
@@ -69,8 +88,28 @@ app.use(async (ctx, next) => {
   }
 });
 
+/////////////////////// Copied from online
+// app.use(async (ctx: any, next: any) => {
+//   try {
+//     await next();
+//   } catch (err) {
+//     if (isHttpError(err)) {
+//       switch (err.status) {
+//         case Status.NotFound:
+//           // handle NotFound
+//           break;
+//         default:
+//           // handle other statuses
+//       }
+//     } else {
+//       // rethrow if you can't handle the error
+//       throw err;
+//     }
+//   }
+// });
+
 //response tracking
-app.use(async (ctx, next) => {
+app.use(async (ctx: any, next: any) => {
   await next();
   const rt = ctx.response.headers.get("X-Response-Time");
   console.log(
@@ -78,7 +117,7 @@ app.use(async (ctx, next) => {
   );
 });
 
-app.use(async (ctx, next) => {
+app.use(async (ctx: any, next: any) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
@@ -86,7 +125,7 @@ app.use(async (ctx, next) => {
 });
 
 //page routing
-app.use((ctx) => {
+app.use((ctx: any) => {
 
    if (ctx.request.url.pathname === '/') { 
      ctx.response.type = `text/html`
@@ -105,7 +144,10 @@ app.use((ctx) => {
 
 
 
-// 
+//Error handler
+app.use(async (ctx) => {
+  ctx.throw(500);
+});
 
 
 //listening on port
