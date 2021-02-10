@@ -1,19 +1,24 @@
-//Path for Deno
-export { join, dirname } from "https://deno.land/std@0.74.0/path/mod.ts";
+// Path for Deno
+export {
+  join,
+  dirname
+} from "https://deno.land/std@0.74.0/path/mod.ts";
 
-//'Console log' module
+// 'Console log' module
 export * as log from "https://deno.land/std/log/mod.ts";
 
-//?
-export { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
+// Oak
+export {
+  Application,
+  Router,
+  send,
+} from 'https://deno.land/x/oak@v6.3.1/mod.ts';
 
-//mongo db
+// MongoDB
 export { MongoClient } from "https://deno.land/x/mongo@v0.12.1/mod.ts";
 
-// deno session
-export { Session } from "https://deno.land/x/session/mod.ts";
-
-// import { Dashport } from '';
+// Deno Sessions
+export { Session } from "https://deno.land/x/session@1.1.0/mod.ts";
 
 export { default as React } from "https://dev.jspm.io/react@16.14.0";
 

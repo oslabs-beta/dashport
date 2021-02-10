@@ -36,7 +36,7 @@ class SessionManager {
    * @returns {Function} The function that adds the dashport.session object onto
    *   the browser's http object
    */
-  _logInDecider(framework: string): Function {
+  private _logInDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext, serializedId: string): void {
         ctx.state._dashport.session = { userId: serializedId };
@@ -50,11 +50,13 @@ class SessionManager {
    * Takes in the name of the framework the developer is using and returns a
    * function that will delete the session object on the browser's http object
    * 
+   * TODO: Add other frameworks
+   * 
    * @param {string} framework - Name of the framework the developer is using
    * @returns {Function} The function that deletes the session object from the
    *   browser's http object
    */
-  _logOutDecider(framework: string): Function {
+  private _logOutDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext): void {
         delete ctx.state._dashport.session
@@ -75,7 +77,7 @@ class SessionManager {
    * @returns {Function} The function that checks if the userId passed in
    *   matches the session object's userId
    */
-  _isAuthenticatedDecider(framework: string): Function {
+  private _isAuthenticatedDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext, serializedId: string): boolean {
         if (ctx.state._dashport.session) {
