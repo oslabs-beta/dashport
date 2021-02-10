@@ -102,9 +102,14 @@ class Dashport {
    * 
    *   dashport.addStrategy('google', GoogleStrategy);
    * 
-   * EXAMPLE: Using authenticate as a middleware
+   * EXAMPLE: Using authenticate as a middleware in Oak
    * 
-   *   dashport.authenticate('google');
+   *   router.get('/test',
+   *     dashport.authenticate('google'),
+   *     (ctx: OakContext, next: any) => {
+   *       ctx.response.body = 'Hello World';
+   *     }
+   *   );
    * 
    * @param {string} strategyName - The name of a strategy that was added
    * @returns {Function} The middleware function (differs depending on server framework)
