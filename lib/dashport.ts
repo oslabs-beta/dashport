@@ -30,7 +30,6 @@ class Dashport {
   // also checks to see if there is an existing session
   // onyx appends methods to the passed-in state, then checks for a userID and deserializes and returns their info
 
-
   /**
    * Takes in a framework and the current instance of dashport and returns a
    * function that will become dashport's initialize method. This method is run
@@ -116,6 +115,12 @@ class Dashport {
    */
   public authenticate(strategyName: string): Function {
     if (this._framework === 'oak') {
+      // PART OF DEBATING IF NEEDED
+      //   Authenticate should be checking URL to tell if
+      //     1. logging in first time
+      //     2. successful OAuth
+      //     3. unsuccessful OAuth
+      
       return async (ctx: OakContext, next: any) => {
         if (this._strategies[strategyName] === undefined) {
           // is ctx.throw the right way to handle an error?
@@ -145,9 +150,13 @@ class Dashport {
   // }
   ///////////////////////////////////////////////////////////
 
-  // public authCbHandler(middleware: Function) {
+  // PART OF DEBATING IF NEEDED
+  public authCbHandler(strategyName: string) {
+    if (this._framework === 'oak') {
+    }
 
-  // }
+    throw new Error('Name of current framework is not supported');
+  }
 
   /**
    * Takes in a function that the developer specifies. This function will be 
