@@ -35,9 +35,9 @@ class SessionManager {
    * @returns {Function} The function that adds the dashport.session object onto
    *   the browser's http object
    */
-  private _logInDecider(framework: string, dashport: Dashport): Function {
+  private _logInDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext, serializedId: string): void {
+      return function(ctx: OakContext, dashport: Dashport, serializedId: string): void {
         if (ctx.state._dashport) {
           ctx.state._dashport.session = serializedId;
           dashport._sId = serializedId;
