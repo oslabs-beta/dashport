@@ -1,4 +1,4 @@
-import { OakContext } from './types.ts';
+import { OakContext, Serializers } from './types.ts';
 import Dashport from './dashport.ts';
 
 /**
@@ -84,7 +84,7 @@ class SessionManager {
    * @param {Object} serializers - An object containing serializer functions
    * @returns {string} A serialized ID
    */
-  public serialize(serializers): string {
+  public serialize(serializers: Serializers): string {
     // Object.values(serializers)[0] returns the first key/value pair's
     // value. We are then invoking it (since it should be a function) and
     // returning a serialized ID
