@@ -1,4 +1,4 @@
-import { OakContext, Serializers, Strategies } from './types.ts';
+import { OakContext, Serializers, Strategies, UserProfile } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -53,16 +53,15 @@ class Dashport {
    * Takes in a strategy name that should exist on this._strategies. The
    * strategy will need to be have been added by the developer.
    * 
-   * Depending on the framework being used, authenticate returns an async
-   * function that will serve as a middleware function.
+   * Authenticate returns an async function depending on the framework being
+   * used, that will serve as a middleware function.
    * 
    * In OAuth, there is a lot of back and forth communication between the
-   * client, the app, and the OAuth provider, when a user begins a sign in to
-   * the OAuth provider. Tokens are sent back and forth and user data gets sent
-   * back at the end. The middleware function that is returned from the
-   * 'authenticate' method bundles up this functionality by having multiple
-   * checks to see what stage of the OAuth cycle the login process is in, and
-   * executes code accordingly. This allows one method to be used for a seamless
+   * client, the app, and the OAuth provider, when a user want to sign in.
+   * Tokens are sent back and forth and user data gets sent back at the end. 
+   * The middleware function that is returned from the 'authenticate' method 
+   * bundles up this functionality by executing code depending if a user has
+   * been authenticated or not. This allows one method to be used for a seamless
    * OAuth process.
    * 
    * EXAMPLE: Adding a strategy
@@ -85,36 +84,47 @@ class Dashport {
    * @returns {Function} The middleware function (differs depending on server framework)
    */
   public authenticate(stratName: string): Function {
-    const self = this;
+    const self: Dashport = this;
 
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
     // ALL strategies made for Dashport MUST have an 'authorize' method that on
-    // successful authentication returns the userData
+    // successful authentication returns the userData in the form of UserProfile
     if (this._strategies[stratName].authorize === undefined) {
       throw new Error('ERROR in authenticate: This strategy does not have an \'authorize\' method.');
     }
 
     if (this._framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
-        // Check if a session object exists (created by SessionManager.logIn)
+        if (ctx.state._dashport === undefined) {
+          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
+        }
+
+        // check if a session object exists (created by SessionManager.logIn).
+        // If it exists, check if the session ID matches. If it does, user has
+        // already been authenticated, so user can go to next middleware
         if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
             await next();
           }
         }
 
-        // Uses the specified strategy's authorize method to get userData
-        const userData = await this._strategies[stratName].authorize(ctx, next);
-        
-        // If users are successfully authorized, Dashport strategies should add
-        // the user info onto its response. By checking to see if the userInfo 
-        // property exists on the res, we know the user has been authenticated
-        const serializedId = self._serialize();
+        // If above check is not passed, user must be authenticated (again), so
+        // call the requested strategy's 'authorize' method.
+        const userData: UserProfile | null = await self._strategies[stratName].authorize(ctx, next);
 
+        if (userData === null) {
+          throw new Error('User failed to authenticate');
+        }
+
+        // serializedId will be obtained by calling SessionManager's serialize
+        // function, which will invoke the serializer(s) the developer specified
+        const serializedId: string = self._sm.serialize(self._serializers, userData);
+        
         // use SessionManager's logIn method to create a session object on
-        // ctx.state._dashport and assign it the serialized ID
+        // ctx.state._dashport and to assign serializedId to the _sId property
+        // of this instance of Dashport
         self._sm.logIn(ctx, self, serializedId);
 
         await next();
