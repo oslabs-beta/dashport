@@ -1,18 +1,4 @@
-import { OakContext, Serializers, Strategies } from './types.ts';
-/**
- * import Authenticate from Authenticate.ts
- */
-
-/***** Some person that wants to use Dashport, in their server file, they would
-****** do below
-
-import { Dashport } from 'Our URL Here';
-
-const dp = new Dashport('oak');
-
-app.use(dp.initialize())
-
-*/
+import { OakContext, Serializers, Strategies, UserProfile } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -29,7 +15,7 @@ class Dashport {
     this._sId = '';
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
-    this.initialize = this._initializeDecider(frmwrk, this);
+    this.initialize = this._initializeDecider(frmwrk);
     this.authenticate = this.authenticate.bind(this);
   }
 
@@ -44,7 +30,7 @@ class Dashport {
    * @param {Dashport} dashport - The current instance of dashport
    * @returns {Function} The function that will be dashport's intialize method
    */
-  private _initializeDecider(framework: string, dashport: Dashport): Function {
+  private _initializeDecider(framework: string): Function {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state === undefined) {
@@ -68,16 +54,15 @@ class Dashport {
    * Takes in a strategy name that should exist on this._strategies. The
    * strategy will need to be have been added by the developer.
    * 
-   * Depending on the framework being used, authenticate returns an async
-   * function that will serve as a middleware function.
+   * Authenticate returns an async function depending on the framework being
+   * used, that will serve as a middleware function.
    * 
    * In OAuth, there is a lot of back and forth communication between the
-   * client, the app, and the OAuth provider, when a user begins a sign in to
-   * the OAuth provider. Tokens are sent back and forth and user data gets sent
-   * back at the end. The middleware function that is returned from the
-   * 'authenticate' method bundles up this functionality by having multiple
-   * checks to see what stage of the OAuth cycle the login process is in, and
-   * executes code accordingly. This allows one method to be used for a seamless
+   * client, the app, and the OAuth provider, when a user want to sign in.
+   * Tokens are sent back and forth and user data gets sent back at the end. 
+   * The middleware function that is returned from the 'authenticate' method 
+   * bundles up this functionality by executing code depending if a user has
+   * been authenticated or not. This allows one method to be used for a seamless
    * OAuth process.
    * 
    * EXAMPLE: Adding a strategy
@@ -100,13 +85,13 @@ class Dashport {
    * @returns {Function} The middleware function (differs depending on server framework)
    */
   public authenticate(stratName: string): Function {
-    const self = this;
+    const self: Dashport = this;
 
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
-    // ALL strategies made for Dashport MUST have an 'authorize' method that
-    // is a middleware
+    // ALL strategies made for Dashport MUST have an 'authorize' method that on
+    // successful authentication returns the userData in the form of UserProfile
     if (this._strategies[stratName].authorize === undefined) {
       throw new Error('ERROR in authenticate: This strategy does not have an \'authorize\' method.');
     }
@@ -114,11 +99,14 @@ class Dashport {
     if (this._framework === 'oak') {
 
       return async (ctx: OakContext, next: any) => {
+        if (ctx.state._dashport === undefined) {
+          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
+        }
 
-        // last and persistent step in 'authenticate' process
-        //   Check if a session object exists (created by SessionManager.logIn
-        //   in 2nd step)
-        if (ctx.state._dashport) {   ///this breaks because you cannot check a key of an undefined object.  
+        // check if a session object exists (created by SessionManager.logIn).
+        // If it exists, check if the session ID matches. If it does, user has
+        // already been authenticated, so user can go to next middleware
+        if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
             await next();
           }
@@ -137,8 +125,25 @@ class Dashport {
             await next();
           }
         }
-        let authData:any = await this._strategies[stratName].router(ctx, next);
-        console.log('142Dash', authData);
+
+        // If above check is not passed, user must be authenticated (again), so
+        // call the requested strategy's 'authorize' method.
+        const authData: any = await self._strategies[stratName].authorize(ctx, next);
+        
+        if (authData === null) {
+          throw new Error('User failed to authenticate');
+        }
+
+        // serializedId will be obtained by calling SessionManager's serialize
+        // function, which will invoke the serializer(s) the developer specified
+        const serializedId: string = self._sm.serialize(self._serializers, userData);
+        
+        // use SessionManager's logIn method to create a session object on
+        // ctx.state._dashport and to assign serializedId to the _sId property
+        // of this instance of Dashport
+        self._sm.logIn(ctx, self, serializedId);
+
+        await next();
       }
     }
     // console.log('this._strategies in dashport.authenticate:', this._strategies);
@@ -161,19 +166,41 @@ class Dashport {
   // }
 
   /**
-   * Takes in a function that the developer specifies. This function will be 
-   * used to serialize IDs in this.authenticate.
+   * Takes in a name for a serializer function and the serializer function the 
+   * developer specifies.
+   * 
+   * The serializer function needs to take in one parameter which will be the
+   * user data in the form of an object.
+   * The serializer function needs to specify what the developer wants to do
+   * with the user data (store it somewhere, add some info to response body, 
+   * etc).
+   * The serializer function needs to specify how to create a serialized ID.
+   * The serializer function needs to return the serialized ID.
    * 
    * EXAMPLE
    * 
-   *   dashport.addSerializer('1', () => { return Math.random() * 10000 })
+   *   dashport.addSerializer('1', (userInfo) => { 
+   *     function getSerializedId () {
+   *       return Math.random() * 10000;
+   *     }
+   * 
+   *     const serializedId = getSerializedId();
+   * 
+   *     // do something with userInfo like store in a database
+   * 
+   *     return serializedId;
+   *   });
    * 
    * @param {string} serializerName - A name to give the serializer if it needs
    *   to be deleted later
    * @param {Function} serializer - The function that will create serialized IDs
    */
   public addSerializer(serializerName: string, serializer: Function): void {
-    // the below if statement is currently not needed. TODO in _serialize method
+    if (serializer.length !== 1) {
+      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+    }
+    
+    // the below if statement is currently not needed. TODO in SessionManager.serialize method
     // if (serializerName === 'all') {
     //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
     // }
@@ -199,26 +226,6 @@ class Dashport {
     }
     
     delete this._strategies[serializerName];
-  }
-
-  /**
-   * Uses the first serializer function in this._serializers to create a
-   * serialized ID.
-   * 
-   * TODO: Allow a 'name' parameter to be passed in that specifies which
-   * serializer to use. If name === 'all', use all the serializers in a chain.
-   * 
-   * TODO: Allow optional parameters to be passed into the serializer to be
-   * used. If chaining multiple serializers is implemented, pass params into the
-   * first serializer function.
-   * 
-   * @returns {string} A serialized ID
-   */
-  private _serialize(): string {
-    // Object.values(this._strategies)[0] returns the first key/value pair's
-    // value. We are then invoking it (since it should be a function) and
-    // returning a serialized ID
-    return Object.values(this._strategies)[0]();
   }
 
   /**
