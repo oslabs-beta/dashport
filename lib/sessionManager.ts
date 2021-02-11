@@ -1,4 +1,5 @@
-import { OakContext, UserProfile } from './types.ts';
+import { OakContext } from './types.ts';
+import Dashport from './dashport.ts';
 
 /**
  * Takes in the framework to use for SessionManager
@@ -17,19 +18,19 @@ import { OakContext, UserProfile } from './types.ts';
 class SessionManager {
   public logIn: Function;
   public logOut: Function;
-  public isAuthenticated: Function;
   
-  constructor(framework: string): void {
+  constructor(framework: string) {
     this.logIn = this._logInDecider(framework);
     this.logOut = this._logOutDecider(framework);
-    this.isAuthenticated = this._isAuthenticatedDecider(framework);
   }
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will add a dashport.session object onto the browser's http 
-   * object. This will allow information across different requests to persist
+   * function that will add a session object onto the browser's http  object.
+   * This will allow information across different requests to persist.
    * 
+   * TODO: Add an optional parameter on the returned function that takes in an
+   *   expiration date for the session
    * TODO: Add other frameworks
    * 
    * @param {string} framework - Name of the framework the developer is using
@@ -38,12 +39,15 @@ class SessionManager {
    */
   private _logInDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext, serializedId: string): void {
-        ctx.state._dashport.session = { userId: serializedId };
+      return function(ctx: OakContext, dashport: Dashport, serializedId: string): void {
+        if (ctx.state._dashport) {
+          ctx.state._dashport.session = serializedId;
+          dashport._sId = serializedId;
+        } else throw new Error('ERROR in _logInDecider: ctx.state._dashport does not exist. Please use dashport.initialize()')
       }
     }
 
-    throw new Error('Name of framework passed in is not supported');
+    throw new Error('ERROR in _logInDecider: Name of framework passed in is not supported.');
   }
 
   /**
@@ -63,33 +67,7 @@ class SessionManager {
       }
     }
 
-    throw new Error('Name of framework passed in is not supported');
-  }
-
-  /**
-   * Takes in the name of the framework the developer is using and returns a
-   * function that will check if the userId passed in matches the session
-   * object's userId
-   * 
-   * TODO: Add other frameworks
-   *  
-   * @param {string} framework - Name of the framework the developer is using
-   * @returns {Function} The function that checks if the userId passed in
-   *   matches the session object's userId
-   */
-  private _isAuthenticatedDecider(framework: string): Function {
-    if (framework = 'oak') {
-      return function(ctx: OakContext, serializedId: string): boolean {
-        if (ctx.state._dashport.session) {
-          if (serializedId === ctx.state._dashport.session.userId) return true;
-          return false;
-        }
-
-        return false;
-      }
-    }
-
-    throw new Error('Name of framework passed in is not supported');
+    throw new Error('ERROR in _logOutDecider: Name of framework passed in is not supported.');
   }
 }
 
