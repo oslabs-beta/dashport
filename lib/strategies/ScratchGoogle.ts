@@ -64,6 +64,7 @@ export default class GoogleStrategy {
       console.log('missing required args')
     }
     this.options = options;
+    // preStep1 request permission 
     // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
     let paramArray: string[][] = Object.entries(options);
     let paramString: string = '';
@@ -84,26 +85,25 @@ export default class GoogleStrategy {
   }
   
   async router(ctx:any, next:any) {
-    if(!ctx.request.url.search) await this.authorize(ctx, next);
-    if(ctx.request.url.search.slice(1, 5)=== 'code') await this.parseResponse(ctx, next);
+    // GO_Step 1 Request Permission
+    if(!ctx.request.url.search) return await this.authorize(ctx, next);
+    // GO_Step 2-3 Exchange code for Token
+    if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
     // if(ctx.state._dashport.coolio===true) await dashport._sm(ctx, next);
   }
   
   // sends the programatically constructed uri to Google's oauth 2.0 server (step 2)
   async authorize(ctx: OakContext, next: any) {
-    await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);                   
+    console.log('in GoogleStrategy.authorize');
+    return await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);                   
   }
 
-  //http://localhost:3000/?
-  //code=4%2F0AY0e-g5PpXeDhrj6VoC4bm4rgNxNw_X1VkK141KE66xjRdtPeIk6w9POa4q_a52Cox4_NQ&
-  // scope=email+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&
-  // authuser=0&
-  // prompt=none
-  
+  // 4%2F0AY0e-g6vCsnt5Gwl8ZyRJibp-CsWF93_0LH0r6J0aGHS8pWDkYm29y-J4mrxEM8HqCopEQ
+  // 4%2F0AY0e-g6vCsnt5Gwl8ZyRJibp-CsWF93_0LH0r6J0aGHS8pWDkYm29y-J4mrxEM8HqCopEQ
   // handle oauth 2.0 server response (step 4)
   // sample error response: https://oauth2.example.com/auth?error=access_denied
   // sample auth code response: https://oauth2.example.com/auth?code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7
-  async parseResponse(ctx:any, next:Function){
+  async getAuthToken(ctx:any, next:Function){
     const OGURI: string = ctx.request.url.search;
     if(OGURI.includes('error')){
       // do error shit
@@ -114,42 +114,80 @@ export default class GoogleStrategy {
     // splits the string at the ampersand(&), storing the string with the access_token in URI2[0] 
     // and the other parameters at URI2[n]
     const URI2: string[] = URI1[1].split('&');
-    const code: string = URI2[0];
-    // console.log('code: ', code);
-    console.log("before the fetch breaks it, here's the code: ", code)
+    const code: string = this.parseCode(URI2[0]);
     const options:object = {
       method: 'POST',
       headers: { "content_type": "application/x-www-form-urlencoded"},
-      body: {
-        "client_id": this.options.client_id,
-        "client_secret": this.options.client_secret,
-        "code": code,
-        "grant_type": this.options.grant_type,
-        "redirect_uri": this.options.redirect_uri
-      }
-    }
+      body: JSON.stringify({
+        client_id: this.options.client_id,
+        client_secret: this.options.client_secret,
+        code: code,
+        grant_type: this.options.grant_type,
+        redirect_uri: this.options.redirect_uri
+      })
+    } 
     //   method:'POST', 
     //   headers:{'Authorization': 'Basic ' + BasicKey, "Content-Type": "application/x-www-form-urlencoded"}, 
     //   body: `code=${code}&redirect_uri=${redirect_uri}&grant_type=authorization_code` 
-    await fetch('https://oauth2.googleapis.com/token', options)
-      .then(data => {
-        console.log('does the json break it?')
-        data.json()
-        console.log("let's see")
-      })
-      .then(parsed => {
-        console.log('parsed137'+parsed);
-        this.parseToken(parsed);
-      })
-      .catch(err => {
-        console.log('error: line 145 of scratchGoogle'+ err)
-      });
-    // prompt user to call swapForToken with the code and all the shit they need to add
-    // this.swapForToken(code);
+    // return await fetch('https://oauth2.googleapis.com/token', options)
+    //   .then(data => data.json())
+    //   .then(parsed => this.getAuthData(parsed))
+    //   .catch(err => {
+    //     console.log('error: line 141 of scratchGoogle'+ err)
+    //   });
+
+    try {
+      let data: any = await fetch('https://oauth2.googleapis.com/token', options)
+      data = await data.json();
+      return this.getAuthData(data);
+    } catch(err) {
+      console.log('error: line 141 of scratchGoogle'+ err)
+    }
   }
-  
-  async parseToken(parsed:any){ 
-    console.log('146 butts');
+
+  async getAuthData(parsed:any){ 
+    // const token: string = parsed['id_token']
+    const authData:any = { tokenData:{ access_token: parsed.access_token, expires_in: parsed.expires_in, scope: parsed.scope, token_type:parsed.token_type, id_token:parsed.id_token}}    ////// ALEX ASKS FOR BETTER TYPING
+    const options:any = {headers:{'Authorization':'Bearer '+parsed.access_token}};
+    // fetch('https://www.googleapis.com/oauth2/v2/userinfo',options)
+    //   .then(parsed => parsed.json())
+    //   .then(reallyParse => {
+    //     authData.userInfo = reallyParse
+    //     console.log('Scratch149', authData.userInfo);
+    //     return authData;
+    //   });
+
+    try {
+      let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',options)
+      authData.userInfo = await data.json();
+      console.log('Scratch149', authData.userInfo);
+      return authData;
+    } catch(err) {
+      console.log('error on line 165', err);
+    }
+  }
+
+  parseCode(encodedCode:string):string{
+    let code: string = encodedCode;
+    const replacements: { [name: string] : string } = {
+      "%24": "$",
+      "%26": "&",
+      "%2B": "+",
+      "%2C": ",",
+      "%2F": "/",
+      "%3A": ":",
+      "%3B": ";",
+      "%3D": "=",
+      "%3F": "?",
+      "%40": "@"
+    }
+    const toReplaceArray: string[] = Object.keys(replacements);
+    for(let i = 0; i < toReplaceArray.length; i++){
+      while(encodedCode.includes(toReplaceArray[i])){
+        encodedCode = encodedCode.replace(toReplaceArray[i], replacements[toReplaceArray[i]]);
+      }
+    }
+    return encodedCode; 
   }
 }
     /**

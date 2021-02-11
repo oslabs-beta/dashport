@@ -57,9 +57,9 @@ dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
   redirect_uri: 'http://localhost:3000/test', 
   response_type: 'code', 
-  scope: 'https://www.googleapis.com/auth/userinfo.email',
-  client_secret:'e44hA4VIInrJDu_isCDl3YCr',
-  grant_type:'authorization_code',
+  scope: 'profile email openid',
+  client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
+  grant_type: 'authorization_code',
 }, () => null));
 /*
 Google OAuth2 API, v2
@@ -75,12 +75,12 @@ scope=email%20openid%20https://www.googleapis.com/auth/userinfo.email&authuser=0
 prompt=none
 
 */
+
 router.get('/test', 
-  dashport.test,
   dashport.authenticate('google'),
   dashport.test,
   (ctx: any, next: any) => {
-    console.log(ctx.response.url)
+    console.log('server 83', ctx.response.url)
     ctx.response.body = 'Hello Waye';
   }
 )
@@ -105,7 +105,7 @@ app.use(async (ctx: any, next: any) => {
   try{
     await next();
   } catch (error) {
-    console.log('in error handling with error', error);
+    console.log('server 108', error);
     throw error;
   }
 });

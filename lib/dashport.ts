@@ -26,6 +26,7 @@ class Dashport {
   public initialize: Function;
 
   constructor(frmwrk: string) {
+    this._sId = '';
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
     this.initialize = this._initializeDecider(frmwrk, this);
@@ -111,33 +112,35 @@ class Dashport {
     }
 
     if (this._framework === 'oak') {
+
       return async (ctx: OakContext, next: any) => {
+
         // last and persistent step in 'authenticate' process
         //   Check if a session object exists (created by SessionManager.logIn
         //   in 2nd step)
-        if (ctx.state._dashport.session) {
+        if (ctx.state._dashport) {   ///this breaks because you cannot check a key of an undefined object.  
           if (ctx.state._dashport.session === self._sId) {
             await next();
           }
+  
+          // 2nd step in 'authenticate' process
+          //   If users are successfully authorized, Dashport strategies should add
+          //   the user info onto its response. By checking to see if the userInfo 
+          //   property exists on the res, we know the user has been authenticated
+          if (ctx.request.body._dashport.userInfo) {
+            const serializedId = self._serialize();
+  
+            // use SessionManager's logIn method to create a session object on
+            // ctx.state._dashport and assign it the serialized ID
+            self._sm.logIn(ctx, self, serializedId);
+  
+            await next();
+          }
         }
-
-        // 2nd step in 'authenticate' process
-        //   If users are successfully authorized, Dashport strategies should add
-        //   the user info onto its response. By checking to see if the userInfo 
-        //   property exists on the res, we know the user has been authenticated
-        if (ctx.request.body._dashport.userInfo) {
-          const serializedId = self._serialize();
-
-          // use SessionManager's logIn method to create a session object on
-          // ctx.state._dashport and assign it the serialized ID
-          self._sm.logIn(ctx, self, serializedId);
-
-          await next();
-        }
-
-        await this._strategies[strategyName].router(ctx, next);
+        let authData:any = await this._strategies[stratName].router(ctx, next);
+        console.log('142Dash', authData);
       }
-``    }
+    }
     // console.log('this._strategies in dashport.authenticate:', this._strategies);
     // await this._strategies['AlvinTest'].authorize(ctx, next);
 
@@ -146,7 +149,7 @@ class Dashport {
 
   //////////////////////////// Used in '/test' route in server.tsx
   async test(ctx: OakContext, next: any) {
-   console.log('test', ctx.request.url.search)
+   console.log('dashport 150', ctx.request.url.search)
     // console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
     await next();
   }
