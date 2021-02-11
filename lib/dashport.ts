@@ -18,9 +18,6 @@ class Dashport {
     this.authenticate = this.authenticate.bind(this);
   }
 
-  // also checks to see if there is an existing session
-  // onyx appends methods to the passed-in state, then checks for a userID and deserializes and returns their info
-
   /**
    * Takes in a framework and the current instance of dashport and returns a
    * function that will become dashport's initialize method. This method is run
@@ -108,9 +105,6 @@ class Dashport {
           if (ctx.state._dashport.session === self._sId) {
             await next();
           }
-
-          // if unable to authenticate, take user to login process
-          await this._strategies[stratName].authorize(ctx, next);
         }
 
         // 2nd step in 'authenticate' process
