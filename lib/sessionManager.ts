@@ -1,4 +1,4 @@
-import OakContext from './types.ts';
+import { OakContext } from './types.ts';
 import Dashport from './dashport.ts';
 
 /**
@@ -29,6 +29,8 @@ class SessionManager {
    * function that will add a session object onto the browser's http  object.
    * This will allow information across different requests to persist.
    * 
+   * TODO: Add an optional parameter on the returned function that takes in an
+   *   expiration date for the session
    * TODO: Add other frameworks
    * 
    * @param {string} framework - Name of the framework the developer is using
