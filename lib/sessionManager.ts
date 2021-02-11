@@ -27,8 +27,8 @@ class SessionManager {
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will add a dashport.session object onto the browser's http 
-   * object. This will allow information across different requests to persist
+   * function that will add a session object onto the browser's http  object.
+   * This will allow information across different requests to persist.
    * 
    * TODO: Add other frameworks
    * 
@@ -39,11 +39,11 @@ class SessionManager {
   private _logInDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext, serializedId: string): void {
-        ctx.state._dashport.session = { userId: serializedId };
+        if (ctx.state._dashport) ctx.state._dashport.session = serializedId;
       }
     }
 
-    throw new Error('Name of framework passed in is not supported');
+    throw new Error('ERROR in _logInDecider: Name of framework passed in is not supported');
   }
 
   /**
@@ -63,7 +63,7 @@ class SessionManager {
       }
     }
 
-    throw new Error('Name of framework passed in is not supported');
+    throw new Error('ERROR in _logOutDecider: Name of framework passed in is not supported');
   }
 
   /**
@@ -89,7 +89,7 @@ class SessionManager {
       }
     }
 
-    throw new Error('Name of framework passed in is not supported');
+    throw new Error('ERROR in _isAuthenticatedDecider: Name of framework passed in is not supported');
   }
 }
 
