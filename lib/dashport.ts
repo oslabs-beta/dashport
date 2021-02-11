@@ -90,27 +90,24 @@ class Dashport {
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
-    // ALL strategies made for Dashport MUST have an 'authorize' method that
-    // is a middleware
+    // ALL strategies made for Dashport MUST have an 'authorize' method that on
+    // successful authentication returns the userData
     if (this._strategies[stratName].authorize === undefined) {
       throw new Error('ERROR in authenticate: This strategy does not have an \'authorize\' method.');
     }
 
     if (this._framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
-        // Check if a session object exists (created by SessionManager.logIn in
-        // 2nd step)
+        // Check if a session object exists (created by SessionManager.logIn)
         if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
             await next();
           }
         }
-        
-        // 1st step in 'authenticate' process
-        // Uses the specified strategy's authorize method to begin login process
+
+        // Uses the specified strategy's authorize method to get userData
         const userData = await this._strategies[stratName].authorize(ctx, next);
         
-        // 2nd step in 'authenticate' process
         // If users are successfully authorized, Dashport strategies should add
         // the user info onto its response. By checking to see if the userInfo 
         // property exists on the res, we know the user has been authenticated
@@ -135,19 +132,41 @@ class Dashport {
   ///////////////////////////////////////////////////////////
 
   /**
-   * Takes in a function that the developer specifies. This function will be 
-   * used to serialize IDs in this.authenticate.
+   * Takes in a name for a serializer function and the serializer function the 
+   * developer specifies.
+   * 
+   * The serializer function needs to take in one parameter which will be the
+   * user data in the form of an object.
+   * The serializer function needs to specify what the developer wants to do
+   * with the user data (store it somewhere, add some info to response body, 
+   * etc).
+   * The serializer function needs to specify how to create a serialized ID.
+   * The serializer function needs to return the serialized ID.
    * 
    * EXAMPLE
    * 
-   *   dashport.addSerializer('1', () => { return Math.random() * 10000 })
+   *   dashport.addSerializer('1', (userInfo) => { 
+   *     function getSerializedId () {
+   *       return Math.random() * 10000;
+   *     }
+   * 
+   *     const serializedId = getSerializedId();
+   * 
+   *     // do something with userInfo like store in a database
+   * 
+   *     return serializedId;
+   *   });
    * 
    * @param {string} serializerName - A name to give the serializer if it needs
    *   to be deleted later
    * @param {Function} serializer - The function that will create serialized IDs
    */
   public addSerializer(serializerName: string, serializer: Function): void {
-    // the below if statement is currently not needed. TODO in _serialize method
+    if (serializer.length !== 1) {
+      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+    }
+    
+    // the below if statement is currently not needed. TODO in SessionManager.serialize method
     // if (serializerName === 'all') {
     //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
     // }
