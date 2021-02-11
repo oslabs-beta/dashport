@@ -12,7 +12,6 @@ const dp = new Dashport('oak');
 
 app.use(dp.initialize())
 
-app.use(passport.initialize());
 */
 
 class Dashport {
@@ -96,7 +95,7 @@ class Dashport {
    * 
    * Depending on the framework being used, authenticate returns an async
    * function that will serve as a middleware function.
-   * 
+   * , dashport: Dashport
    * EXAMPLE: Adding a strategy
    * 
    *   dashport.addStrategy('google', GoogleStrategy);
@@ -134,9 +133,9 @@ class Dashport {
           ctx.throw('This strategy does not have an \'authorize\' method');
         }
 
-        await this._strategies[strategyName].authorize(ctx, next);
+        await this._strategies[strategyName].router(ctx, next);
       }
-    }
+``    }
     // console.log('this._strategies in dashport.authenticate:', this._strategies);
     // await this._strategies['AlvinTest'].authorize(ctx, next);
 
@@ -144,19 +143,17 @@ class Dashport {
   }
 
   //////////////////////////// Used in '/test' route in server.tsx
-  // async test(ctx: OakContext, next: any) {
-  //   console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
-  //   await next();
-  // }
+  async test(ctx: OakContext, next: any) {
+   console.log('test', ctx.request.url.search)
+    // console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
+    await next();
+  }
   ///////////////////////////////////////////////////////////
 
   // PART OF DEBATING IF NEEDED
-  public authCbHandler(strategyName: string) {
-    if (this._framework === 'oak') {
-    }
-
-    throw new Error('Name of current framework is not supported');
-  }
+  // public authCbHandler(uri: string) {
+  //   throw new Error('Name of current framework is not supported');
+  // }
 
   /**
    * Takes in a function that the developer specifies. This function will be 
