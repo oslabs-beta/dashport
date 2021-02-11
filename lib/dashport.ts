@@ -195,26 +195,6 @@ class Dashport {
   }
 
   /**
-   * Uses the first serializer function in this._serializers to create a
-   * serialized ID.
-   * 
-   * TODO: Allow a 'name' parameter to be passed in that specifies which
-   * serializer to use. If name === 'all', use all the serializers in a chain.
-   * 
-   * TODO: Allow optional parameters to be passed into the serializer to be
-   * used. If chaining multiple serializers is implemented, pass params into the
-   * first serializer function.
-   * 
-   * @returns {string} A serialized ID
-   */
-  private _serialize(): string {
-    // Object.values(this._strategies)[0] returns the first key/value pair's
-    // value. We are then invoking it (since it should be a function) and
-    // returning a serialized ID
-    return Object.values(this._strategies)[0]();
-  }
-
-  /**
    * Adds an OAuth strategy that the developer would like to use.
    * 
    * EXAMPLE
