@@ -71,9 +71,8 @@ class SessionManager {
   }
 
   /**
-   * Takes in an array of serializers and uses the first one 
-   * Uses the first serializer function in the serializers passed in to create a
-   * serialized ID.
+   * Takes in an object of serializer functions and currently - read TODO - uses
+   * the first one to create a serialized ID and return it.
    * 
    * TODO: Allow a 'name' parameter to be passed in that specifies which
    * serializer to use. If name === 'all', use all the serializers in a chain.
@@ -82,13 +81,14 @@ class SessionManager {
    * used. If chaining multiple serializers is implemented, pass params into the
    * first serializer function.
    * 
+   * @param {Object} serializers - An object containing serializer functions
    * @returns {string} A serialized ID
    */
-  private _serialize(): string {
-    // Object.values(this._strategies)[0] returns the first key/value pair's
+  public serialize(serializers): string {
+    // Object.values(serializers)[0] returns the first key/value pair's
     // value. We are then invoking it (since it should be a function) and
     // returning a serialized ID
-    return Object.values(this._strategies)[0]();
+    return Object.values(serializers)[0]();
   }
 }
 
