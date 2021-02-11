@@ -19,7 +19,7 @@ class SessionManager {
   public logOut: Function;
   public isAuthenticated: Function;
   
-  constructor(framework: string): void {
+  constructor(framework: string) {
     this.logIn = this._logInDecider(framework);
     this.logOut = this._logOutDecider(framework);
     this.isAuthenticated = this._isAuthenticatedDecider(framework);
@@ -43,7 +43,7 @@ class SessionManager {
       }
     }
 
-    throw new Error('ERROR in _logInDecider: Name of framework passed in is not supported');
+    throw new Error('ERROR in _logInDecider: Name of framework passed in is not supported.');
   }
 
   /**
@@ -63,7 +63,7 @@ class SessionManager {
       }
     }
 
-    throw new Error('ERROR in _logOutDecider: Name of framework passed in is not supported');
+    throw new Error('ERROR in _logOutDecider: Name of framework passed in is not supported.');
   }
 
   /**
@@ -89,7 +89,7 @@ class SessionManager {
       }
     }
 
-    throw new Error('ERROR in _isAuthenticatedDecider: Name of framework passed in is not supported');
+    throw new Error('ERROR in _isAuthenticatedDecider: Name of framework passed in is not supported.');
   }
 }
 
