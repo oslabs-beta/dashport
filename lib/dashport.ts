@@ -14,7 +14,7 @@ class Dashport {
   constructor(frmwrk: string) {
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
-    this.initialize = this._initializeDecider(frmwrk, this);
+    this.initialize = this._initializeDecider(frmwrk);
     this.authenticate = this.authenticate.bind(this);
   }
 
@@ -29,7 +29,7 @@ class Dashport {
    * @param {Dashport} dashport - The current instance of dashport
    * @returns {Function} The function that will be dashport's intialize method
    */
-  private _initializeDecider(framework: string, dashport: Dashport): Function {
+  private _initializeDecider(framework: string): Function {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state === undefined) {
