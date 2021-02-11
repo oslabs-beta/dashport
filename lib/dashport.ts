@@ -98,32 +98,29 @@ class Dashport {
 
     if (this._framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
-        // last and persistent step in 'authenticate' process
-        //   Check if a session object exists (created by SessionManager.logIn
-        //   in 2nd step)
+        // Check if a session object exists (created by SessionManager.logIn in
+        // 2nd step)
         if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
             await next();
           }
         }
-
-        // 2nd step in 'authenticate' process
-        //   If users are successfully authorized, Dashport strategies should add
-        //   the user info onto its response. By checking to see if the userInfo 
-        //   property exists on the res, we know the user has been authenticated
-        if (ctx.request.body._dashport.userInfo) {
-          const serializedId = self._serialize();
-
-          // use SessionManager's logIn method to create a session object on
-          // ctx.state._dashport and assign it the serialized ID
-          self._sm.logIn(ctx, self, serializedId);
-
-          await next();
-        }
-
+        
         // 1st step in 'authenticate' process
-        //   Uses the specified strategy's authorize method to begin login process
-        await this._strategies[stratName].authorize(ctx, next);
+        // Uses the specified strategy's authorize method to begin login process
+        const userData = await this._strategies[stratName].authorize(ctx, next);
+        
+        // 2nd step in 'authenticate' process
+        // If users are successfully authorized, Dashport strategies should add
+        // the user info onto its response. By checking to see if the userInfo 
+        // property exists on the res, we know the user has been authenticated
+        const serializedId = self._serialize();
+
+        // use SessionManager's logIn method to create a session object on
+        // ctx.state._dashport and assign it the serialized ID
+        self._sm.logIn(ctx, self, serializedId);
+
+        await next();
       }
     }
 
