@@ -32,12 +32,12 @@ export interface UserProfile {
   providerUserId: string;
   // the display name or username for this specific user
   displayName: string;
-  name: {
-    familyName: string;
-    givenName: string;
-    middleName: string;
+  name?: {
+    familyName?: string;
+    givenName?: string;
+    middleName?: string;
   };
-  emails: Array<string>;
+  emails?: Array<string>;
 }
 
 /**
@@ -53,7 +53,7 @@ export interface Serializers {
  * TODO: Make this work ???
  */
 export interface Strategies {
-  [stratName: string]: any; // Is this how to do it???????
+  [stratName: string]: any; // Is this how to do it?? What's the correct type for classes?
 }
 
 export interface googOptions {

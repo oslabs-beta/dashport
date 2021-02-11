@@ -13,26 +13,31 @@ const dp = new Dashport('oak');
 app.use(dp.initialize())
 
 */
+import SessionManager from './sessionManager.ts';
 
 class Dashport {
   private _serializers: Serializers = {};
   private _strategies: Strategies = {};
   private _framework: string;
+  private _sm: SessionManager;
+  // public since _sId needs to be accessed by SessionManager but _ since a
+  // developer should not access it
+  public _sId: string;
   public initialize: Function;
 
   constructor(frmwrk: string) {
     this._framework = frmwrk;
+    this._sm = new SessionManager(frmwrk);
     this.initialize = this._initializeDecider(frmwrk, this);
     this.authenticate = this.authenticate.bind(this);
   }
 
-  // also checks to see if there is an existing session
-  // onyx appends methods to the passed-in state, then checks for a userID and deserializes and returns their info
-
   /**
    * Takes in a framework and the current instance of dashport and returns a
    * function that will become dashport's initialize method. This method is run
-   * inside the constructor of a new Dashport instance
+   * inside the constructor of a new Dashport instance.
+   * 
+   * TODO: Add other frameworks
    * 
    * @param {string} framework - The server framework that will be used
    * @param {Dashport} dashport - The current instance of dashport
@@ -41,52 +46,21 @@ class Dashport {
   private _initializeDecider(framework: string, dashport: Dashport): Function {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
-        try {
-          if (!ctx.state) {
-            console.log('There is no state on ctx');
-            throw new Error('Please use dashport.initialize() in app.use()');
-          }
-
-          // // create the _dashport attribute on ctx.state
-          // ctx.state._dashport = {};
-          // // not sure if below is needed but passport does it
-          // ctx.state._dashport.instance = dashport;
-          // // do we need ctx.state.session???
-          // // only have ctx.state._dashport.session
-          // if (ctx.state.session && ctx.state.session.userId) {
-            
-          // }
-
-          /******* From Passport - initialize.js
-          return function initialize(req, res, next) {
-            req._passport = {};
-            req._passport.instance = passport;
-        
-            if (req.session && req.session[passport._key]) {
-              // load data from existing session
-              req._passport.session = req.session[passport._key];
-            }
-        
-            next();
-          };
-          */
-
-          await next();
-        } catch(err) {
-          await next(err);
+        if (ctx.state === undefined) {
+          throw new Error('ERROR in initialize: \'state\' property needs to exist on context object of Oak.');
         }
-        // if (!ctx.state) {
-        //   console.log('not ok')
-        //   throw new Error('Please use onyx.initialize in app.use()');
-        //   return;
-        // }
-        // await next();
+
+        // if the _dashport property on ctx.state does not exist, create one.
+        // ctx.state will persist across requests
+        if (ctx.state._dashport === undefined) {
+          ctx.state._dashport = {};
+        }
+
+        await next();
       }
     }
 
-    throw new Error('Name of framework passed in is not supported');
-    // could have different closure functions for different frameworks, 
-    // and we can return the invocation of whichever based on the clientStr
+    throw new Error('ERROR constructing Dashport: Name of framework passed in is not supported.');
   }
 
   /**
@@ -95,12 +69,21 @@ class Dashport {
    * 
    * Depending on the framework being used, authenticate returns an async
    * function that will serve as a middleware function.
-   * , dashport: Dashport
+   * 
+   * In OAuth, there is a lot of back and forth communication between the
+   * client, the app, and the OAuth provider, when a user begins a sign in to
+   * the OAuth provider. Tokens are sent back and forth and user data gets sent
+   * back at the end. The middleware function that is returned from the
+   * 'authenticate' method bundles up this functionality by having multiple
+   * checks to see what stage of the OAuth cycle the login process is in, and
+   * executes code accordingly. This allows one method to be used for a seamless
+   * OAuth process.
+   * 
    * EXAMPLE: Adding a strategy
    * 
    *   dashport.addStrategy('google', GoogleStrategy);
    * 
-   * EXAMPLE: Using authenticate as a middleware in Oak
+   * EXAMPLE: Using dashport.authenticate as a middleware in Oak
    * 
    *   router.get('/test',
    *     dashport.authenticate('google'),
@@ -109,28 +92,47 @@ class Dashport {
    *     }
    *   );
    * 
-   * @param {string} strategyName - The name of a strategy that was added
+   * TODO: Add optional parameter for options in case developers want to have
+   *   different strategy options for a particular route
+   * 
+   * @param {string} stratName - The name of a strategy that was added
    * @returns {Function} The middleware function (differs depending on server framework)
    */
-  public authenticate(strategyName: string): Function {
+  public authenticate(stratName: string): Function {
+    const self = this;
+
+    if (this._strategies[stratName] === undefined) {
+      throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
+    }
+    // ALL strategies made for Dashport MUST have an 'authorize' method that
+    // is a middleware
+    if (this._strategies[stratName].authorize === undefined) {
+      throw new Error('ERROR in authenticate: This strategy does not have an \'authorize\' method.');
+    }
+
     if (this._framework === 'oak') {
-      // PART OF DEBATING IF NEEDED
-      //   Authenticate should be checking URL to tell if
-      //     1. logging in first time
-      //     2. successful OAuth
-      //     3. unsuccessful OAuth
-      
       return async (ctx: OakContext, next: any) => {
-        if (this._strategies[strategyName] === undefined) {
-          // is ctx.throw the right way to handle an error?
-          ctx.throw('This strategy name has not been specified for use');
+        // last and persistent step in 'authenticate' process
+        //   Check if a session object exists (created by SessionManager.logIn
+        //   in 2nd step)
+        if (ctx.state._dashport.session) {
+          if (ctx.state._dashport.session === self._sId) {
+            await next();
+          }
         }
 
-        // ALL strategies made for Dashport MUST have an 'authorize' method that
-        // is a middleware
-        if (this._strategies[strategyName].authorize === undefined) {
-          // is ctx.throw the right way to handle an error?
-          ctx.throw('This strategy does not have an \'authorize\' method');
+        // 2nd step in 'authenticate' process
+        //   If users are successfully authorized, Dashport strategies should add
+        //   the user info onto its response. By checking to see if the userInfo 
+        //   property exists on the res, we know the user has been authenticated
+        if (ctx.request.body._dashport.userInfo) {
+          const serializedId = self._serialize();
+
+          // use SessionManager's logIn method to create a session object on
+          // ctx.state._dashport and assign it the serialized ID
+          self._sm.logIn(ctx, self, serializedId);
+
+          await next();
         }
 
         await this._strategies[strategyName].router(ctx, next);
@@ -139,7 +141,7 @@ class Dashport {
     // console.log('this._strategies in dashport.authenticate:', this._strategies);
     // await this._strategies['AlvinTest'].authorize(ctx, next);
 
-    throw new Error('Name of current framework is not supported');
+    throw new Error('ERROR in authenticate: Name of current framework is not supported.');
   }
 
   //////////////////////////// Used in '/test' route in server.tsx
@@ -157,7 +159,7 @@ class Dashport {
 
   /**
    * Takes in a function that the developer specifies. This function will be 
-   * used to serialize IDs in this.authenticate
+   * used to serialize IDs in this.authenticate.
    * 
    * EXAMPLE
    * 
@@ -168,15 +170,19 @@ class Dashport {
    * @param {Function} serializer - The function that will create serialized IDs
    */
   public addSerializer(serializerName: string, serializer: Function): void {
+    // the below if statement is currently not needed. TODO in _serialize method
+    // if (serializerName === 'all') {
+    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
+    // }
     if (this._serializers[serializerName] !== undefined) {
-      throw new Error('A serializer with this name already exists');
+      throw new Error('ERROR in addSerializer: A serializer with this name already exists.');
     }
     
     this._serializers[serializerName] = serializer;
   }
 
   /**
-   * Removes a serializer from the this._serializers object
+   * Removes a serializer from the this._serializers object.
    * 
    * EXAMPLE
    * 
@@ -184,34 +190,54 @@ class Dashport {
    * 
    * @param {string} serializerName - The name of the serializer to remove
    */
-  public removeSerializer(serializerName: string): void {
+  public removeSerializer(serializerName: string): void  {
     if (this._serializers[serializerName] === undefined) {
-      throw new Error('The specified serializer does not exist');
+      throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
     }
     
     delete this._strategies[serializerName];
   }
 
   /**
-   * Adds an OAuth strategy that the developer would like to use
+   * Uses the first serializer function in this._serializers to create a
+   * serialized ID.
+   * 
+   * TODO: Allow a 'name' parameter to be passed in that specifies which
+   * serializer to use. If name === 'all', use all the serializers in a chain.
+   * 
+   * TODO: Allow optional parameters to be passed into the serializer to be
+   * used. If chaining multiple serializers is implemented, pass params into the
+   * first serializer function.
+   * 
+   * @returns {string} A serialized ID
+   */
+  private _serialize(): string {
+    // Object.values(this._strategies)[0] returns the first key/value pair's
+    // value. We are then invoking it (since it should be a function) and
+    // returning a serialized ID
+    return Object.values(this._strategies)[0]();
+  }
+
+  /**
+   * Adds an OAuth strategy that the developer would like to use.
    * 
    * EXAMPLE
    * 
-   *   dashport.addStrategy('google', GoogleStrategy());
+   *   dashport.addStrategy('google', new GoogleStrategy());
    * 
    * @param {string} stratName - The name that will be used to reference this strategy
    * @param {Function} strategy - The imported OAuth strategy module to be used
    */
   public addStrategy(stratName: string, strategy: any): void {
     if (stratName === undefined || strategy === undefined) {
-      throw new Error('A strategy name and a strategy must be provided');
+      throw new Error('ERROR in addStrategy: A strategy name and a strategy must be provided.');
     }
-    
+
     this._strategies[stratName] = strategy;
   }
 
   /**
-   * Removes an OAuth strategy from the _strategies attribute
+   * Removes an OAuth strategy from the _strategies attribute.
    * 
    * EXAMPLE
    * 
@@ -221,7 +247,7 @@ class Dashport {
    */
   public removeStrategy(stratName: string): void {
     if (stratName === undefined) {
-      throw new Error('A strategy name must be provided');
+      throw new Error('ERROR in removeStrategy: A strategy name must be provided.');
     }
 
     delete this._strategies[stratName];
@@ -237,7 +263,7 @@ class Dashport {
       // There is no session, so person is not logged in, so redirect to login
     }
 
-    const serializedId = ctx.state._dashport.session.userId;
+    const serializedId = ctx.state._dashport.session;
 
     if (serializedId === idToCompare) {
       // nice go ahead grant access to secret stuff
