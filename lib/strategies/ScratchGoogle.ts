@@ -106,8 +106,8 @@ export default class GoogleStrategy {
   async getAuthToken(ctx:any, next:Function){
     const OGURI: string = ctx.request.url.search;
     if(OGURI.includes('error')){
-      // do error shit
-      console.log('Damn it, Waye broke the code again');
+      // do error handling
+      console.log('broke the code again');
     }
     // splits the string at the =, storing the first part in URI1[0] and the part we want in URI1[1]
     let URI1: string[] = OGURI.split('=');
