@@ -46,24 +46,45 @@ export interface Serializers {
 }
 
 /**
- * The _strategies object on Dashport that contains strategy classes
- * 
- * TODO: Make this work ???
+ * All Dashport strategies are classes that must contain a router method
  */
-export interface Strategies {
-  [stratName: string]: any; // Is this how to do it?? What's the correct type for classes?
+interface Strategy {
+  router: Function;
 }
 
-export interface googOptions {
-  client_id:string; /*we do not supply this-----R*/ 
-  redirect_uri:string; /*we do not supply this-----R*/
-  response_type:string; /*we do not supply this-----R*/
-  scope:string; /*we do not supply this------R*/
-  client_secret:string;
-  access_type?:string; /*we do not supply this ------Reccommend*/
-  state?:string; /*we do not supply this------Reccomend*/
-  included_granted_scopes?:string; /*we do not supply this**********OPTIONAL*/
-  login_hint?:string;   /*we do not supply this**********OPTIONAL*/
-  prompt?:string;       /*we do not supply this**********OPTIONAL*/
-  grant_type?:string;
+/**
+ * The _strategies object on Dashport that contains strategy classes
+ */
+export interface Strategies {
+  [stratName: string]: Strategy;
+}
+
+/**
+ * Google Strategy options that should be specified by the developer when adding
+ */
+export interface GoogOptions {
+  client_id: string;
+  redirect_uri: string;
+  response_type: string;
+  scope: string;
+  client_secret: string;
+  access_type?: string;
+  state?: string;
+  included_granted_scopes?: string;
+  login_hint?: string;
+  prompt?: string;
+  grant_type?: string;
+}
+
+export interface TokenData {
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  token_type: string;
+  id_token: string;
+}
+
+export interface AuthData {
+  tokenData?: TokenData;
+  userInfo?: UserProfile;
 }
