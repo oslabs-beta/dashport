@@ -11,12 +11,11 @@ const html: string =
 <html>
   <head>
     <script type="module" src="/test.js"></script>
-
+    <link rel="stylesheet" href="style.css" type="text/css">
     <title>Dashport</title>
   </head>
   <body>
     <div id="root">
-      <div>Welcome to Dashboard!</div>
       ${body}
     </div>
   </body>

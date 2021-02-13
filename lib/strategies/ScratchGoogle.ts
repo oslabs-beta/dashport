@@ -1,3 +1,6 @@
+// import Dashport from '../dashport';
+import { OakContext, googOptions } from '../types.ts';
+
 // Obtain OAuth 2.0 credentials of client key, client secret
 // Obtain access token from Google Authorization Server
 // Examine scopes of access granted by the user
@@ -44,25 +47,10 @@
  *     ));
  *
  */
-interface googOptions {
-  client_id:string; /*we do not supply this-----R*/ 
-  redirect_uri:string; /*we do not supply this-----R*/
-  response_type:string; /*we do not supply this-----R*/
-  scope:string; /*we do not supply this------R*/
-  access_type?:string; /*we do not supply this ------Recommend*/
-  state?:string; /*we do not supply this------Reccomend*/
-  included_granted_access?:string; /*we do not supply this**********OPTIONAL*/
-  login_hint?:string;   /*we do not supply this**********OPTIONAL*/
-  prompt?:string;       /*we do not supply this**********OPTIONAL*/
-}
-class GoogleStrategy {
-  uriFromParams: string;
-  client_id: string;
-  client_secret: string;
-  code: string;
-  grant_type: string;
-  redirect_uri: string;
-
+export default class GoogleStrategy {
+  name: string = 'google'
+  options: googOptions;
+  uriFromParams:string;
   /**
    * @constructor
    * @param {Object} options
@@ -70,57 +58,148 @@ class GoogleStrategy {
    * @api public
    */
   constructor (options:googOptions, verify:Function) {
-    if(!options.client_id || !options.redirect_uri || !options.response_type || !options.scope){
-      // HANDLE ERROR -- missing required args
+    if(!options.client_id || !options.redirect_uri || !options.response_type || !options.scope || !options.client_secret){
+      // HANDLE ERROR
+      // throw new Error('Missing required arguments');
+      console.log('missing required args')
     }
     this.options = options;
+    // preStep1 request permission 
     // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
     let paramArray: string[][] = Object.entries(options);
+    let paramString: string = '';
     for(let i = 0; i < paramArray.length; i++){
       let [key, value] = paramArray[i];
-      key += '=';
+      if(key === 'client_secret' || key === 'grant_type'){
+        break;
+      }
+      paramString += (key + '=');
       if(i < paramArray.length - 1){
-        value += '&';
+        paramString += (value + '&');
+      }
+      else{
+        paramString += value;
       }
     }
-    this.uriFromParams = paramArray.join('');
+    this.uriFromParams = paramString;
   }
   
-  async router(ctx, next) {
-    // if no params - this.authorize
-    // if "code" params - this.parseResponse
-    // if "authcode" params - this.getAccessToken
+  async router(ctx:any, next:any) {
+    // GO_Step 1 Request Permission
+    if(!ctx.request.url.search) return await this.authorize(ctx, next);
+    // GO_Step 2-3 Exchange code for Token
+    if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
+    // if(ctx.state._dashport.coolio===true) await dashport._sm(ctx, next);
   }
   
   // sends the programatically constructed uri to Google's oauth 2.0 server (step 2)
-  async authorize(ctx, next) {
-    await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);
+  async authorize(ctx: OakContext, next: any) {
+    console.log('in GoogleStrategy.authorize');
+    return await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);                   
   }
-  
+
+  // 4%2F0AY0e-g6vCsnt5Gwl8ZyRJibp-CsWF93_0LH0r6J0aGHS8pWDkYm29y-J4mrxEM8HqCopEQ
+  // 4%2F0AY0e-g6vCsnt5Gwl8ZyRJibp-CsWF93_0LH0r6J0aGHS8pWDkYm29y-J4mrxEM8HqCopEQ
   // handle oauth 2.0 server response (step 4)
   // sample error response: https://oauth2.example.com/auth?error=access_denied
   // sample auth code response: https://oauth2.example.com/auth?code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7
-  async parseResponse(ctx, next){
-    const OGURI: string = '';
-    console.log(ctx.request);
-    // splits the string at the question mark, storing the left half in URI1[0] and the half we want at URI1[1]
-    let URI1: string[] = OGURI.split('?');
-    // splits the string at the equals sign, storing the left half, which includes 'auth' or 'error' in URI2[0] 
-    // and the half with the code or error message at URI2[1]
-    const URI2: string[] = URI1[1].split('=');
-    if(URI1[1].includes('auth')){
+  async getAuthToken(ctx:any, next:Function){
+    const OGURI: string = ctx.request.url.search;
+    if(OGURI.includes('error')){
       // do error shit
+      console.log('Damn it, Waye broke the code again');
     }
-    else if(URI1.includes('error')){
-      const code: string = URI2[1].split('/')[0]
-      // prompt user to call swapForToken with the code and all the shit they need to add
-      this.swapForToken(code);
+    // splits the string at the =, storing the first part in URI1[0] and the part we want in URI1[1]
+    let URI1: string[] = OGURI.split('=');
+    // splits the string at the ampersand(&), storing the string with the access_token in URI2[0] 
+    // and the other parameters at URI2[n]
+    const URI2: string[] = URI1[1].split('&');
+    const code: string = this.parseCode(URI2[0]);
+    const options:object = {
+      method: 'POST',
+      headers: { "content_type": "application/x-www-form-urlencoded"},
+      body: JSON.stringify({
+        client_id: this.options.client_id,
+        client_secret: this.options.client_secret,
+        code: code,
+        grant_type: this.options.grant_type,
+        redirect_uri: this.options.redirect_uri
+      })
+    } 
+    //   method:'POST', 
+    //   headers:{'Authorization': 'Basic ' + BasicKey, "Content-Type": "application/x-www-form-urlencoded"}, 
+    //   body: `code=${code}&redirect_uri=${redirect_uri}&grant_type=authorization_code` 
+    // return await fetch('https://oauth2.googleapis.com/token', options)
+    //   .then(data => data.json())
+    //   .then(parsed => this.getAuthData(parsed))
+    //   .catch(err => {
+    //     console.log('error: line 141 of scratchGoogle'+ err)
+    //   });
+
+    try {
+      let data: any = await fetch('https://oauth2.googleapis.com/token', options)
+      data = await data.json();
+      return this.getAuthData(data);
+    } catch(err) {
+      console.log('error: line 141 of scratchGoogle'+ err)
     }
   }
-  
-  swapForToken(authCode){
-    
+
+  async getAuthData(parsed:any){ 
+    // const token: string = parsed['id_token']
+    const authData:any = { tokenData:{ access_token: parsed.access_token, expires_in: parsed.expires_in, scope: parsed.scope, token_type:parsed.token_type, id_token:parsed.id_token}}    ////// ALEX ASKS FOR BETTER TYPING
+    const options:any = {headers:{'Authorization':'Bearer '+parsed.access_token}};
+    // fetch('https://www.googleapis.com/oauth2/v2/userinfo',options)
+    //   .then(parsed => parsed.json())
+    //   .then(reallyParse => {
+    //     authData.userInfo = reallyParse
+    //     console.log('Scratch149', authData.userInfo);
+    //     return authData;
+    //   });
+
+    try {
+      let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',options)
+      data = await data.json();
+      authData.userInfo = {
+        provider: 'google',
+        providerUserId: data.id,
+        displayName: data.name,
+        name: {
+          familyName: data.family_name,
+          givenName: data.given_name,
+        },
+        emails: [data.email]
+      }
+      console.log('Scratch149', authData.userInfo);
+      return authData;
+    } catch(err) {
+      console.log('error on line 165', err);
+    }
   }
+
+  parseCode(encodedCode:string):string{
+    let code: string = encodedCode;
+    const replacements: { [name: string] : string } = {
+      "%24": "$",
+      "%26": "&",
+      "%2B": "+",
+      "%2C": ",",
+      "%2F": "/",
+      "%3A": ":",
+      "%3B": ";",
+      "%3D": "=",
+      "%3F": "?",
+      "%40": "@"
+    }
+    const toReplaceArray: string[] = Object.keys(replacements);
+    for(let i = 0; i < toReplaceArray.length; i++){
+      while(encodedCode.includes(toReplaceArray[i])){
+        encodedCode = encodedCode.replace(toReplaceArray[i], replacements[toReplaceArray[i]]);
+      }
+    }
+    return encodedCode; 
+  }
+}
     /**
      *  exchange autorization code for refresh and access tokens (step 5)
      * To exchange an authorization code for an access token, 
@@ -160,7 +239,6 @@ class GoogleStrategy {
           "refresh_token": "1//xEoDL4iW3cxlI7yDbSRFYNG01kVKM2C-259HOF2aQbI"
         }
     */
-}
 
 
 ///redirect to 
