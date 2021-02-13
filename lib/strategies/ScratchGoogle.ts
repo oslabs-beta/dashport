@@ -76,7 +76,6 @@ export default class GoogleStrategy {
   
   // sends the programatically constructed uri to Google's oauth 2.0 server (step 2)
   async authorize(ctx: OakContext, next: any) {
-    console.log('in GoogleStrategy.authorize');
     return await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);                   
   }
 
