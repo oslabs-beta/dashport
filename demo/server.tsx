@@ -36,7 +36,18 @@ import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
 const port = 3000;
 const app: Application = new Application();
 const dashport = new Dashport('oak');
-// app.use(dashport.initialize())
+
+//Error handling
+app.use(async (ctx: any, next: any) => {
+  try{
+    await next();
+  } catch (error) {
+    console.log('server 51', error);
+    throw error;
+  }
+});
+
+app.use(dashport.initialize);
 
 // Initialize Dashport fater sesssion
 // router
@@ -76,9 +87,11 @@ prompt=none
 
 */
 
+dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
+
 router.get('/test', 
   dashport.authenticate('google'),
-  dashport.test,
+  // dashport.test,
   (ctx: any, next: any) => {
     console.log('server 83', ctx.response.url)
     ctx.response.body = 'Hello Waye';
@@ -99,16 +112,6 @@ router.get('/params',
 //   }
 // )
 ////////////////////////////////////////////////////////////
-
-//Error handling
-app.use(async (ctx: any, next: any) => {
-  try{
-    await next();
-  } catch (error) {
-    console.log('server 108', error);
-    throw error;
-  }
-});
 
 //response tracking
 app.use(async (ctx: any, next: any) => {

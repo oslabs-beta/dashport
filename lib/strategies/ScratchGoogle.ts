@@ -159,7 +159,17 @@ export default class GoogleStrategy {
 
     try {
       let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',options)
-      authData.userInfo = await data.json();
+      data = await data.json();
+      authData.userInfo = {
+        provider: 'google',
+        providerUserId: data.id,
+        displayName: data.name,
+        name: {
+          familyName: data.family_name,
+          givenName: data.given_name,
+        },
+        emails: [data.email]
+      }
       console.log('Scratch149', authData.userInfo);
       return authData;
     } catch(err) {

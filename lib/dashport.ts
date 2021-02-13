@@ -1,18 +1,4 @@
 import { OakContext, Serializers, Strategies } from './types.ts';
-/**
- * import Authenticate from Authenticate.ts
- */
-
-/***** Some person that wants to use Dashport, in their server file, they would
-****** do below
-
-import { Dashport } from 'Our URL Here';
-
-const dp = new Dashport('oak');
-
-app.use(dp.initialize())
-
-*/
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -22,14 +8,13 @@ class Dashport {
   private _sm: SessionManager;
   // public since _sId needs to be accessed by SessionManager but _ since a
   // developer should not access it
-  public _sId: string;
-  public initialize: Function;
+  public _sId: string = '';
+  public initialize: any;
 
   constructor(frmwrk: string) {
-    this._sId = '';
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
-    this.initialize = this._initializeDecider(frmwrk, this);
+    this.initialize = this._initializeDecider(frmwrk);
     this.authenticate = this.authenticate.bind(this);
   }
 
@@ -42,13 +27,13 @@ class Dashport {
    * 
    * @param {string} framework - The server framework that will be used
    * @param {Dashport} dashport - The current instance of dashport
-   * @returns {Function} The function that will be dashport's intialize method
+   * @returns {*} The async function that will be dashport's intialize method
    */
-  private _initializeDecider(framework: string, dashport: Dashport): Function {
+  private _initializeDecider(framework: string): Function {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state === undefined) {
-          throw new Error('ERROR in initialize: \'state\' property needs to exist on context object of Oak.');
+          throw new Error('ERROR in initialize: \'state\' property needs to exist on context object of Oak. Use app.use(dashport.initialize) not app.use(dashport.initialize()).');
         }
 
         // if the _dashport property on ctx.state does not exist, create one.
@@ -57,27 +42,26 @@ class Dashport {
           ctx.state._dashport = {};
         }
 
-        await next();
+        return await next();
       }
     }
 
     throw new Error('ERROR constructing Dashport: Name of framework passed in is not supported.');
   }
 
-  /**
+ /**
    * Takes in a strategy name that should exist on this._strategies. The
    * strategy will need to be have been added by the developer.
    * 
-   * Depending on the framework being used, authenticate returns an async
-   * function that will serve as a middleware function.
+   * Authenticate returns an async function depending on the framework being
+   * used, that will serve as a middleware function.
    * 
    * In OAuth, there is a lot of back and forth communication between the
-   * client, the app, and the OAuth provider, when a user begins a sign in to
-   * the OAuth provider. Tokens are sent back and forth and user data gets sent
-   * back at the end. The middleware function that is returned from the
-   * 'authenticate' method bundles up this functionality by having multiple
-   * checks to see what stage of the OAuth cycle the login process is in, and
-   * executes code accordingly. This allows one method to be used for a seamless
+   * client, the app, and the OAuth provider, when a user want to sign in.
+   * Tokens are sent back and forth and user data gets sent back at the end. 
+   * The middleware function that is returned from the 'authenticate' method 
+   * bundles up this functionality by executing code depending if a user has
+   * been authenticated or not. This allows one method to be used for a seamless
    * OAuth process.
    * 
    * EXAMPLE: Adding a strategy
@@ -100,7 +84,7 @@ class Dashport {
    * @returns {Function} The middleware function (differs depending on server framework)
    */
   public authenticate(stratName: string): Function {
-    const self = this;
+    const self: Dashport = this;
 
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
@@ -112,67 +96,91 @@ class Dashport {
     }
 
     if (this._framework === 'oak') {
-
       return async (ctx: OakContext, next: any) => {
+        if (ctx.state._dashport === undefined) {
+          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
+        }
 
-        // last and persistent step in 'authenticate' process
-        //   Check if a session object exists (created by SessionManager.logIn
-        //   in 2nd step)
-        if (ctx.state._dashport) {   ///this breaks because you cannot check a key of an undefined object.  
+        console.log('ctx.state._dashport:', ctx.state._dashport);
+        console.log('ctx.state._dashport.session:', ctx.state._dashport.session);
+        console.log('self._sId:', self._sId);
+
+        // check if a session object exists (created by SessionManager.logIn).
+        // If it exists, check if the session ID matches. If it does, user has
+        // already been authenticated, so user can go to next middleware
+        if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
-            await next();
-          }
-  
-          // 2nd step in 'authenticate' process
-          //   If users are successfully authorized, Dashport strategies should add
-          //   the user info onto its response. By checking to see if the userInfo 
-          //   property exists on the res, we know the user has been authenticated
-          if (ctx.request.body._dashport.userInfo) {
-            const serializedId = self._serialize();
-  
-            // use SessionManager's logIn method to create a session object on
-            // ctx.state._dashport and assign it the serialized ID
-            self._sm.logIn(ctx, self, serializedId);
-  
-            await next();
+            console.log('Authenticated, gonna just go to next');
+            return await next();
           }
         }
-        let authData:any = await this._strategies[stratName].router(ctx, next);
-        console.log('142Dash', authData);
+
+        // If above check is not passed, user must be authenticated (again), so
+        // call the requested strategy's 'authorize' method.
+        const authData: any = await self._strategies[stratName].router(ctx, next);
+        console.log('116Dash', authData);
+
+        if (authData !== undefined) {
+          // serializedId will be obtained by calling SessionManager's serialize
+          // function, which will invoke the serializer(s) the developer specified
+          const serializedId: string = self._sm.serialize(self._serializers, authData.userInfo);
+
+          // use SessionManager's logIn method to create a session object on
+          // ctx.state._dashport and to assign serializedId to the _sId property
+          // of this instance of Dashport
+          self._sm.logIn(ctx, self, serializedId);
+
+          return await next();
+        }
       }
     }
-    // console.log('this._strategies in dashport.authenticate:', this._strategies);
-    // await this._strategies['AlvinTest'].authorize(ctx, next);
 
     throw new Error('ERROR in authenticate: Name of current framework is not supported.');
   }
 
   //////////////////////////// Used in '/test' route in server.tsx
   async test(ctx: OakContext, next: any) {
-   console.log('dashport 150', ctx.request.url.search)
+    console.log('dashport 150', ctx.request.url.search)
     // console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
-    await next();
+    return await next();
   }
   ///////////////////////////////////////////////////////////
 
-  // PART OF DEBATING IF NEEDED
-  // public authCbHandler(uri: string) {
-  //   throw new Error('Name of current framework is not supported');
-  // }
-
   /**
-   * Takes in a function that the developer specifies. This function will be 
-   * used to serialize IDs in this.authenticate.
+   * Takes in a name for a serializer function and the serializer function the 
+   * developer specifies.
+   * 
+   * The serializer function needs to take in one parameter which will be the
+   * user data in the form of an object.
+   * The serializer function needs to specify what the developer wants to do
+   * with the user data (store it somewhere, add some info to response body, 
+   * etc).
+   * The serializer function needs to specify how to create a serialized ID.
+   * The serializer function needs to return the serialized ID.
    * 
    * EXAMPLE
    * 
-   *   dashport.addSerializer('1', () => { return Math.random() * 10000 })
+   *   dashport.addSerializer('1', (userInfo) => { 
+   *     function getSerializedId () {
+   *       return Math.random() * 10000;
+   *     }
+   * 
+   *     const serializedId = getSerializedId();
+   * 
+   *     // do something with userInfo like store in a database
+   * 
+   *     return serializedId;
+   *   });
    * 
    * @param {string} serializerName - A name to give the serializer if it needs
    *   to be deleted later
    * @param {Function} serializer - The function that will create serialized IDs
    */
   public addSerializer(serializerName: string, serializer: Function): void {
+    if (serializer.length !== 1) {
+      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+    }
+
     // the below if statement is currently not needed. TODO in _serialize method
     // if (serializerName === 'all') {
     //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
@@ -180,7 +188,7 @@ class Dashport {
     if (this._serializers[serializerName] !== undefined) {
       throw new Error('ERROR in addSerializer: A serializer with this name already exists.');
     }
-    
+
     this._serializers[serializerName] = serializer;
   }
 
@@ -197,28 +205,8 @@ class Dashport {
     if (this._serializers[serializerName] === undefined) {
       throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
     }
-    
-    delete this._strategies[serializerName];
-  }
 
-  /**
-   * Uses the first serializer function in this._serializers to create a
-   * serialized ID.
-   * 
-   * TODO: Allow a 'name' parameter to be passed in that specifies which
-   * serializer to use. If name === 'all', use all the serializers in a chain.
-   * 
-   * TODO: Allow optional parameters to be passed into the serializer to be
-   * used. If chaining multiple serializers is implemented, pass params into the
-   * first serializer function.
-   * 
-   * @returns {string} A serialized ID
-   */
-  private _serialize(): string {
-    // Object.values(this._strategies)[0] returns the first key/value pair's
-    // value. We are then invoking it (since it should be a function) and
-    // returning a serialized ID
-    return Object.values(this._strategies)[0]();
+    delete this._strategies[serializerName];
   }
 
   /**
@@ -255,7 +243,7 @@ class Dashport {
 
     delete this._strategies[stratName];
   }
-  
+
   /**
    * method: getUserInfo
    * @param: the serialized id that comes from serializeUser

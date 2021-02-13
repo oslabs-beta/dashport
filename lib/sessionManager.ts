@@ -1,4 +1,4 @@
-import { OakContext } from './types.ts';
+import { OakContext, Serializers, UserProfile } from './types.ts';
 import Dashport from './dashport.ts';
 
 /**
@@ -11,7 +11,7 @@ import Dashport from './dashport.ts';
  * When using an instance of SessionManager, only use
  *   sm.logIn();
  *   sm.logOut();
- *   sm.isAuthenticated();
+ *   sm.serialize();
  * 
  * @param {string} framework - The name of the server framework to be used
  */
@@ -68,6 +68,31 @@ class SessionManager {
     }
 
     throw new Error('ERROR in _logOutDecider: Name of framework passed in is not supported.');
+  }
+
+  /**
+   * Takes in an object of serializer functions and currently - read TODO - uses
+   * the first one to create a serialized ID and return it.
+   * 
+   * TODO: Allow a 'name' parameter to be passed in that specifies which
+   * serializer to use. If name === 'all', use all the serializers in a chain.
+   * 
+   * TODO: Allow optional parameters to be passed into the serializer to be
+   * used. If chaining multiple serializers is implemented, pass params into the
+   * first serializer function.
+   * 
+   * @param {Object} serializers - An object containing serializer functions
+   * @returns {string} A serialized ID
+   */
+  public serialize(serializers: Serializers, userData: UserProfile): string {
+    if (Object.values(serializers).length === 0) {
+      throw new Error('ERROR in serialize: No serializers');
+    }
+
+    // Object.values(serializers)[0] returns the first key/value pair's
+    // value. We are then invoking it (since it should be a function) and
+    // returning what's returned (should be a serialized ID)
+    return Object.values(serializers)[0](userData);
   }
 }
 
