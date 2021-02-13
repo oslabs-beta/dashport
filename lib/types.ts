@@ -24,8 +24,6 @@ export interface OakContext {
  * info into the standardized UserProfile below
  */
 export interface UserProfile {
-  // the ID Dashport has come up with for a user
-  serializedID: string;
   // the provider the user is authenticated with
   provider: string;
   // the unique id a user has with that specific provider
