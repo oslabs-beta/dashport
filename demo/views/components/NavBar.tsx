@@ -14,22 +14,26 @@ const NavBar = () => {
 
   return (
     <div>
-      <button onClick={openLogin}>Login/Sign In Options</button>
+      <button onClick={openLogin} id='loginButton'>Login/Sign In Options</button>
       {clicked && (
         <div>
-        <form >
-          <div>
-            <label>Username</label>
-            <input/>
+        <form id='form'>
+          <div id='userForm'>
+            <input placeholder='Username'/>
           </div>
-          <div>
-            <label>Password</label>
-            <input/>
+          <div id='passForm'>
+            <input placeholder='Password'/>
           </div>
-          <button type='button'>Login</button>
-          <button type='button'>Sign Up</button>
+          <button type='button' id='login'>Login</button>
+          <button type='button' id='signIn'>Sign Up</button>
         </form>
-        <button>Sign in with Google</button>
+        <span>
+            <a href="/test">
+              <img id='googleIcon'
+                src="https://i.imgur.com/PHJ6j1E.png"
+              ></img>
+            </a>
+        </span>
         </div>
       )}
       

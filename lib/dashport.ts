@@ -8,8 +8,8 @@ class Dashport {
   private _sm: SessionManager;
   // public since _sId needs to be accessed by SessionManager but _ since a
   // developer should not access it
-  public _sId: string;
-  public initialize: Function;
+  public _sId: string = '';
+  public initialize: any;
 
   constructor(frmwrk: string) {
     this._framework = frmwrk;
@@ -27,13 +27,13 @@ class Dashport {
    * 
    * @param {string} framework - The server framework that will be used
    * @param {Dashport} dashport - The current instance of dashport
-   * @returns {Function} The function that will be dashport's intialize method
+   * @returns {*} The async function that will be dashport's intialize method
    */
   private _initializeDecider(framework: string): Function {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state === undefined) {
-          throw new Error('ERROR in initialize: \'state\' property needs to exist on context object of Oak.');
+          throw new Error('ERROR in initialize: \'state\' property needs to exist on context object of Oak. Use app.use(dashport.initialize) not app.use(dashport.initialize()).');
         }
 
         // if the _dashport property on ctx.state does not exist, create one.
@@ -42,14 +42,14 @@ class Dashport {
           ctx.state._dashport = {};
         }
 
-        await next();
+        return await next();
       }
     }
 
     throw new Error('ERROR constructing Dashport: Name of framework passed in is not supported.');
   }
 
-  /**
+ /**
    * Takes in a strategy name that should exist on this._strategies. The
    * strategy will need to be have been added by the developer.
    * 
@@ -101,33 +101,38 @@ class Dashport {
           throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
         }
 
+        console.log('ctx.state._dashport:', ctx.state._dashport);
+        console.log('ctx.state._dashport.session:', ctx.state._dashport.session);
+        console.log('self._sId:', self._sId);
+
         // check if a session object exists (created by SessionManager.logIn).
         // If it exists, check if the session ID matches. If it does, user has
         // already been authenticated, so user can go to next middleware
         if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
-            await next();
+            console.log('Authenticated, gonna just go to next');
+            return await next();
           }
         }
 
         // If above check is not passed, user must be authenticated (again), so
         // call the requested strategy's 'authorize' method.
-        const userData: UserProfile | null = await self._strategies[stratName].authorize(ctx, next);
+        const authData: any = await self._strategies[stratName].router(ctx, next);
+        console.log('116Dash', authData);
 
-        if (userData === null) {
-          throw new Error('User failed to authenticate');
+        if (authData !== undefined) {
+          // serializedId will be obtained by calling SessionManager's serialize
+          // function, which will invoke the serializer(s) the developer specified
+          const serializedId: string = self._sm.serialize(self._serializers, authData.userInfo);
+
+          // use SessionManager's logIn method to create a session object on
+          // ctx.state._dashport and to assign serializedId to the _sId property
+          // of this instance of Dashport
+          self._sm.logIn(ctx, self, serializedId);
+
+          return await next();
         }
 
-        // serializedId will be obtained by calling SessionManager's serialize
-        // function, which will invoke the serializer(s) the developer specified
-        const serializedId: string = self._sm.serialize(self._serializers, userData);
-        
-        // use SessionManager's logIn method to create a session object on
-        // ctx.state._dashport and to assign serializedId to the _sId property
-        // of this instance of Dashport
-        self._sm.logIn(ctx, self, serializedId);
-
-        await next();
       }
     }
 
@@ -135,10 +140,11 @@ class Dashport {
   }
 
   //////////////////////////// Used in '/test' route in server.tsx
-  // async test(ctx: OakContext, next: any) {
-  //   console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
-  //   await next();
-  // }
+  async test(ctx: OakContext, next: any) {
+    console.log('dashport 150', ctx.request.url.search)
+    // console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
+    return await next();
+  }
   ///////////////////////////////////////////////////////////
 
   /**
@@ -183,7 +189,7 @@ class Dashport {
     if (this._serializers[serializerName] !== undefined) {
       throw new Error('ERROR in addSerializer: A serializer with this name already exists.');
     }
-    
+
     this._serializers[serializerName] = serializer;
   }
 
@@ -200,9 +206,10 @@ class Dashport {
     if (this._serializers[serializerName] === undefined) {
       throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
     }
-    
+
     delete this._strategies[serializerName];
   }
+
 
   /**
    * Adds an OAuth strategy that the developer would like to use.
@@ -238,7 +245,7 @@ class Dashport {
 
     delete this._strategies[stratName];
   }
-  
+
   /**
    * method: getUserInfo
    * @param: the serialized id that comes from serializeUser

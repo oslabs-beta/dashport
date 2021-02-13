@@ -11,7 +11,7 @@ import Dashport from './dashport.ts';
  * When using an instance of SessionManager, only use
  *   sm.logIn();
  *   sm.logOut();
- *   sm.isAuthenticated();
+ *   sm.serialize();
  * 
  * @param {string} framework - The name of the server framework to be used
  */
@@ -85,6 +85,10 @@ class SessionManager {
    * @returns {string} A serialized ID
    */
   public serialize(serializers: Serializers, userData: UserProfile): string {
+    if (Object.values(serializers).length === 0) {
+      throw new Error('ERROR in serialize: No serializers');
+    }
+
     // Object.values(serializers)[0] returns the first key/value pair's
     // value. We are then invoking it (since it should be a function) and
     // returning what's returned (should be a serialized ID)

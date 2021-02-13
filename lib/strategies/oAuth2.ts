@@ -87,6 +87,16 @@ interface oauthOptions {
   sessionKey:string;
 }
 
+interface meta {
+  authorizationURL:string;
+  tokenURL:string;
+  clientID:string;
+}
+
+interface error {
+  
+}
+
 function OAuth2Strat( options:oauthOptions, verify:Function) {
   //make sure options exist
 
@@ -100,7 +110,7 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
   this._verify = verify; // passing on verify function
 
   //PASSPORT MENTIONS THIS IS "PROTECTED"
-  this._oauth2 = new oAuth2(options.clientID, options.clientSecret, '', options.authorizationURL, options.tokenURL, options.customHeaders);
+  this._oauth2 = new oAuth2(options.clientID, options.clientSecret, '', options.authorizationURL, options.tokenURL, options.customHeaders); //DENO MODE
 
   this._callbackURL = options.callbackURL;
   this._scope = options.scope;
@@ -108,197 +118,151 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
   this._pkceMethod = (options.pkce === true ) ? 'S256' : options.pkce;
   this._key = options.sessionKey || ('oauth2:' + url.parse(options.authorizationURL).hostname); // url.parse is a node module need to see deno built in.
 
+  /// OPTIONS.STORE PKCE key to be stored, if needed.    BELIEVE ALL OF THIS CAN BE SKIPPED
+  // if ( options.store ) this._stateStore = options.store;
+  // else {
+  //   if (options.pkce) throw new TypeError('oauth2 requires true state when PKCE is enabled');
+    // this._stateStore = new NullStateStore();  BELIEVE THIS IS NOT NEEDED
+    // this._trustProxy = options.proxyl
+    // this._passReqToCallback = options.passReqToCallbacl;
+    // this._skipUserProfile = ( options.skipUserProfile === undefined ) ? false : options.skipUserProfile;
+  // }
+
+  // ******* FIGURE OUT INHERITANCE **********//
+  util.inherits(OAuth2Strategy, passport.Strategy);
+  // ******* FIGURE OUT INHERITANCE **********//
 
 }
 
 
 
-//   if (options.store) {
-//     this._stateStore = options.store;
-//   } else {
-//     if (options.state) {
-//       this._stateStore = options.pkce ? new PKCESessionStateStore({ key: this._key }) : new SessionStateStore({ key: this._key });
-//     } else {
-//       if (options.pkce) { throw new TypeError('OAuth2Strategy requires `state: true` option when PKCE is enabled'); }
-//       this._stateStore = new NullStateStore();
-//     }
-//   }
-//   this._trustProxy = options.proxy;
-//   this._passReqToCallback = options.passReqToCallback;
-//   this._skipUserProfile = (options.skipUserProfile === undefined) ? false : options.skipUserProfile;
-// }
-
-// // Inherit from `passport.Strategy`.
-// util.inherits(OAuth2Strategy, passport.Strategy);
-
-
 // /**
-//  * Authenticate request by delegating to a service provider using OAuth 2.0.
-//  *
-//  * @param {Object} req
-//  * @api protected
+//  * DENO HAS OAUTH 2 that may be sufficient doesnt cover all types of authorization oauth2 oferr, but should be sufficient for google at least.
 //  */
-// OAuth2Strategy.prototype.authenticate = function(req, options) {
-//   options = options || {};
-//   var self = this;
+OAuth2Strat.prototype.authenticate = function( req:object, options:oauthOptions) { //  Make this more precise typing.
+  const self = this;
 
-//   if (req.query && req.query.error) {
-//     if (req.query.error == 'access_denied') {
-//       return this.fail({ message: req.query.error_description });
-//     } else {
-//       return this.error(new AuthorizationError(req.query.error_description, req.query.error, req.query.error_uri));
-//     }
-//   }
+  //mild error handling before request is sent;
+  if ( req.query && req.query.error ){
+    if(req.query.error === 'access_denied'){
+      return this.fail({message: req.query.error_description});
+    } else {
+      // WE DON'T ACTUALLY HAVE AUTHORIZATIONERROR
+      return this.error(new AuthorizationError(req.query.error_description, req.query.error, req.query.error_uri))
+      // NEED ERROR HANDLING
+    }
+  }
 
-//   var callbackURL = options.callbackURL || this._callbackURL;
-//   if (callbackURL) {
-//     var parsed = url.parse(callbackURL);
-//     if (!parsed.protocol) {
-//       // The callback URL is relative, resolve a fully qualified URL from the
-//       // URL of the originating request.
-//       callbackURL = url.resolve(utils.originalURL(req, { proxy: this._trustProxy }), callbackURL);
-//     }
-//   }
+  const callbackURL = options.callbackURL || this._callbackURL; // redirect URL
+  if (callbackURL) {
+    const parsed = url.parse(callbackURL)  ///AGAIN MAY NOT HAVE ACCESS TO A URL PARSER AND MAY NEED TO HAND TYPE
+    if (!parsed.protocol) callbackURL = url.resolve(utils.originalURL(Req, { proxy: this._trustProxy}), callbackURL)  // AGAIN USES URL and UTIL TO AUTO CONSTRACT A URL THAT MAY HAVE BEEN SHORTENED.
+  }
 
-//   var meta = {
-//     authorizationURL: this._oauth2._authorizeUrl,
-//     tokenURL: this._oauth2._accessTokenUrl,
-//     clientID: this._oauth2._clientId
-//   }
+  const meta:meta = { // meta 
+    authorizationURL: this._oauth2._authorizeUrl,
+    tokenURL: this._oauth2._accessTokenUrl,
+    clientID: this._oauth2._clientId
+  }
 
-//   if (req.query && req.query.code) {
-//     function loaded(err, ok, state) {
-//       if (err) { return self.error(err); }
-//       if (!ok) {
-//         return self.fail(state, 403);
-//       }
+  if ( req.query && req.query.code ) {  //IS REQ STILL GOOD?
+    function loaded(err, ok, state) {
+      if (err) return self.error(err);
+      if (!ok) return self.fail(state, 403);
+      const code:string = req.query.code;
+      const params:object = self.tokenParams(options);  // define this object more specifically
+      params.grant_types = 'authorization_code';
+      if (callbackURL) params.redirect_uri = callbackURL;
+      if (typeof ok === 'string') params.code_verifier = ok; 
 
-//       var code = req.query.code;
+      self._oauth2.getOAuthAccessToken( code, params, ( error:object, accessToken:string, refreshToken:string, params:string) => { // get OAuth Access Token
+        if ( error ) return self.error(self._createOAuthError('Couldnt get Access Token', error));  //WONT WORK
+        self._loadUserProfile(accessToken, (err:object, profile:object) => {
+          if (err) return self.error(err)  // REPORT ERROR
+          function verified( err:object, user:object, info:object = {}) {
+            if (err) return self.error(err);
+            if (!user) return self.fail(info);
+            if (state) info.state = state;
+            self.success(user, info);
+          };
+          try {
+            if (self._passReqToCallback) {  /// chan t Req to CTX? 
+              const funcParamsLength:number = self._verify.length;  ///CHECKING TO SEE HOW MANY PARAMETERS THE FUNCTION TAKES IN
+              if (funcParamsLength === 6) self._verify(req, accessToken, refreshToken, params, profile, verified);
+              else self._verify( req, accessToken, refreshToken, profile, verified);
+            } else {
+              const funcParamsLength:number = self._verify.length;
+              if ( funcParamsLength === 5) self._verify( accessToken, refreshToken, params, profile, verified);
+              else self._verify(accessToken, refreshToken, profile, verified);
+            }
+          } catch (err:object) {return self.error(err)};
+        });
+      });
+   }
+   const state:object = req.query.state;   /// mention of req now be CTX?
+   try {
+     const funcParamsLength:number = this._stateStore.verify.length;
+     if (funcParamsLength === 4) this._stateStore.verifty(req, state, meta, loaded) // REQ ??
+     else this._stateStore.verify(req, state, loaded);
+   } catch (err) { return this.error(err)};
+  }   else {
+    const params:object = this.authorizationParams(options);
+    params.response_type = 'code';
+    if ( callbackURL ) params.redirect_uri = callbackURL;
+    const scope:string = options.scope || this._scope;
+    if (scope) {
+      if (Array.isArray(scope)) scope = scope.join(this._scopeSeparator);
+      params.scope = scope;
+    }
+    let verifier:string, challenge:string /// I DONT KNOW I THINK FUNCTION AND STRING -alex
+    /******************************* THIS ALL MAY NOT BE NEEDED FOR GOOGLE */
+    if (this._pkceMethod) { // pkce Proof Key for Code Exchange 
+      verifier = base65url(crypto.pseudoRandomBytes(32));
+      switch (this._pkceMethod) {
+        case 'plain':
+          challenge = verifier;
+          break;
+        case 'S256':
+          challenge = base64url(crypto.createHash('sha256').update(verifier).digest());
+          break;
+        default:
+          return this.error(new Error('Unsupported code verifier transformation method: '+ this._pkceMethod));
+      }
+    
+      params.code_challenge = challenge; 
+      params.code_challenge_method = this._pkceMethod;
+    }
+    /******************************* THIS ALL MAY NOT BE NEEDED FOR GOOGLE */
 
-//       var params = self.tokenParams(options);
-//       params.grant_type = 'authorization_code';
-//       if (callbackURL) { params.redirect_uri = callbackURL; }
-//       if (typeof ok == 'string') { // PKCE
-//         params.code_verifier = ok;
-//       }
-
-//       self._oauth2.getOAuthAccessToken(code, params,
-//         function(err, accessToken, refreshToken, params) {
-//           if (err) { return self.error(self._createOAuthError('Failed to obtain access token', err)); }
-
-//           self._loadUserProfile(accessToken, function(err, profile) {
-//             if (err) { return self.error(err); }
-
-//             function verified(err, user, info) {
-//               if (err) { return self.error(err); }
-//               if (!user) { return self.fail(info); }
-
-//               info = info || {};
-//               if (state) { info.state = state; }
-//               self.success(user, info);
-//             }
-
-//             try {
-//               if (self._passReqToCallback) {
-//                 var arity = self._verify.length;
-//                 if (arity == 6) {
-//                   self._verify(req, accessToken, refreshToken, params, profile, verified);
-//                 } else { // arity == 5
-//                   self._verify(req, accessToken, refreshToken, profile, verified);
-//                 }
-//               } else {
-//                 var arity = self._verify.length;
-//                 if (arity == 5) {
-//                   self._verify(accessToken, refreshToken, params, profile, verified);
-//                 } else { // arity == 4
-//                   self._verify(accessToken, refreshToken, profile, verified);
-//                 }
-//               }
-//             } catch (ex) {
-//               return self.error(ex);
-//             }
-//           });
-//         }
-//       );
-//     }
-
-//     var state = req.query.state;
-//     try {
-//       var arity = this._stateStore.verify.length;
-//       if (arity == 4) {
-//         this._stateStore.verify(req, state, meta, loaded);
-//       } else { // arity == 3
-//         this._stateStore.verify(req, state, loaded);
-//       }
-//     } catch (ex) {
-//       return this.error(ex);
-//     }
-//   } else {
-//     var params = this.authorizationParams(options);
-//     params.response_type = 'code';
-//     if (callbackURL) { params.redirect_uri = callbackURL; }
-//     var scope = options.scope || this._scope;
-//     if (scope) {
-//       if (Array.isArray(scope)) { scope = scope.join(this._scopeSeparator); }
-//       params.scope = scope;
-//     }
-//     var verifier, challenge;
-
-//     if (this._pkceMethod) {
-//       verifier = base64url(crypto.pseudoRandomBytes(32))
-//       switch (this._pkceMethod) {
-//       case 'plain':
-//         challenge = verifier;
-//         break;
-//       case 'S256':
-//         challenge = base64url(crypto.createHash('sha256').update(verifier).digest());
-//         break;
-//       default:
-//         return this.error(new Error('Unsupported code verifier transformation method: ' + this._pkceMethod));
-//       }
-      
-//       params.code_challenge = challenge;
-//       params.code_challenge_method = this._pkceMethod;
-//     }
-
-//     var state = options.state;
-//     if (state) {
-//       params.state = state;
-      
-//       var parsed = url.parse(this._oauth2._authorizeUrl, true);
-//       utils.merge(parsed.query, params);
-//       parsed.query['client_id'] = this._oauth2._clientId;
-//       delete parsed.search;
-//       var location = url.format(parsed);
-//       this.redirect(location);
-//     } else {
-//       function stored(err, state) {
-//         if (err) { return self.error(err); }
-
-//         if (state) { params.state = state; }
-//         var parsed = url.parse(self._oauth2._authorizeUrl, true);
-//         utils.merge(parsed.query, params);
-//         parsed.query['client_id'] = self._oauth2._clientId;
-//         delete parsed.search;
-//         var location = url.format(parsed);
-//         self.redirect(location);
-//       }
-
-//       try {
-//         var arity = this._stateStore.store.length;
-//         if (arity == 5) {
-//           this._stateStore.store(req, verifier, undefined, meta, stored);
-//         } else if (arity == 3) {
-//           this._stateStore.store(req, meta, stored);
-//         } else { // arity == 2
-//           this._stateStore.store(req, stored);
-//         }
-//       } catch (ex) {
-//         return this.error(ex);
-//       }
-//     }
-//   }
-// };
+    const state:object = options.state;
+    if (state) {
+      params.state = state;
+      const parsed:object = url.parse(this._oauth2._authorizeUrl, true); // url.parse needs to be adjusted.
+      utils.merge(parsed.query, params);
+      parsed.query['client_id'] = this._oath2._clientId;
+      delete parsed.search;
+      const location:string = url.format(parsed);
+      this.redirect(location);
+    } else {
+      function stored(err:object, state:object) {
+        if (err) return self.error(err);
+        if (state) params.state = state;
+        const parsed = url.parse(self._oauth2._authorizeUrl, true);
+        utils.merge(parsed.query, params);
+        parsed.query['client_id'] = self._oauth2._clientId;
+        delete parsed.search;
+        const location:string = url.format(parsed);
+        self.redirect(location);
+      }
+      try { 
+        const funcParamsLength:number = this._stateStore.store.length;
+        if (funcParamsLength === 5) this._stateStore.store(req, verifier, undefined, meta, stored);
+        if (funcParamsLength === 3) this._stateStore.store(req, meta, stored);
+        else this._stateStore.store(req, stored);
+      } catch (err) {return this.error(err)}
+    }
+  }
+};
 
 // /**
 //  * Retrieve user profile from service provider.
@@ -312,9 +276,9 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
 //  * @param {Function} done
 //  * @api protected
 //  */
-// OAuth2Strategy.prototype.userProfile = function(accessToken, done) {
-//   return done(null, {});
-// };
+OAuth2Strat.prototype.userProfile = function(accessToken:string, done:Function) {
+  return done(null, {});
+};
 
 // /**
 //  * Return extra parameters to be included in the authorization request.
@@ -329,9 +293,9 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
 //  * @return {Object}
 //  * @api protected
 //  */
-// OAuth2Strategy.prototype.authorizationParams = function(options) {
-//   return {};
-// };
+OAuth2Strat.prototype.authorizationParams = function(options:oauthOptions) {
+  return {};
+};
 
 // /**
 //  * Return extra parameters to be included in the token request.
@@ -345,9 +309,9 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
 //  * @return {Object}
 //  * @api protected
 //  */
-// OAuth2Strategy.prototype.tokenParams = function(options) {
-//   return {};
-// };
+OAuth2Strat.prototype.tokenParams = function(options:oauthOptions) {
+  return {};
+};
 
 // /**
 //  * Parse error response from OAuth 2.0 endpoint.
@@ -364,13 +328,13 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
 //  * @return {Error}
 //  * @api protected
 //  */
-// OAuth2Strategy.prototype.parseErrorResponse = function(body, status) {
-//   var json = JSON.parse(body);
-//   if (json.error) {
-//     return new TokenError(json.error_description, json.error, json.error_uri);
-//   }
-//   return null;
-// };
+OAuth2Strat.prototype.parseErrorResponse = function(body:object, status:number) {
+  var json:object = JSON.parse(body);
+  if (json.error) {
+    return new TokenError(json.error_description, json.error, json.error_uri); //NO ERROR HANDLING
+  }
+  return null;
+};
 
 // /**
 //  * Load user profile, contingent upon options.
@@ -379,29 +343,29 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
 //  * @param {Function} done
 //  * @api private
 //  */
-// OAuth2Strategy.prototype._loadUserProfile = function(accessToken, done) {
-//   var self = this;
+OAuth2Strat.prototype._loadUserProfile = function(accessToken, done) {
+  const self = this;
 
-//   function loadIt() {
-//     return self.userProfile(accessToken, done);
-//   }
-//   function skipIt() {
-//     return done(null);
-//   }
+  function loadIt() {
+    return self.userProfile(accessToken, done);
+  }
+  function skipIt() {
+    return done(null);
+  }
 
-//   if (typeof this._skipUserProfile == 'function' && this._skipUserProfile.length > 1) {
-//     // async
-//     this._skipUserProfile(accessToken, function(err, skip) {
-//       if (err) { return done(err); }
-//       if (!skip) { return loadIt(); }
-//       return skipIt();
-//     });
-//   } else {
-//     var skip = (typeof this._skipUserProfile == 'function') ? this._skipUserProfile() : this._skipUserProfile;
-//     if (!skip) { return loadIt(); }
-//     return skipIt();
-//   }
-// };
+  if (typeof this._skipUserProfile == 'function' && this._skipUserProfile.length > 1) {
+    // async
+    this._skipUserProfile(accessToken, function(err, skip) {
+      if (err) { return done(err); }
+      if (!skip) { return loadIt(); }
+      return skipIt();
+    });
+  } else {
+    const skip = (typeof this._skipUserProfile == 'function') ? this._skipUserProfile() : this._skipUserProfile;
+    if (!skip) { return loadIt(); }
+    return skipIt();
+  }
+};
 
 // /**
 //  * Create an OAuth error.
@@ -410,17 +374,17 @@ function OAuth2Strat( options:oauthOptions, verify:Function) {
 //  * @param {Object|Error} err
 //  * @api private
 //  */
-// OAuth2Strategy.prototype._createOAuthError = function(message, err) {
-//   var e;
-//   if (err.statusCode && err.data) {
-//     try {
-//       e = this.parseErrorResponse(err.data, err.statusCode);
-//     } catch (_) {}
-//   }
-//   if (!e) { e = new InternalOAuthError(message, err); }
-//   return e;
-// };
+OAuth2Strat.prototype._createOAuthError = function(message:string, err:object) {
+  let errorObj:object;
+  if (err.statusCode && err.data) {
+    try {
+      errorObj = this.parseErrorResponse(err.data, err.statusCode);
+    } catch (_) {}
+  }
+  if (!errorObj) { errorObj = new InternalOAuthError(message, err); }
+  return errorObj;
+};
 
 
 // // Expose constructor.
-// module.exports = OAuth2Strategy;
+export default OAuth2Strat;

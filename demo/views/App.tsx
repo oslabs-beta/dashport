@@ -15,16 +15,22 @@ declare global {
       span: any;
       form: any;
       label: any;
+      a: any;
     }
   }
 }
 
 function App() {
   return (
-    <div>
-      <div>Welcome to Dashport!</div>
-      <NavBar/>
-      <MainContainer/>
+    <div >
+      <div style={{position: "relative", left: "10.5rem", marginTop:"4rem"}}>
+        <img src='https://i.imgur.com/6wdVrZ1.png' id='dashportIcon'></img>
+          <div id='homeContainer'>
+            <div>Welcome to Dashport!</div>
+            <NavBar/>
+            {/* <MainContainer/> */}
+          </div>
+      </div>
     </div>
   )
 }
