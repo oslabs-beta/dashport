@@ -1,4 +1,4 @@
-import { OakContext, Serializers, Strategies } from './types.ts';
+import { OakContext, Serializers, Strategies, UserProfile } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -89,8 +89,8 @@ class Dashport {
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
-    // ALL strategies made for Dashport MUST have an 'authorize' method that
-    // is a middleware
+    // ALL strategies made for Dashport MUST have an 'authorize' method that on
+    // successful authentication returns the userData in the form of UserProfile
     if (this._strategies[stratName].authorize === undefined) {
       throw new Error('ERROR in authenticate: This strategy does not have an \'authorize\' method.');
     }
@@ -132,6 +132,7 @@ class Dashport {
 
           return await next();
         }
+
       }
     }
 
@@ -180,8 +181,8 @@ class Dashport {
     if (serializer.length !== 1) {
       throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
     }
-
-    // the below if statement is currently not needed. TODO in _serialize method
+    
+    // the below if statement is currently not needed. TODO in SessionManager.serialize method
     // if (serializerName === 'all') {
     //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
     // }
@@ -208,6 +209,7 @@ class Dashport {
 
     delete this._strategies[serializerName];
   }
+
 
   /**
    * Adds an OAuth strategy that the developer would like to use.
