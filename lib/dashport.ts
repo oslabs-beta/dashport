@@ -1,4 +1,4 @@
-import { OakContext, Serializers, Strategies, UserProfile } from './types.ts';
+import { OakContext, Serializers, Strategies } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -26,8 +26,7 @@ class Dashport {
    * TODO: Add other frameworks
    * 
    * @param {string} framework - The server framework that will be used
-   * @param {Dashport} dashport - The current instance of dashport
-   * @returns {*} The async function that will be dashport's intialize method
+   * @returns {Function} The async function that will be dashport's intialize method
    */
   private _initializeDecider(framework: string): Function {
     if (framework === 'oak') {
@@ -49,7 +48,7 @@ class Dashport {
     throw new Error('ERROR constructing Dashport: Name of framework passed in is not supported.');
   }
 
- /**
+  /**
    * Takes in a strategy name that should exist on this._strategies. The
    * strategy will need to be have been added by the developer.
    * 
@@ -89,10 +88,12 @@ class Dashport {
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
-    // ALL strategies made for Dashport MUST have an 'authorize' method that on
-    // successful authentication returns the userData in the form of UserProfile
-    if (this._strategies[stratName].authorize === undefined) {
-      throw new Error('ERROR in authenticate: This strategy does not have an \'authorize\' method.');
+
+    // ALL strategies made for Dashport MUST have a 'router' method that on
+    // successful authentication, returns an authData object with a userInfo
+    // property in the form of UserProfile
+    if (this._strategies[stratName].router === undefined) {
+      throw new Error('ERROR in authenticate: This strategy does not have a \'router\' method.');
     }
 
     if (this._framework === 'oak') {
@@ -101,24 +102,19 @@ class Dashport {
           throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
         }
 
-        console.log('ctx.state._dashport:', ctx.state._dashport);
-        console.log('ctx.state._dashport.session:', ctx.state._dashport.session);
-        console.log('self._sId:', self._sId);
-
         // check if a session object exists (created by SessionManager.logIn).
         // If it exists, check if the session ID matches. If it does, user has
         // already been authenticated, so user can go to next middleware
         if (ctx.state._dashport.session) {
           if (ctx.state._dashport.session === self._sId) {
-            console.log('Authenticated, gonna just go to next');
             return await next();
           }
         }
 
-        // If above check is not passed, user must be authenticated (again), so
-        // call the requested strategy's 'authorize' method.
+        // if above check is not passed, user must be authenticated (again), so
+        // call the requested strategy's 'router' method. authData must contain
+        // a userInfo property in the form of UserProfile
         const authData: any = await self._strategies[stratName].router(ctx, next);
-        console.log('116Dash', authData);
 
         if (authData !== undefined) {
           // serializedId will be obtained by calling SessionManager's serialize
@@ -132,32 +128,23 @@ class Dashport {
 
           return await next();
         }
-
       }
     }
 
     throw new Error('ERROR in authenticate: Name of current framework is not supported.');
   }
 
-  //////////////////////////// Used in '/test' route in server.tsx
-  async test(ctx: OakContext, next: any) {
-    console.log('dashport 150', ctx.request.url.search)
-    // console.log('ctx.state._dashingportingtest in test:', ctx.state._dashingportingtest);
-    return await next();
-  }
-  ///////////////////////////////////////////////////////////
-
   /**
    * Takes in a name for a serializer function and the serializer function the 
-   * developer specifies.
+   * developer specifies. Serializer function needs to do 4 things below
    * 
-   * The serializer function needs to take in one parameter which will be the
+   * 1. The serializer function needs to take in one parameter which will be the
    * user data in the form of an object.
-   * The serializer function needs to specify what the developer wants to do
+   * 2. The serializer function needs to specify what the developer wants to do
    * with the user data (store it somewhere, add some info to response body, 
    * etc).
-   * The serializer function needs to specify how to create a serialized ID.
-   * The serializer function needs to return the serialized ID.
+   * 3. The serializer function needs to specify how to create a serialized ID.
+   * 4. The serializer function needs to return the serialized ID.
    * 
    * EXAMPLE
    * 
@@ -186,6 +173,7 @@ class Dashport {
     // if (serializerName === 'all') {
     //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
     // }
+
     if (this._serializers[serializerName] !== undefined) {
       throw new Error('ERROR in addSerializer: A serializer with this name already exists.');
     }
@@ -247,18 +235,27 @@ class Dashport {
   }
 
   /**
-   * method: getUserInfo
-   * @param: the serialized id that comes from serializeUser
-   * @return: the user's information
+   * --- Currently in process for configuring for Oak ---
+   * 
+   * Takes in a serialized ID and compares it to the _sId. If they match, allow
+   * permission
+   * 
+   * TODO: Configure for other server frameworks
+   * 
+   * @param {Object} ctx - The Oak context object
+   * @param {string} idToCompare - The ID to compare to _sId
+   * @returns {} 
    */
   public getUserInfo(ctx: OakContext, idToCompare: string) {
+    if (ctx.state._dashport === undefined) {
+      throw new Error('ERROR in getUserInfo: Dashport must be initialized')
+    }
+
     if (ctx.state._dashport.session === undefined) {
       // There is no session, so person is not logged in, so redirect to login
     }
 
-    const serializedId = ctx.state._dashport.session;
-
-    if (serializedId === idToCompare) {
+    if (idToCompare === this._sId) {
       // nice go ahead grant access to secret stuff
     }
 
