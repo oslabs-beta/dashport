@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import { OakContext, Serializers, Strategies, UserProfile } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
@@ -269,4 +267,3 @@ class Dashport {
 }
 
 export default Dashport;
->>>>>>> e1aec772f7b889e7c75afdfa17252831c661e315

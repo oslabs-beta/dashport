@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-=======
-//import modules
+// import modules
 // https://oakserver.github.io/oak/
 import { Application, Session, send, join, log } from './deps.ts'
 import { html, ReactComponents } from './ssrConstants.tsx';
@@ -173,4 +171,3 @@ await app.listen({ port });
 
 //denon run --allow-all --unstable demo/server.tsx
 //deno install -qAf --unstable https://deno.land/x/denon/denon.ts
->>>>>>> e1aec772f7b889e7c75afdfa17252831c661e315

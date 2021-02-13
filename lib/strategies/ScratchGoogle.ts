@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 // import Dashport from '../dashport';
 import { OakContext, googOptions } from '../types.ts';
 
@@ -108,8 +106,8 @@ export default class GoogleStrategy {
   async getAuthToken(ctx:any, next:Function){
     const OGURI: string = ctx.request.url.search;
     if(OGURI.includes('error')){
-      // do error handling
-      console.log('broke the code again');
+      // do error shit
+      console.log('Damn it, Waye broke the code again');
     }
     // splits the string at the =, storing the first part in URI1[0] and the part we want in URI1[1]
     let URI1: string[] = OGURI.split('=');
@@ -161,17 +159,7 @@ export default class GoogleStrategy {
 
     try {
       let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',options)
-      data = await data.json();
-      authData.userInfo = {
-        provider: 'google',
-        providerUserId: data.id,
-        displayName: data.name,
-        name: {
-          familyName: data.family_name,
-          givenName: data.given_name,
-        },
-        emails: [data.email]
-      }
+      authData.userInfo = await data.json();
       console.log('Scratch149', authData.userInfo);
       return authData;
     } catch(err) {
@@ -263,4 +251,3 @@ export default class GoogleStrategy {
     token_type:string: 'Bearer'
     expires_in:number: 3600    
 */
->>>>>>> e1aec772f7b889e7c75afdfa17252831c661e315
