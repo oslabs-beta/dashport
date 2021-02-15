@@ -4,9 +4,6 @@ export {
   dirname
 } from "https://deno.land/std@0.74.0/path/mod.ts";
 
-// 'Console log' module
-export * as log from "https://deno.land/std/log/mod.ts";
-
 // Oak
 export {
   Application,
@@ -16,9 +13,6 @@ export {
 
 // MongoDB
 export { MongoClient } from "https://deno.land/x/mongo@v0.12.1/mod.ts";
-
-// Deno Sessions
-export { Session } from "https://deno.land/x/session@1.1.0/mod.ts";
 
 export { default as React } from "https://dev.jspm.io/react@16.14.0";
 

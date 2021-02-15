@@ -1,5 +1,9 @@
 import { Application, send, join } from './deps.ts'
+<<<<<<< HEAD
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
+=======
+import { html, ReactComponents } from './ssrConstants.tsx';
+>>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
@@ -8,7 +12,7 @@ const port = 3000;
 const app: Application = new Application();
 const dashport = new Dashport('oak');
 
-//Error handling
+// Error handling
 app.use(async (ctx: any, next: any) => {
   try{
     await next();
@@ -23,7 +27,10 @@ app.use(dashport.initialize);
 app.use(router.routes());
 app.use(router.allowedMethods());
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
   redirect_uri: 'http://localhost:3000/test', 
@@ -31,13 +38,18 @@ dashport.addStrategy('google', new GoogleStrat({
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
   grant_type: 'authorization_code',
+<<<<<<< HEAD
 }, () => null));
+=======
+}));
+>>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/test', 
   dashport.authenticate('google'),
   (ctx: any, next: any) => {
+<<<<<<< HEAD
     if(ctx.state._dashport.session){
       ctx.response.redirect('/protected');
     }
@@ -57,6 +69,20 @@ router.get('/protected',
 )
 
 //response tracking
+=======
+    ctx.response.body = 'Hello Waye';
+  }
+)
+
+router.get('/params',
+  async (ctx: any, next: any) => {
+    console.log('ctx.request.url.search:', ctx.request.url.search);
+    await next();
+  }
+)
+
+// response tracking
+>>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 app.use(async (ctx: any, next: any) => {
   await next();
   const rt = ctx.response.headers.get("X-Response-Time");
@@ -72,7 +98,7 @@ app.use(async (ctx: any, next: any) => {
   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
 });
 
-//page routing
+// page routing
 app.use(async (ctx: any) => {
    if (ctx.request.url.pathname === '/') { 
      ctx.response.type = `text/html`
@@ -88,29 +114,9 @@ app.use(async (ctx: any) => {
    }
 });
 
-//Error handler
-app.use(async (ctx) => {
-  ctx.throw(500);
-});
-
-
-//listening on port
-app.addEventListener('listen', ()=>{console.log('server live on 3000')});
+// listening on port
+app.addEventListener('listen', () => { console.log(`Server live on port ${port}`) });
 await app.listen({ port });
 
-
-// session with Redis Database
-// const session: Session = new Session({
-//   framework: "oak",
-//   store: "redis",
-//   hostname: "127.0.0.1",
-//   port: 6379,
-// });
-
-// Initialize Session
-// await session.init();
-// app.use(session.use()(session));
-
-
-//denon run --allow-all --unstable demo/server.tsx
-//deno install -qAf --unstable https://deno.land/x/denon/denon.ts
+// denon run --allow-all --unstable demo/server.tsx
+// deno install -qAf --unstable https://deno.land/x/denon/denon.ts
