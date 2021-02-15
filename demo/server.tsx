@@ -1,5 +1,5 @@
 import { Application, send, join } from './deps.ts'
-import { html, ReactComponents } from './ssrConstants.tsx';
+import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
@@ -37,18 +37,25 @@ dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 router.get('/test', 
   dashport.authenticate('google'),
   (ctx: any, next: any) => {
-    ctx.response.body = 'Hello Waye';
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
   }
 )
 
-router.get('/params',
-  async (ctx: any, next: any) => {
-    console.log('ctx.request.url.search:', ctx.request.url.search);
-    await next();
+router.get('/protected',
+  (ctx: any, next: any) => {
+    if(!ctx.state._dashport.session){
+      ctx.response.body = 'You need to log in first. Please try again'
+    } else {
+      ctx.response.type = `text/html`
+      ctx.response.body = protectedPage
+      
+    }
   }
 )
 
-// response tracking
+//response tracking
 app.use(async (ctx: any, next: any) => {
   await next();
   const rt = ctx.response.headers.get("X-Response-Time");
