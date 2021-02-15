@@ -168,7 +168,7 @@ class Dashport {
     if (serializer.length !== 1) {
       throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
     }
-    
+
     // the below if statement is currently not needed. TODO in SessionManager.serialize method
     // if (serializerName === 'all') {
     //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
@@ -197,7 +197,6 @@ class Dashport {
 
     delete this._strategies[serializerName];
   }
-
 
   /**
    * Adds an OAuth strategy that the developer would like to use.
