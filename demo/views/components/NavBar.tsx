@@ -47,7 +47,6 @@ const NavBar = () => {
               <button type='button' id='login'>Login</button>
               <button type='button' id='signIn'>Sign Up</button>
             </form>
-            <button onClick={test}>
               <span>
                   <a href="/test">
                     <img id='googleIcon'
@@ -55,7 +54,6 @@ const NavBar = () => {
                     ></img>
                   </a>
               </span>
-            </button>
             </div>
           )}
       </div>
