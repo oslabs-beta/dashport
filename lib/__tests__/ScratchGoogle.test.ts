@@ -32,7 +32,7 @@ const fakeOakCtx = {
 const fakeNext = () => 1;
 
 Deno.test({
-  name: "GoogleStrategy should be have a router method and be initialized with correct default properties",
+  name: "GoogleStrategy should have a router method and be initialized with correct default properties",
   fn(): void{
     const goog = new GoogleStrategy(fakeOptions);
 
