@@ -1,43 +1,14 @@
-// import modules
-// https://oakserver.github.io/oak/
-import { Application, Session, send, join, log } from './deps.ts'
+import { Application, send, join } from './deps.ts'
 import { html, ReactComponents } from './ssrConstants.tsx';
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
 
-// oauth2Client.code.getAuthorizationUri()
-  /** Builds a URI you can redirect a user to to make the authorization request. */
-  // public getAuthorizationUri(options: GetUriOptions = {}): URL {
-  //   const params = new URLSearchParams();
-  //   params.set("response_type", "code");
-  //   params.set("client_id", this.client.config.clientId);
-  //   if (typeof this.client.config.redirectUri === "string") {
-  //     params.set("redirect_uri", this.client.config.redirectUri);
-  //   }
-  //   const scope = options.scope ?? this.client.config.defaults?.scope;
-  //   if (scope) {
-  //     params.set("scope", Array.isArray(scope) ? scope.join(" ") : scope);
-  //   }
-  //   if (options.state) {
-  //     params.set("state", options.state);
-  //   }
-  //   return new URL(`?${params}`, this.client.config.authorizationEndpointUri);
-  // }
-
-
-// import in Dashport and setup
-
-//server middlewares
-
-// SSR
-// session with Server Memory
-
 const port = 3000;
 const app: Application = new Application();
 const dashport = new Dashport('oak');
 
-//Error handling
+// Error handling
 app.use(async (ctx: any, next: any) => {
   try{
     await next();
@@ -49,20 +20,8 @@ app.use(async (ctx: any, next: any) => {
 
 app.use(dashport.initialize);
 
-// Initialize Dashport fater sesssion
-// router
 app.use(router.routes());
 app.use(router.allowedMethods());
-
-///////////////////////////////////////////// Testing out dashport.authenticate
-// class AlvinTest {
-//   async authorize(ctx: any, next: any) {
-//     ctx.state._dashingportingtest = { 'test': 'hey' }
-//     await next();
-//   }
-// }
-
-//client_id=1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com&redirect_uri,localhost:3000/testresponse_type,tokenscope,https://www.googleapis.com/auth/userinfo.email
 
 dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
@@ -71,49 +30,25 @@ dashport.addStrategy('google', new GoogleStrat({
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
   grant_type: 'authorization_code',
-}, () => null));
-/*
-Google OAuth2 API, v2
-Scopes
-https://www.googleapis.com/auth/userinfo.email	View your email address
-https://www.googleapis.com/auth/userinfo.profile	See your personal info, including any personal info you've made publicly available
-openid
-CODE APPROVAL URI
-http://localhost:3000/#access_token=ya29.a0AfH6SMAWQMs11uEsfnV5J7SOZyhpkaJCeD0BzQUs7_es-jv7hUyNmTZ4yNTSTjlnJlex87HaRy0sZWdY2cMSfyqwJna4aTAyv7ke2QvC1q9C5lyx3mcZj2r6r9y6hoZoeAjXnCz6rORQ5-2SoVmRtBoADxaIYh_v4Z-LLOqf4-M&
-token_type=Bearer&
-expires_in=3599&
-scope=email%20openid%20https://www.googleapis.com/auth/userinfo.email&authuser=0&
-prompt=none
-
-*/
+}));
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/test', 
   dashport.authenticate('google'),
-  // dashport.test,
   (ctx: any, next: any) => {
-    console.log('server 83', ctx.response.url)
     ctx.response.body = 'Hello Waye';
   }
 )
 
-router.get('/params', 
-  dashport.test,
+router.get('/params',
   async (ctx: any, next: any) => {
+    console.log('ctx.request.url.search:', ctx.request.url.search);
     await next();
   }
 )
 
-// router.get('/:objectData', 
-//   dashport.test,
-//   (ctx: any, next: any) => {
-//     ctx.response.body = 'Hello World';
-//   }
-// )
-////////////////////////////////////////////////////////////
-
-//response tracking
+// response tracking
 app.use(async (ctx: any, next: any) => {
   await next();
   const rt = ctx.response.headers.get("X-Response-Time");
@@ -129,7 +64,7 @@ app.use(async (ctx: any, next: any) => {
   ctx.response.headers.set("X-Response-Time", `${ms}ms`);
 });
 
-//page routing
+// page routing
 app.use(async (ctx: any) => {
    if (ctx.request.url.pathname === '/') { 
      ctx.response.type = `text/html`
@@ -145,16 +80,11 @@ app.use(async (ctx: any) => {
    }
 });
 
-//Error handler
-app.use(async (ctx) => {
-  ctx.throw(500);
-});
-
-
-//listening on port
-app.addEventListener('listen', ()=>{console.log('server live on 3000')});
+// listening on port
+app.addEventListener('listen', () => { console.log(`Server live on port ${port}`) });
 await app.listen({ port });
 
+<<<<<<< HEAD
 
 // session with Redis Database
 // const session: Session = new Session({
@@ -171,3 +101,7 @@ await app.listen({ port });
 
 //denon run --allow-all --unstable demo/server.tsx
 //deno install -qAf --unstable https://deno.land/x/denon/denon.ts
+=======
+// denon run --allow-all --unstable demo/server.tsx
+// deno install -qAf --unstable https://deno.land/x/denon/denon.ts
+>>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef

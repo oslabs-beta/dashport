@@ -26,7 +26,7 @@ class SessionManager {
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will add a session object onto the browser's http  object.
+   * function that will add a session object onto the browser's http object.
    * This will allow information across different requests to persist.
    * 
    * TODO: Add an optional parameter on the returned function that takes in an
@@ -63,7 +63,7 @@ class SessionManager {
   private _logOutDecider(framework: string): Function {
     if (framework = 'oak') {
       return function(ctx: OakContext): void {
-        delete ctx.state._dashport.session
+        delete ctx.state._dashport.session;
       }
     }
 
@@ -82,11 +82,12 @@ class SessionManager {
    * first serializer function.
    * 
    * @param {Object} serializers - An object containing serializer functions
+   * @param {Object} userData - An object containing the authenticated user data
    * @returns {string} A serialized ID
    */
   public serialize(serializers: Serializers, userData: UserProfile): string {
     if (Object.values(serializers).length === 0) {
-      throw new Error('ERROR in serialize: No serializers');
+      throw new Error('ERROR in serialize: No serializers.');
     }
 
     // Object.values(serializers)[0] returns the first key/value pair's
