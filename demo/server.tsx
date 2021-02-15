@@ -1,9 +1,5 @@
 import { Application, send, join } from './deps.ts'
-<<<<<<< HEAD
-import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
-=======
 import { html, ReactComponents } from './ssrConstants.tsx';
->>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
@@ -27,10 +23,6 @@ app.use(dashport.initialize);
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
   redirect_uri: 'http://localhost:3000/test', 
@@ -38,51 +30,18 @@ dashport.addStrategy('google', new GoogleStrat({
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
   grant_type: 'authorization_code',
-<<<<<<< HEAD
-}, () => null));
-=======
 }));
->>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/test', 
   dashport.authenticate('google'),
   (ctx: any, next: any) => {
-<<<<<<< HEAD
-    if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
-    }
-  }
-)
-
-router.get('/protected',
-  (ctx: any, next: any) => {
-    if(!ctx.state._dashport.session){
-      ctx.response.body = 'You need to log in first. Please try again'
-    } else {
-      ctx.response.type = `text/html`
-      ctx.response.body = protectedPage
-      
-    }
-  }
-)
-
-//response tracking
-=======
     ctx.response.body = 'Hello Waye';
   }
 )
 
-router.get('/params',
-  async (ctx: any, next: any) => {
-    console.log('ctx.request.url.search:', ctx.request.url.search);
-    await next();
-  }
-)
-
 // response tracking
->>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
 app.use(async (ctx: any, next: any) => {
   await next();
   const rt = ctx.response.headers.get("X-Response-Time");
