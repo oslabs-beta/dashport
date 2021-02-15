@@ -2,9 +2,10 @@ import { React, ReactDOMServer } from "./deps.ts";
 import App from '../demo/views/App.tsx'
 import MainContainer from '../demo/views/components/MainContainer.tsx';
 import NavBar from '../demo/views/components/NavBar.tsx';
+import Protected from '../demo/views/components/Protected.tsx'
 
 const body = (ReactDOMServer as any).renderToString(<App />);
-
+const protectedPage = (ReactDOMServer as any).renderToString(<Protected />);
 
 const html: string = 
 `<!DOCTYPE html>
@@ -28,4 +29,4 @@ const ReactComponents: string =
 \nconst MainContainer = ${MainContainer};
 \nReactDOM.hydrate(React.createElement(${App}), document.getElementById("root"));`;
 
-export { html, ReactComponents }
+export { html, ReactComponents, protectedPage }
