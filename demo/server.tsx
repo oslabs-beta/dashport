@@ -84,24 +84,5 @@ app.use(async (ctx: any) => {
 app.addEventListener('listen', () => { console.log(`Server live on port ${port}`) });
 await app.listen({ port });
 
-<<<<<<< HEAD
-
-// session with Redis Database
-// const session: Session = new Session({
-//   framework: "oak",
-//   store: "redis",
-//   hostname: "127.0.0.1",
-//   port: 6379,
-// });
-
-// Initialize Session
-// await session.init();
-// app.use(session.use()(session));
-
-
-//denon run --allow-all --unstable demo/server.tsx
-//deno install -qAf --unstable https://deno.land/x/denon/denon.ts
-=======
 // denon run --allow-all --unstable demo/server.tsx
 // deno install -qAf --unstable https://deno.land/x/denon/denon.ts
->>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef
