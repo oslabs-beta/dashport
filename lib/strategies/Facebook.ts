@@ -1,23 +1,21 @@
-import { OakContext, GoogOptions, AuthData } from '../types.ts';
+import { OakContext, FacebookOptions, AuthData } from '../types.ts';
 
 /**
- * Creates an instance of `GoogleStrategy`.
+ * Creates an instance of `FacebookStrategy`.
+ * 
  *
  * * Options:
  *
- *   - `clientID`: string                 identifies client to service provider - Required
+ *   - client_id: string                 identifies client to service provider - Required
+ *   - client_secret: string              Required
  *   - redirect_uri: string               Required
- *   - response_type: string              Required
- *   - scope: string                      Required
- *   - access_type: string                Recommended
- *   - state: string                      Recommended
- *   - included_granted_access: string    Optional
- *   - login_hint: string                 Optional
- *   - prompt: string                     Optional
+ *   - state: string                      Required
+ *   - response_type: string              O
+ *   - scope: string                      O
  *
  * Examples:
  * 
- *     dashport.use(new GoogleStrategy({
+ *     dashport.use(new FacebookStrategy({
  *         authorizationURL: 'https://www.example.com/oauth2/authorize',
  *         tokenURL: 'https://www.example.com/oauth2/token',
  *         clientID: '123-456-789',
@@ -32,21 +30,23 @@ import { OakContext, GoogOptions, AuthData } from '../types.ts';
  *     ));
  *
  */
-export default class GoogleStrategy {
-  name: string = 'google'
-  options: GoogOptions;
-  uriFromParams:string;
+export default class FacebookStrategy {
+  name: string = 'facebook'
+  options: FacebookOptions;
+  uriFromParams: string;
+  authURL: string;
   /**
    * @constructor
    * @param {Object} options
    * @api public
    */
-  constructor (options: GoogOptions) {
-    if (!options.client_id || !options.redirect_uri || !options.response_type || !options.scope || !options.client_secret) {
+  constructor (options: FacebookOptions) {
+    if (!options.client_id || !options.redirect_uri || !options.state || !options.client_secret) {
       throw new Error('Missing required arguments');
     }
 
     this.options = options;
+    this.authURL = 'https://www.facebook.com/v9.0/dialog/oauth?'
 
     // preStep1 request permission 
     // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
@@ -56,27 +56,28 @@ export default class GoogleStrategy {
     for (let i = 0; i < paramArray.length; i++) {
       let [key, value] = paramArray[i];
 
-      if (key === 'client_secret' || key === 'grant_type') continue;
-
+      // adds the key and '=' for every member of options needed for this request 
+      if (key === 'client_secret') continue;
       paramString += (key + '=');
-
-      if (i < paramArray.length - 1) paramString += (value + '&');
-      else paramString += value;
+      paramString += (value + '&');
     }
 
     this.uriFromParams = paramString;
+    console.log(this.uriFromParams);
   }
 
   async router(ctx: OakContext, next: any) {
+    console.log('url returned from auth request', ctx.request.url.search)
     // GO_Step 1 Request Permission
     if(!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 2-3 Exchange code for Token
     if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
+    // if(ctx.request.url.search.slice) -- error
   }
   
   // sends the programatically constructed uri to Google's oauth 2.0 server (step 2)
   async authorize(ctx: OakContext, next: any) {
-    return await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);                   
+    return await ctx.response.redirect(this.authURL + this.uriFromParams);                   
   }
 
   // handle oauth 2.0 server response (step 4)
@@ -96,20 +97,20 @@ export default class GoogleStrategy {
     const code: string = this.parseCode(URI2[0]);
 
     const options: any = {
-      method: 'POST',
+      method: 'GET',
       headers: { 'content-type': "application/x-www-form-urlencoded" },
       body: JSON.stringify({
         client_id: this.options.client_id,
+        redirect_uri: this.options.redirect_uri,
         client_secret: this.options.client_secret,
-        code: code,
-        grant_type: this.options.grant_type,
-        redirect_uri: this.options.redirect_uri
+        code: code
       })
     }
 
     try {
-      let data: any = await fetch('https://oauth2.googleapis.com/token', options);
+      let data: any = await fetch('https://graph.facebook.com/v9.0/oauth/access_token?', options);
       data = await data.json();
+      console.log('returned token obj', data);
       return this.getAuthData(data);
     } catch(err) {
       console.log('getAuthToken error on line 133 of scratchGoogle'+ err)
@@ -131,7 +132,7 @@ export default class GoogleStrategy {
     };
 
     try {
-      let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', options);
+      let data: any = await fetch('//graph.facebook.com/v9.0/oauth/access_token?', options);
       data = await data.json();
 
       authData.userInfo = {
@@ -176,66 +177,3 @@ export default class GoogleStrategy {
     return encodedCode; 
   }
 }
-<<<<<<< HEAD
-    /**
-     *  exchange autorization code for refresh and access tokens (step 5)
-     * To exchange an authorization code for an access token, 
-     * call the https://oauth2.googleapis.com/token endpoint and set the following parameters:
-        * client_id
-        * client_secret
-        * code
-        * grant_type
-        * redirect_uri
-        * client_id.
-     * SAMPLE REQ: 
-     *    POST /token HTTP/1.1
-          Host: oauth2.googleapis.com
-          Content-Type: application/x-www-form-urlencoded
-
-          code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7&
-          client_id=your_client_id&
-          client_secret=your_client_secret&
-          redirect_uri=https%3A//oauth2.example.com/code&
-          grant_type=authorization_code
-     * 
-     * Google responds to this request by returning a JSON object 
-     * that contains a short-lived access token and a refresh token. 
-     * Note that the refresh token is only returned if your application set the access_type parameter to offline
-     * the response contains the following fields: 
-     * access_token
-     * expires_in
-     * refresh_token
-     * scope
-     * token_type
-     * sample: 
-     * {
-          "access_token": "1/fFAGRNJru1FTz70BzhT3Zg",
-          "expires_in": 3920,
-          "token_type": "Bearer",
-          "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
-          "refresh_token": "1//xEoDL4iW3cxlI7yDbSRFYNG01kVKM2C-259HOF2aQbI"
-        }
-    */
-
-
-///redirect to 
-/*https://accounts.google.com/o/oauth2/v2/auth?
-  scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
-  access_type=offline&
-  include_granted_scopes=true&
-  response_type=code&
-  state=state_parameter_passthrough_value&
-  redirect_uri=https%3A//oauth2.example.com/code&
-  client_id=client_id
-*/
-
-//with options 
-
-// then returns with callback url with added token data
-//${RedirectURI}#access_token=4/P7q7W91&token_type=Bearer&expires_in=3600
-/*  access_token:string: 4/P7q7W91 
-    token_type:string: 'Bearer'
-    expires_in:number: 3600    
-*/
-=======
->>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef

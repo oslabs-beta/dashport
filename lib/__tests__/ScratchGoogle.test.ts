@@ -34,7 +34,7 @@ const fakeOakCtx = {
 const fakeNext = ()=>1
 
 Deno.test({
-  name: "testDp.addStrategy('google', goog(options)) should add google to testDp._strategies",
+  name: "Google Strategy should be formatted and apply its inputted values correctly",
   fn(): void{
     testDp.addStrategy('google', goog);
     assertNotEquals(testDp.authenticate('google'), new Error('ERROR in authenticate: This strategy name has not been specified for use.'));
