@@ -1,4 +1,4 @@
-import { OakContext, Serializers, Strategies } from './types.ts';
+import { OakContext, Serializers, Strategies, Strategy } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -89,17 +89,10 @@ class Dashport {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
 
-    // ALL strategies made for Dashport MUST have a 'router' method that on
-    // successful authentication, returns an authData object with a userInfo
-    // property in the form of UserProfile
-    if (this._strategies[stratName].router === undefined) {
-      throw new Error('ERROR in authenticate: This strategy does not have a \'router\' method.');
-    }
-
     if (this._framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state._dashport === undefined) {
-          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
+          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with app.use(dashport.initialize).');
         }
 
         // check if a session object exists (created by SessionManager.logIn).
@@ -206,11 +199,18 @@ class Dashport {
    *   dashport.addStrategy('google', new GoogleStrategy());
    * 
    * @param {string} stratName - The name that will be used to reference this strategy
-   * @param {Function} strategy - The imported OAuth strategy module to be used
+   * @param {Class} strategy - The imported OAuth strategy module to be used
    */
-  public addStrategy(stratName: string, strategy: any): void {
+  public addStrategy(stratName: string, strategy: Strategy): void {
     if (stratName === undefined || strategy === undefined) {
       throw new Error('ERROR in addStrategy: A strategy name and a strategy must be provided.');
+    }
+
+    // ALL strategies made for Dashport MUST have a 'router' method that on
+    // successful authentication, returns an authData object with a userInfo
+    // property in the form of UserProfile
+    if (typeof(strategy.router) !== 'function') {
+      throw new Error('ERROR in addStrategy: This strategy does not have a \'router\' method.');
     }
 
     this._strategies[stratName] = strategy;

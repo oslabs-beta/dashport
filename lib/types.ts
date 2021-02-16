@@ -48,7 +48,7 @@ export interface Serializers {
 /**
  * All Dashport strategies are classes that must contain a router method
  */
-interface Strategy {
+export interface Strategy {
   router: Function;
 }
 

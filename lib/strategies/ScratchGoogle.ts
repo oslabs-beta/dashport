@@ -69,9 +69,11 @@ export default class GoogleStrategy {
 
   async router(ctx: OakContext, next: any) {
     // GO_Step 1 Request Permission
-    if(!ctx.request.url.search) return await this.authorize(ctx, next);
+    if (!ctx.request.url.search) return this.authorize(ctx, next);
     // GO_Step 2-3 Exchange code for Token
-    if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
+    if (ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
+    // if (ctx.request.url.search.slice(1, 6)=== 'error')
+    throw new Error('ERROR: Unable to login correctly');
   }
   
   // sends the programatically constructed uri to Google's oauth 2.0 server (step 2)
@@ -82,11 +84,6 @@ export default class GoogleStrategy {
   // handle oauth 2.0 server response (step 4)
   async getAuthToken(ctx: OakContext, next: any) {
     const OGURI: string = ctx.request.url.search;
-
-    if (OGURI.includes('error')) {
-      // do error handling
-      console.log('broke the code again');
-    }
 
     // splits the string at the =, storing the first part in URI1[0] and the part we want in URI1[1]
     let URI1: string[] = OGURI.split('=');
@@ -112,7 +109,7 @@ export default class GoogleStrategy {
       data = await data.json();
       return this.getAuthData(data);
     } catch(err) {
-      console.log('getAuthToken error on line 133 of scratchGoogle'+ err)
+      return new Error(`ERROR: ${err}`);
     }
   }
 
@@ -147,7 +144,7 @@ export default class GoogleStrategy {
 
       return authData;
     } catch(err) {
-      console.log('getAuthData error on line 153 of scratchGoogle', err);
+      return new Error(`ERROR: ${err}`);
     }
   }
 

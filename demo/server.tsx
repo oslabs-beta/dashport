@@ -37,21 +37,15 @@ dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 router.get('/test', 
   dashport.authenticate('google'),
   (ctx: any, next: any) => {
-    if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
-    }
+    ctx.response.redirect('/')
   }
 )
 
 router.get('/protected',
+  dashport.authenticate('google'),
   (ctx: any, next: any) => {
-    if(!ctx.state._dashport.session){
-      ctx.response.body = 'You need to log in first. Please try again'
-    } else {
-      ctx.response.type = `text/html`
-      ctx.response.body = protectedPage
-      
-    }
+    ctx.response.type = `text/html`
+    ctx.response.body = protectedPage
   }
 )
 

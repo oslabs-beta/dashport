@@ -43,7 +43,7 @@ class SessionManager {
         if (ctx.state._dashport) {
           ctx.state._dashport.session = serializedId;
           dashport._sId = serializedId;
-        } else throw new Error('ERROR in _logInDecider: ctx.state._dashport does not exist. Please use dashport.initialize()')
+        } else throw new Error('ERROR in _logInDecider: ctx.state._dashport does not exist. Please use app.use(dashport.initialize).')
       }
     }
 
