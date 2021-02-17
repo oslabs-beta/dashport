@@ -25,11 +25,11 @@ export interface OakContext {
  */
 export interface UserProfile {
   // the provider the user is authenticated with
-  provider: string;
+  provider?: string;
   // the unique id a user has with that specific provider
   providerUserId: string;
   // the display name or username for this specific user
-  displayName: string;
+  displayName?: string;
   name?: {
     familyName?: string;
     givenName?: string;
@@ -107,4 +107,21 @@ export interface TokenData {
 export interface AuthData {
   tokenData?: TokenData;
   userInfo?: UserProfile;
+}
+
+export interface FBTokenData {
+  access_token: string;
+  token_type: string;
+  expires_in: string;
+} 
+
+export interface FBAuthData {
+  tokenData: FBTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface AppOptions {
+  client_id: string;
+  client_secret: string;
+  grant_type: string;
 }

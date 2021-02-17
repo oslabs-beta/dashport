@@ -129,6 +129,9 @@ class Dashport {
 
           return await next();
         }
+        else {
+          console.log('we didn\'t get authData back (dash 133)')
+        }
       }
     }
 
