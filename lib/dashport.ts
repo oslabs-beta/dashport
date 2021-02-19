@@ -1,8 +1,9 @@
-import { OakContext, Serializers, Strategies } from './types.ts';
+import { OakContext, Translators, Strategies } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
-  private _serializers: Serializers = {};
+  private _serializers: Translators = {};
+  private _deserializers: Translators = {};
   private _strategies: Strategies = {};
   private _framework: string;
   private _sm: SessionManager;
@@ -201,6 +202,99 @@ class Dashport {
 
     delete this._strategies[serializerName];
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+   * Takes in a name for a serializer function and the serializer function the 
+   * developer specifies. Serializer function needs to do 4 things below
+   * 
+   * 1. The serializer function needs to take in one parameter which will be the
+   * user data in the form of an object.
+   * 2. The serializer function needs to specify what the developer wants to do
+   * with the user data (store it somewhere, add some info to response body, 
+   * etc).
+   * 3. The serializer function needs to specify how to create a serialized ID.
+   * 4. The serializer function needs to return the serialized ID.
+   * 
+   * EXAMPLE
+   * 
+   *   dashport.addSerializer('1', (userInfo) => { 
+   *     function getSerializedId () {
+   *       return Math.random() * 10000;
+   *     }
+   * 
+   *     const serializedId = getSerializedId();
+   * 
+   *     // do something with userInfo like store in a database
+   * 
+   *     return serializedId;
+   *   });
+   * 
+   * @param {string} serializerName - A name to give the serializer if it needs
+   *   to be deleted later
+   * @param {Function} serializer - The function that will create serialized IDs
+   */
+  public addDeserializer(serializerName: string, serializer: Function): void {
+    if (serializer.length !== 1) {
+      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+    }
+
+    // the below if statement is currently not needed. TODO in SessionManager.serialize method
+    // if (serializerName === 'all') {
+    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
+    // }
+
+    if (this._serializers[serializerName] !== undefined) {
+      throw new Error('ERROR in addSerializer: A serializer with this name already exists.');
+    }
+
+    this._serializers[serializerName] = serializer;
+  }
+
+  /**
+   * Removes a serializer from the this._serializers object.
+   * 
+   * EXAMPLE
+   * 
+   *   dashport.removeSerializer('1');
+   * 
+   * @param {string} serializerName - The name of the serializer to remove
+   */
+  public removeDeserializer(serializerName: string): void  {
+    if (this._serializers[serializerName] === undefined) {
+      throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
+    }
+
+    delete this._strategies[serializerName];
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /**
    * Adds an OAuth strategy that the developer would like to use.
