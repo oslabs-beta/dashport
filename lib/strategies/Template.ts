@@ -186,6 +186,7 @@ export default class TemplateStrategy {
       // ACTION REQUIRED:
         // Add whatever data you requested and want to pass back to dashport.ts here
       authData.userInfo = {
+        provider: this.name,
         providerUserId: data.data.user_id
       };
 
