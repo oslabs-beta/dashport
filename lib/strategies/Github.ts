@@ -6,15 +6,14 @@ import { OakContext, GitHubOptions, AuthData } from '../types.ts';
 * * Options / Parameters:
 *
 *   - client_id: string      Required  the client ID for your Github  
-*   - redirect_uri: string     Required  The URL in your application where users will be sent after authorization
-*   - login: string            Required, a random string to protect against forgery attacks and coudl contina any other abibtary data
+*   - redirect_uri: string     Required  http://localhost:1234/path
+*   - login: string            Required, a random string to protect against forgery attacks 
 *   - scope: string            Required, suggest a specific account to use for signing in and authorizing the app
-*   - state: string            Required, An unguessable random string. It is used to protect against cross-site request forgery attacks.
+*   - state: string            Optional, An unguessable random string for protection
 *   - allow_signup: string     Optional 
 *                                     reference: https://docs.github.com/en/developers/apps/authorizing-oauth-apps
 *
-
-*
+* 
 *
 *
 */
@@ -29,11 +28,12 @@ export default class GitHubStrategy {
    * @api public 
    */
   constructor (options: GitHubOptions) {
-    if (!options.client_id || !options.redirect_uri || !options.response_type || !options.scope || !options.client_secret) {
+    if (!options.client_id || !options.redirect_uri || !options.login || !options.scope || !options.state) {
       throw new Error('Mssing Required arguments');
     }
 
     this.options = options; 
+    // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
 
 
 
