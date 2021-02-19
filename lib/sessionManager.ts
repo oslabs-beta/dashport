@@ -76,7 +76,8 @@ class SessionManager {
    * the first one to create a serialized ID and return it.
    * 
    * TODO: Allow a 'name' parameter to be passed in that specifies which
-   * serializer to use. If name === 'all', use all the serializers in a chain.
+   * serializer to use
+   * TODO: If name === 'all', use all the serializers in a chain.
    * 
    * TODO: Allow optional parameters to be passed into the serializer to be
    * used. If chaining multiple serializers is implemented, pass params into the
