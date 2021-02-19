@@ -96,6 +96,15 @@ export interface FacebookOptions {
   scope: string;
 }
 
+/**
+ * Template Strategy options that should be specified by the developer when adding
+ */
+export interface TemplateOptions {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+}
+
 export interface TokenData {
   access_token: string;
   expires_in: number;
