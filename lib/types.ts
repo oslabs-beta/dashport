@@ -88,3 +88,16 @@ export interface AuthData {
   tokenData?: TokenData;
   userInfo?: UserProfile;
 }
+
+/**
+ * Google Strategy options that should be specified by the developer when adding
+ */
+
+export interface GitHubOptions {
+  client_id: string;
+  redirect_uri: string;
+  login: string;
+  scope: string;
+  state: string;
+  allow_signup?: string;
+}

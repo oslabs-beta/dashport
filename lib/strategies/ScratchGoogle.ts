@@ -63,6 +63,9 @@ export default class GoogleStrategy {
       if (i < paramArray.length - 1) paramString += (value + '&');
       else paramString += value;
     }
+      if(paramString[paramString.length - 1] === '&'){
+      paramString = paramString.slice(0, -1);
+    }
 
     this.uriFromParams = paramString;
   }

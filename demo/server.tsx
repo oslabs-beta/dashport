@@ -10,6 +10,7 @@ const dashport = new Dashport('oak');
 
 // Error handling
 app.use(async (ctx: any, next: any) => {
+  debugger;
   try{
     await next();
   } catch (error) {
