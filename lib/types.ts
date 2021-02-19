@@ -16,6 +16,7 @@ export interface OakContext {
   throw: Function;
   upgrade: Function;
   params: any;
+  locals?: any;
 }
 
 /**
