@@ -8,6 +8,8 @@ import { React } from '../../deps.ts';
 const NavBar = () => {
   const [clicked, setClick] = (React as any).useState(false)
   const [loggedIn, setLogin] = (React as any).useState(false)
+  const [loginData, setLoginData] = (React as any).useState(['','']);
+  // const [password, setPassword] = (React as any).useState('');
 
   const openLogin = () => {
     if (clicked === false) {
@@ -30,6 +32,35 @@ const NavBar = () => {
     }
   }
 
+  const inputgetter = (event:any) => {
+    console.log(loginData)
+    const oldLoginData = loginData;
+    if (event.target.id === 'username') oldLoginData[0] = event.target.value;
+    if (event.target.id === 'password') oldLoginData[1] = event.target.value;
+    return setLoginData(oldLoginData);
+  }
+
+  const localLogin = () => {
+    // if (!user || !pass ) {
+      // console.log(document.querySelector('#username').nodeValue);
+    //   document.querySelector('#password').classList.toggle('error');
+    //   return console.log('error')
+    // }
+    const postOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: loginData[0],
+        password: loginData[1]
+      })
+    };
+    console.log('abouttofetch');
+    fetch(`http://localhost:3000/local`, postOptions)
+      // .then( res => (console.log(res), res.json()))
+      // .then( parsed => console.log(parsed))
+      // .catch((error) => console.log('error: ', error));
+  };
+  
   if (!loggedIn) {
     return (
       <div>
@@ -39,12 +70,12 @@ const NavBar = () => {
             <div>
             <form id='form'>
               <div id='userForm'>
-                <input placeholder='Username'/>
+                <input id='username' onChange={inputgetter} placeholder='Username'/>
               </div>
               <div id='passForm'>
-                <input placeholder='Password'/>
+                <input type='password' id='password' onChange={inputgetter} placeholder='Password'/>
               </div>
-              <button type='button' id='login'>Login</button>
+              <button type='button' onClick={localLogin} id='login'>Login</button>
               <button type='button' id='signIn'>Sign Up</button>
             </form>
               <span>

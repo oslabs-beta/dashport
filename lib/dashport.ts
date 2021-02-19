@@ -115,7 +115,6 @@ class Dashport {
         // call the requested strategy's 'router' method. authData must contain
         // a userInfo property in the form of UserProfile
         const authData: any = await self._strategies[stratName].router(ctx, next);
-
         if (authData !== undefined) {
           // serializedId will be obtained by calling SessionManager's serialize
           // function, which will invoke the serializer(s) the developer specified
@@ -125,7 +124,7 @@ class Dashport {
           // ctx.state._dashport and to assign serializedId to the _sId property
           // of this instance of Dashport
           self._sm.logIn(ctx, self, serializedId);
-
+          console.log('dp 127', ctx.state);
           return await next();
         }
       }

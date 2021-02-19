@@ -17,7 +17,7 @@ const fakeOakCtx = {
   cookies: {},
   request: {url:{}},
   respond: {},
-  response: {redirect: (string: string)=>"Redirect Occurred"},
+  response: {redirect: (string: string)=>string},
   socket: {},
   state: {
     _dashport: { 
@@ -44,7 +44,7 @@ Deno.test({
 Deno.test({
   name: "goog.authorize, should redirect to Google for client authorization",
   async fn(): Promise<any>{
-    assertEquals(await goog.authorize(fakeOakCtx, ()=>null), fakeOakCtx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + goog.uriFromParams));
+    assertEquals(await goog.authorize(fakeOakCtx, fakeNext), fakeOakCtx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + goog.uriFromParams));
   }
 });
 

@@ -29,7 +29,7 @@ export interface UserProfile {
   // the unique id a user has with that specific provider
   providerUserId: string;
   // the display name or username for this specific user
-  displayName: string;
+  displayName?: string;
   name?: {
     familyName?: string;
     givenName?: string;

@@ -1,17 +1,11 @@
-import { MongoClient } from "../deps.ts";
+import { Client } from "../deps.ts";
 
-const client = new MongoClient();
-const Mongo_URI: string = Deno.env.get("MONGOURI")!;
+const pgclient = new Client('postgres://jbbzinao:OslM_aTTgi71R38LFvWXUbVw2fz5HVW5@ziggy.db.elephantsql.com:5432/jbbzinao');
+
 // const Mongo_URI: string = Deno.env.get("MONGOURI")!;
-client.connectWithUri(Mongo_URI);
+await pgclient.connect();
 
-interface UserSchema {
-  _id: { $oid: string };
-  username: string;
-  password: string;
-}
+// (async () => {await client.queryArray('INSERT INTO users(username, password) VALUES ("alex", "password")')})();
 
-const db = client.database("userdatabase");
-const User = db.collection<UserSchema>("user");
-
-export default User;
+export default pgclient;
+// export default User;
