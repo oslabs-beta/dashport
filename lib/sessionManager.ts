@@ -1,4 +1,4 @@
-import { OakContext, Serializers, UserProfile } from './types.ts';
+import { OakContext, Translators, UserProfile } from './types.ts';
 import Dashport from './dashport.ts';
 
 /**
@@ -86,7 +86,7 @@ class SessionManager {
    * @param {Object} userData - An object containing the authenticated user data
    * @returns {string} A serialized ID
    */
-  public serialize(serializers: Serializers, userData: UserProfile): string {
+  public serialize(serializers: Translators, userData: UserProfile): string {
     if (Object.values(serializers).length === 0) {
       throw new Error('ERROR in serialize: No serializers.');
     }
