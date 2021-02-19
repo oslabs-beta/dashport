@@ -25,7 +25,7 @@ export interface OakContext {
  */
 export interface UserProfile {
   // the provider the user is authenticated with
-  provider?: string;
+  provider: string;
   // the unique id a user has with that specific provider
   providerUserId: string;
   // the display name or username for this specific user
