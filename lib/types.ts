@@ -29,7 +29,7 @@ export interface UserProfile {
   // the unique id a user has with that specific provider
   providerUserId: string;
   // the display name or username for this specific user
-  displayName: string;
+  displayName?: string;
   name?: {
     familyName?: string;
     givenName?: string;
@@ -60,6 +60,14 @@ export interface Strategies {
 }
 
 /**
+ * 
+ * client_id: string                 identifies client to service provider - Required
+ *   - client_secret: string              Required
+ *   - redirect_uri: string               Required
+ *   - state: string                      Required
+ *   - response_type: string              O
+ *   - scope: string
+ * 
  * Google Strategy options that should be specified by the developer when adding
  */
 export interface GoogOptions {
@@ -74,6 +82,27 @@ export interface GoogOptions {
   login_hint?: string;
   prompt?: string;
   grant_type?: string;
+}
+
+/**
+ * Facebook Strategy options that should be specified by the developer when adding
+ */
+export interface FacebookOptions {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+  state?: string;
+  response_type: string;
+  scope: string;
+}
+
+/**
+ * Template Strategy options that should be specified by the developer when adding
+ */
+export interface TemplateOptions {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
 }
 
 export interface TokenData {
@@ -100,4 +129,20 @@ export interface GitHubOptions {
   scope: string;
   state: string;
   allow_signup?: string;
+}
+export interface FBTokenData {
+  access_token: string;
+  token_type: string;
+  expires_in: string;
+} 
+
+export interface FBAuthData {
+  tokenData: FBTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface AppOptions {
+  client_id: string;
+  client_secret: string;
+  grant_type: string;
 }
