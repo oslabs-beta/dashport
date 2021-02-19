@@ -1,4 +1,4 @@
-import { OakContext, TemplateOptions} from '../types.ts';
+import { OakContext, TemplateOptions, TemplateAuthData} from '../types.ts';
 
 /**
  * Creates an instance of `TemplateStrategy`.
@@ -12,7 +12,7 @@ import { OakContext, TemplateOptions} from '../types.ts';
  *
  */
 export default class TemplateStrategy {
-  name: string = ''
+  name: string = '';
   options: TemplateOptions;
   uriFromParams: string;
   authURL: string;
@@ -118,7 +118,7 @@ export default class TemplateStrategy {
 
     if (OGURI.includes('error')) {
       // do error handling
-      console.log('broke the code again');
+      console.log('RECEIVED AN ERROR FROM AUTH CODE REQUEST');
     }
 
     // EXTRACT THE AUTH CODE
@@ -126,7 +126,7 @@ export default class TemplateStrategy {
       // console.log('authorize response: ', OGURI);
     // splits the string at the '=,' storing the first part in URI1[0] and the part we want in URI1[1]
     let URI1: string[] = OGURI.split('=');
-    // splits the string at the ampersand(&), storing the string with the access_token in URI2[0] 
+    // splits the string at the '&', storing the string with the access_token in URI2[0] 
     // and the other parameters at URI2[n]
     const URI2: string[] = URI1[1].split('&');
     // console.log('uri on line 99', URI2[0])
@@ -182,7 +182,7 @@ export default class TemplateStrategy {
     try {
       let data: any = await fetch(this.authDataURL + this.constructURI(authOptions));
       data = await data.json();
-      // DEBIGGING console.log('auth data returned: ', data);
+      // DEBUGGING console.log('auth data returned: ', data);
       // ACTION REQUIRED:
         // Add whatever data you requested and want to pass back to dashport.ts here
       authData.userInfo = {

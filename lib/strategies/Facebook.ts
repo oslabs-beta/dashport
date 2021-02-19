@@ -36,6 +36,7 @@ export default class FacebookStrategy {
   uriFromParams: string;
   authURL: string;
   tokenURL: string;
+  authDataURL: string;
   /**
    * @constructor
    * @param {Object} options
@@ -49,6 +50,7 @@ export default class FacebookStrategy {
     this.options = options;
     this.authURL = 'https://www.facebook.com/v9.0/dialog/oauth?'
     this.tokenURL = 'https://graph.facebook.com/v9.0/oauth/access_token?'
+    this.authDataURL ='https://graph.facebook.com/debug_token?'
 
     // preStep1 request permission 
     // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
@@ -174,7 +176,7 @@ export default class FacebookStrategy {
     };
     // DEBUGGING: console.log('uri being used line 137', 'https://graph.facebook.com/debug_token?' + this.constructURI(authOptions))
     try {
-      let data: any = await fetch('https://graph.facebook.com/debug_token?' + this.constructURI(authOptions));
+      let data: any = await fetch(this.authDataURL + this.constructURI(authOptions));
       data = await data.json();
       console.log('data line 141', data);
       authData.userInfo = {
