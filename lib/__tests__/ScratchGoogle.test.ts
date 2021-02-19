@@ -2,20 +2,18 @@ import GoogleStrategy from '../strategies/ScratchGoogle.ts';
 import Dashport from '../dashport.ts'
 import { assertEquals, assertNotEquals } from "https://deno.land/std@0.87.0/testing/asserts.ts"
 
-const testDp = new Dashport('oak');
-const options = {
+const fakeOptions = {
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
   redirect_uri: 'http://localhost:3000/test', 
   response_type: 'code', 
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
   grant_type: 'authorization_code',
-}
-const goog = new GoogleStrategy(options)
+};
 const fakeOakCtx = {
   app: {},
   cookies: {},
-  request: {url:{}},
+  request: { url: {} },
   respond: {},
   response: {redirect: (string: string)=>string},
   socket: {},
@@ -30,14 +28,25 @@ const fakeOakCtx = {
   throw: () => 4,
   upgrade: () => 5,
   params: {}
-}
-const fakeNext = ()=>1
+};
+const fakeNext = () => 1;
 
 Deno.test({
-  name: "testDp.addStrategy('google', goog(options)) should add google to testDp._strategies",
+  name: "GoogleStrategy should have a router method and be initialized with correct default properties",
   fn(): void{
-    testDp.addStrategy('google', goog);
-    assertNotEquals(testDp.authenticate('google'), new Error('ERROR in authenticate: This strategy name has not been specified for use.'));
+    const goog = new GoogleStrategy(fakeOptions);
+
+    assertNotEquals(goog.router, undefined);
+    assertEquals(goog.name, 'google');
+    assertEquals(goog.options, {
+      client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
+      redirect_uri: 'http://localhost:3000/test', 
+      response_type: 'code', 
+      scope: 'profile email openid',
+      client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
+      grant_type: 'authorization_code',
+    });
+    assertEquals(goog.uriFromParams, 'client_id=1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com&redirect_uri=http://localhost:3000/test&response_type=code&scope=profile email openid&');
   }
 });
 
@@ -49,8 +58,10 @@ Deno.test({
 });
 
 Deno.test({
-  name: "testDp.router should correctly call either authorize or get authToken",
-  async fn(): Promise<any>{
+  name: "router method should correctly call either authorize or getAuthToken",
+  async fn(): Promise<any> {
+    const goog = new GoogleStrategy(fakeOptions);
+
     fakeOakCtx.request.url = {search : undefined};
     assertEquals(await goog.router(fakeOakCtx, fakeNext), await goog.authorize(fakeOakCtx, fakeNext));
     fakeOakCtx.request.url = {search : "?code=testing"};
@@ -59,8 +70,9 @@ Deno.test({
 });
 
 Deno.test({
-  name: "testDp.getAuthToken, should get the response from google, split string and return json data ",
-   async fn(): Promise<any>{
+  name: "getAuthToken method, should get the response from google, split string and return json data ",
+  async fn(): Promise<any> {
+    const goog = new GoogleStrategy(fakeOptions);
     const returnVal: any = {
       tokenData: {
         access_token: undefined,
@@ -77,13 +89,15 @@ Deno.test({
         emails: [ undefined ]
       }
     };
+
     assertEquals(await goog.getAuthToken(fakeOakCtx, fakeNext), returnVal)
   }
 });
 
 Deno.test({
-  name: "testDp.getAuthData should return authorization data",
-  async fn(): Promise<any>{
+  name: "getAuthData method should return authorization data",
+  async fn(): Promise<any> {
+    const goog = new GoogleStrategy(fakeOptions);
     const returnVal: any = {
       tokenData: {
         access_token: undefined,
@@ -100,13 +114,16 @@ Deno.test({
         emails: [ undefined ]
       }
     };
+
     assertEquals(await goog.getAuthData({tokenData: returnVal.tokenData}), returnVal);
   } 
 });
 
 Deno.test({
-  name: "Testing google.parseCode to see if it accurately parsed url encoding",
+  name: "parseCode method should return accurately parsed url encoding",
   fn() :void {
+    const goog = new GoogleStrategy(fakeOptions);
+
     assertEquals(goog.parseCode('%24%26%2B%2C%2F%3A%3B%3D%3F%40'), '$&+,/:;=?@')
   }
 })

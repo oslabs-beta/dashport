@@ -60,6 +60,14 @@ export interface Strategies {
 }
 
 /**
+ * 
+ * client_id: string                 identifies client to service provider - Required
+ *   - client_secret: string              Required
+ *   - redirect_uri: string               Required
+ *   - state: string                      Required
+ *   - response_type: string              O
+ *   - scope: string
+ * 
  * Google Strategy options that should be specified by the developer when adding
  */
 export interface GoogOptions {
@@ -76,6 +84,27 @@ export interface GoogOptions {
   grant_type?: string;
 }
 
+/**
+ * Facebook Strategy options that should be specified by the developer when adding
+ */
+export interface FacebookOptions {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+  state?: string;
+  response_type: string;
+  scope: string;
+}
+
+/**
+ * Template Strategy options that should be specified by the developer when adding
+ */
+export interface TemplateOptions {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+}
+
 export interface TokenData {
   access_token: string;
   expires_in: number;
@@ -87,4 +116,21 @@ export interface TokenData {
 export interface AuthData {
   tokenData?: TokenData;
   userInfo?: UserProfile;
+}
+
+export interface FBTokenData {
+  access_token: string;
+  token_type: string;
+  expires_in: string;
+} 
+
+export interface FBAuthData {
+  tokenData: FBTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface AppOptions {
+  client_id: string;
+  client_secret: string;
+  grant_type: string;
 }
