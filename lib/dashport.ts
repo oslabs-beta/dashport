@@ -245,7 +245,7 @@ class Dashport {
    * @param {string} idToCompare - The ID to compare to _sId
    * @returns {} 
    */
-  public getUserInfo(ctx: OakContext, idToCompare: string) {
+  public deserializeUser(ctx: OakContext, idToCompare: string) {
     if (ctx.state._dashport === undefined) {
       throw new Error('ERROR in getUserInfo: Dashport must be initialized')
     }

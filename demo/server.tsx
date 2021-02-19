@@ -43,6 +43,24 @@ router.get('/test',
   }
 )
 
+// router.get('/testing',
+//   async (ctx: any, next: any) => {
+//     console.log('ctx.locals in first middleware:', ctx.locals);
+//     ctx.locals = {};
+//     console.log('ctx.locals after adding in first middleware:', ctx.locals);
+//     await next();
+//   },
+//   async (ctx: any, next: any) => {
+//     console.log('ctx.locals in second middleware:', ctx.locals);
+//     ctx.locals.test = 'hurrah';
+//     console.log('ctx.locals should have {test: \'hurrah\'} in second middleware:', ctx.locals);
+//     await next();
+//   },
+//   async (ctx: any, next: any) => {
+//     ctx.body = "Hello made it";
+//   }
+// )
+
 router.get('/protected',
   (ctx: any, next: any) => {
     if(!ctx.state._dashport.session){
@@ -50,7 +68,6 @@ router.get('/protected',
     } else {
       ctx.response.type = `text/html`
       ctx.response.body = protectedPage
-      
     }
   }
 )
@@ -82,6 +99,8 @@ app.use(async (ctx: any) => {
    }  else if (ctx.request.url.pathname === '/style.css') {
       ctx.response.type = "text/css"
       await send(ctx, ctx.request.url.pathname, {
+        // FIX ISSUE: Currently have to "deno run --unstable -A demo/server.tsx" from /dashport
+        // Unable to "deno run --unstable -A server.tsx" from /dashport/demo
         root: join(Deno.cwd(), "demo/views/assets"),
       });
    }
