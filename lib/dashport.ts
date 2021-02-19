@@ -11,10 +11,12 @@ class Dashport {
   public _sId: string = '';
   public initialize: any;
   public deserialize: any;
+  public logOut: Function;
 
   constructor(frmwrk: string) {
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
+    this.logOut = this._sm.logOut;
     this.initialize = this._initializeDecider(frmwrk);
     this.deserialize = this._deserializeDecider(frmwrk);
     this.authenticate = this.authenticate.bind(this);

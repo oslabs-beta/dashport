@@ -52,18 +52,19 @@ class SessionManager {
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will delete the session object on the browser's http object
+   * middleware that will delete the session object on the browser's http object
    * 
    * TODO: Add other frameworks
    * 
    * @param {string} framework - Name of the framework the developer is using
-   * @returns {Function} The function that deletes the session object from the
+   * @returns {Function} The middleware that deletes the session object from the
    *   browser's http object
    */
   private _logOutDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext): void {
+      return async (ctx: OakContext, next: any) => {
         delete ctx.state._dashport.session;
+        await next();
       }
     }
 
