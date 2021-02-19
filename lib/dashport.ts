@@ -10,18 +10,20 @@ class Dashport {
   // developer should not access it
   public _sId: string = '';
   public initialize: any;
+  public deserialize: any;
 
   constructor(frmwrk: string) {
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
     this.initialize = this._initializeDecider(frmwrk);
+    this.deserialize = this._deserializeDecider(frmwrk);
     this.authenticate = this.authenticate.bind(this);
   }
 
   /**
-   * Takes in a framework and the current instance of dashport and returns a
-   * function that will become dashport's initialize method. This method is run
-   * inside the constructor of a new Dashport instance.
+   * Takes in a framework and returns a function that will become dashport's
+   * initialize method. This method is run inside the constructor of a new
+   * Dashport instance.
    * 
    * TODO: Add other frameworks
    * 
@@ -234,31 +236,33 @@ class Dashport {
   }
 
   /**
-   * --- Currently in process for configuring for Oak ---
+   * Takes in a framework and returns a function that will become dashport's
+   * deserialize method. This method is run inside the constructor of a new
+   * Dashport instance.
    * 
-   * Takes in a serialized ID and compares it to the _sId. If they match, allow
-   * permission
+   * TODO: Add other frameworks
    * 
-   * TODO: Configure for other server frameworks
-   * 
-   * @param {Object} ctx - The Oak context object
-   * @param {string} idToCompare - The ID to compare to _sId
-   * @returns {} 
+   * @param {string} framework - The server framework that will be used
+   * @returns {*} The async function that will be dashport's deserialize method
    */
-  public deserializeUser(ctx: OakContext, idToCompare: string) {
-    if (ctx.state._dashport === undefined) {
-      throw new Error('ERROR in getUserInfo: Dashport must be initialized')
-    }
+  private _deserializeDecider(framework: string) {
+    if (framework === 'oak') {
+      return async (ctx: OakContext, next: any) => {
+        if (ctx.state._dashport === undefined) {
+          throw new Error('ERROR in getUserInfo: Dashport must be initialized')
+        }
 
-    if (ctx.state._dashport.session === undefined) {
-      // There is no session, so person is not logged in, so redirect to login
-    }
+        if (ctx.state._dashport.session === undefined) {
+          // There is no session, so person is not logged in, so redirect to login
+        }
 
-    if (idToCompare === this._sId) {
-      // nice go ahead grant access to secret stuff
-    }
+        if (idToCompare === this._sId) {
+          // nice go ahead grant access to secret stuff
+        }
 
-    // otherwise you are not the person so go away
+        // otherwise you are not the person so go away
+      }
+    }
   }
 }
 
