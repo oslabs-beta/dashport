@@ -62,13 +62,5 @@ export default class LocalStrategy {
     return {userInfo: userInfo};
     // return new Error("No Username or Password submitted for authorization");
   }
-  
-  // sends the programatically constructed uri to Google's oauth 2.0 server (step 2)
-  async authorize(ctx: OakContext, next: any) {
-    const UserObj = {[this.usernameField]:ctx.request.body[this.usernameField], [this.passwordField]:ctx.request.body[this.passwordField]}     
-  }
-
-  // handle oauth 2.0 server response (step 4)
-
-
+ 
 }
