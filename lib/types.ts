@@ -134,3 +134,15 @@ export interface AppOptions {
   client_secret: string;
   grant_type: string;
 }
+export interface LinkedInAuthData{
+  tokenData: FBTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface LinkedInOptions{
+    client_id: string;
+    client_secret: string;
+    redirect_uri: string;
+    response_type: string;
+    scope: string;
+}
