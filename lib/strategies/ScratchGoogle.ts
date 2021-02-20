@@ -56,7 +56,7 @@ export default class GoogleStrategy {
     for (let i = 0; i < paramArray.length; i++) {
       let [key, value] = paramArray[i];
 
-      if (key === 'client_secret' || key === 'grant_type') break;
+      if (key === 'client_secret' || key === 'grant_type') continue;
 
       paramString += (key + '=');
 
