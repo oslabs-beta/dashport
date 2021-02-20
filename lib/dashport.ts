@@ -171,12 +171,12 @@ class Dashport {
    */
   public addSerializer(serializerName: string, serializer: Function): void {
     if (serializer.length !== 1) {
-      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter that is the userInfo.');
     }
 
     // the below if statement is currently not needed. TODO in SessionManager.serialize method
     // if (serializerName === 'all') {
-    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
+    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a reserved keyword Dashport uses.')
     // }
 
     if (this._serializers[serializerName] !== undefined) {
@@ -216,22 +216,14 @@ class Dashport {
    * 
    * // Below code written in a dashport configuration file
    *   dashport.addDeserializer('A', (serializedId) => {
-   *     // handle getting userInfo from a serializedId here. e.g. taking the ID
-   *     // and querying a DB for the info. If userInfo comes back successfully,
-   *     // return it. Otherwise return an error
-   *     try {
-   *       const userInfo = await (look up serializedId in a db here);
-   *       return userInfo;
-   *     } catch(err) {
-   *       return err;
-   *     }
+   *     // code code code
    *   })
    * 
    * // Below code written in a router file
    *   router.get('/iWantUserInfo',
    *     dashport.deserialize('A'),
    *     (ctx: OakContext, next: any) => {
-   *       ctx.response.body = 'Data was deserialized and handled in previous middleware';
+   *       ctx.response.body = 'Data was deserialized in previous middleware';
    *     }
    *   )
    * 
@@ -258,8 +250,8 @@ class Dashport {
         if (ctx.state._dashport.session === undefined) {
           userInfo = new Error('ERROR in deserialize: No session exists');
         } else if (self._sId === ctx.state._dashport.session) {
-          // a deserializer should either return the userInfo in whatever shape
-          // the developer stored it in, or an Error
+          // a deserializer should either return the user info in an object or
+          // an Error
           userInfo = Object.values(self._deserializers)[0](ctx.state._dashport.session);
         } else {
           userInfo = new Error('ERROR in deserialize: serializedId cannot be authenticated');
@@ -275,53 +267,51 @@ class Dashport {
     throw new Error('ERROR in _deserializeDecider: Name of current framework is not supported.');
   }
 
-
-
 /**
-   * Takes in a name for a serializer function and the serializer function the 
-   * developer specifies. Serializer function needs to do 4 things below
+   * Takes in a name for a deserializer function and the deserializer function
+   * the developer specifies. Deserializer function needs to do 3 things below
    * 
-   * 1. The serializer function needs to take in one parameter which will be the
-   * user data in the form of an object.
-   * 2. The serializer function needs to specify what the developer wants to do
-   * with the user data (store it somewhere, add some info to response body, 
-   * etc).
-   * 3. The serializer function needs to specify how to create a serialized ID.
-   * 4. The serializer function needs to return the serialized ID.
+   * 1. The deserializer function needs to take in one parameter which will be
+   * the serialized ID
+   * 2. The deserializer function needs to specify what the developer wants to
+   * do with the serialized ID to obtain user info (e.g. fetch the userData from
+   * a database)
+   * 3. The deserializer function needs to return the user info or an Error
    * 
    * EXAMPLE
    * 
-   *   dashport.addSerializer('1', (userInfo) => { 
-   *     function getSerializedId () {
-   *       return Math.random() * 10000;
+   *   dashport.addDeserializer('A', (serializedId) => {
+   *     // handle getting userInfo from a serializedId here. e.g. taking the ID
+   *     // and querying a DB for the info. If userInfo comes back successfully,
+   *     // return it. Otherwise return an error
+   *     try {
+   *       const userInfo = await (look up serializedId in a db here);
+   *       return userInfo;
+   *     } catch(err) {
+   *       return err;
    *     }
+   *   })
    * 
-   *     const serializedId = getSerializedId();
-   * 
-   *     // do something with userInfo like store in a database
-   * 
-   *     return serializedId;
-   *   });
-   * 
-   * @param {string} serializerName - A name to give the serializer if it needs
-   *   to be deleted later
-   * @param {Function} serializer - The function that will create serialized IDs
+   * @param {string} deserializerName - A name to give the deserializer if it
+   *   needs to be deleted later
+   * @param {Function} serializer - The function that will take a serialized ID
+   *   and return the user info in an object or an Error
    */
-  public addDeserializer(serializerName: string, serializer: Function): void {
-    if (serializer.length !== 1) {
-      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+  public addDeserializer(deserializerName: string, deserializer: Function): void {
+    if (deserializer.length !== 1) {
+      throw new Error('ERROR in addDeserializer: Deserializer function must have 1 parameter that is the serializedId.');
     }
 
-    // the below if statement is currently not needed. TODO in SessionManager.serialize method
-    // if (serializerName === 'all') {
-    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
+    // the below if statement is currently not needed. TODO in Dashport._deserializeDecider method
+    // if (deserializerName === 'all') {
+    //   throw new Error('ERROR in addDeserializer: Cannot use the name \'all\'. It is a reserved keyword Dashport uses.')
     // }
 
-    if (this._serializers[serializerName] !== undefined) {
-      throw new Error('ERROR in addSerializer: A serializer with this name already exists.');
+    if (this._deserializers[deserializerName] !== undefined) {
+      throw new Error('ERROR in addDeserializer: A deserializer with this name already exists.');
     }
 
-    this._serializers[serializerName] = serializer;
+    this._deserializers[deserializerName] = deserializer;
   }
 
   /**
