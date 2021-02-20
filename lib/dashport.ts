@@ -1,4 +1,4 @@
-import { OakContext, Translators, Strategies, UserProfile } from './types.ts';
+import { OakContext, Translators, Strategies } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
