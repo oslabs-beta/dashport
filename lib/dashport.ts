@@ -315,36 +315,21 @@ class Dashport {
   }
 
   /**
-   * Removes a serializer from the this._serializers object.
+   * Removes a deserializer from the this._deserializers object.
    * 
    * EXAMPLE
    * 
-   *   dashport.removeSerializer('1');
+   *   dashport.removeDeserializer('A');
    * 
-   * @param {string} serializerName - The name of the serializer to remove
+   * @param {string} deserializerName - The name of the serializer to remove
    */
-  public removeDeserializer(serializerName: string): void  {
-    if (this._serializers[serializerName] === undefined) {
-      throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
+  public removeDeserializer(deserializerName: string): void  {
+    if (this._deserializers[deserializerName] === undefined) {
+      throw new Error('ERROR in removeDeserializer: The specified deserializer does not exist.');
     }
 
-    delete this._strategies[serializerName];
+    delete this._deserializers[deserializerName];
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   /**
    * Adds an OAuth strategy that the developer would like to use.
