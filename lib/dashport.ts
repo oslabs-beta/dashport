@@ -11,6 +11,10 @@ class Dashport {
   // developer should not access it
   public _sId: string = '';
   public initialize: any;
+  // Note to help clear any confusion - the purpose of deserialize is NOT to
+  // remove the serializedId. High-level explanation:
+  //   serialize takes in user info and outputs a serializedId
+  //   deserialize takes in a serializedId and outputs user info
   public deserialize: any;
   public logOut: Function;
 
@@ -244,7 +248,7 @@ class Dashport {
         if (Object.values(self._deserializers).length === 0) {
           throw new Error('ERROR in deserialize: No deserializers.');
         }
-        
+
         let userInfo: any;
 
         if (ctx.state._dashport.session === undefined) {
@@ -294,7 +298,7 @@ class Dashport {
    * 
    * @param {string} deserializerName - A name to give the deserializer if it
    *   needs to be deleted later
-   * @param {Function} serializer - The function that will take a serialized ID
+   * @param {Function} deserializer - The function that will take a serialized ID
    *   and return the user info in an object or an Error
    */
   public addDeserializer(deserializerName: string, deserializer: Function): void {
