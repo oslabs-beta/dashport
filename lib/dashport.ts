@@ -1,4 +1,4 @@
-import { OakContext, Translators, Strategies } from './types.ts';
+import { OakContext, Translators, Strategies, UserProfile } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -25,15 +25,15 @@ class Dashport {
 
   /**
    * Takes in a framework and returns a function that will become dashport's
-   * initialize method. This method is run inside the constructor of a new
+   * initialize method. _initializeDecider runs inside the constructor of a new
    * Dashport instance.
    * 
    * TODO: Add other frameworks
    * 
    * @param {string} framework - The server framework that will be used
-   * @returns {Function} The async function that will be dashport's intialize method
+   * @returns {*} The async function that will be dashport's intialize method
    */
-  private _initializeDecider(framework: string): Function {
+  private _initializeDecider(framework: string) {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state === undefined) {
@@ -50,7 +50,7 @@ class Dashport {
       }
     }
 
-    throw new Error('ERROR constructing Dashport: Name of framework passed in is not supported.');
+    throw new Error('ERROR in constructor of Dashport: Name of framework passed in is not supported.');
   }
 
   /**
@@ -203,17 +203,77 @@ class Dashport {
     delete this._strategies[serializerName];
   }
 
+  /**
+   * Takes in a framework and returns a function that will become dashport's
+   * deserialize method. _deserializeDecider runs inside the constructor of a new
+   * Dashport instance.
+   * 
+   * dashport.deserialize will act as middleware and invoke the specified
+   * deserializer(s) if the serialized ID on the session object matches the
+   * serialized ID on the current instance of Dashport
+   * 
+   * EXAMPLE: Using Oak as server framework
+   * 
+   * // Below code written in a dashport configuration file
+   *   dashport.addDeserializer('A', (serializedId) => {
+   *     // handle getting userInfo from a serializedId here. e.g. taking the ID
+   *     // and querying a DB for the info. If userInfo comes back successfully,
+   *     // return it. Otherwise return an error
+   *     try {
+   *       const userInfo = await (look up serializedId in a db here);
+   *       return userInfo;
+   *     } catch(err) {
+   *       return err;
+   *     }
+   *   })
+   * 
+   * // Below code written in a router file
+   *   router.get('/iWantUserInfo',
+   *     dashport.deserialize('A'),
+   *     (ctx: OakContext, next: any) => {
+   *       ctx.response.body = 'Data was deserialized and handled in previous middleware';
+   *     }
+   *   )
+   * 
+   * TODO: Add other frameworks
+   * 
+   * TODO: Current deserialize method for Oak uses the first deserializer in
+   * _deserializers. Extend code to take in an extra parameter (a name) that 
+   * specifies which deserializer to use
+   * 
+   * @param {string} framework - The server framework that will be used
+   * @returns {*} The async function that will be dashport's deserialize method
+   */
+  private _deserializeDecider(framework: string) {
+    const self: Dashport = this;
 
+    if (framework === 'oak') {
+      return async (ctx: OakContext, next: any) => {
+        if (Object.values(self._deserializers).length === 0) {
+          throw new Error('ERROR in deserialize: No deserializers.');
+        }
+        
+        let userInfo: any;
 
+        if (ctx.state._dashport.session === undefined) {
+          userInfo = new Error('ERROR in deserialize: No session exists');
+        } else if (self._sId === ctx.state._dashport.session) {
+          // a deserializer should either return the userInfo in whatever shape
+          // the developer stored it in, or an Error
+          userInfo = Object.values(self._deserializers)[0](ctx.state._dashport.session);
+        } else {
+          userInfo = new Error('ERROR in deserialize: serializedId cannot be authenticated');
+        }
 
+        // store the userInfo or the error in ctx.locals for next middleware to
+        // access
+        ctx.locals = userInfo;
+        return await next();
+      }
+    }
 
-
-
-
-
-
-
-
+    throw new Error('ERROR in _deserializeDecider: Name of current framework is not supported.');
+  }
 
 
 
@@ -329,36 +389,6 @@ class Dashport {
     }
 
     delete this._strategies[stratName];
-  }
-
-  /**
-   * Takes in a framework and returns a function that will become dashport's
-   * deserialize method. This method is run inside the constructor of a new
-   * Dashport instance.
-   * 
-   * TODO: Add other frameworks
-   * 
-   * @param {string} framework - The server framework that will be used
-   * @returns {*} The async function that will be dashport's deserialize method
-   */
-  private _deserializeDecider(framework: string) {
-    if (framework === 'oak') {
-      return async (ctx: OakContext, next: any) => {
-        if (ctx.state._dashport === undefined) {
-          throw new Error('ERROR in getUserInfo: Dashport must be initialized')
-        }
-
-        if (ctx.state._dashport.session === undefined) {
-          // There is no session, so person is not logged in, so redirect to login
-        }
-
-        if (idToCompare === this._sId) {
-          // nice go ahead grant access to secret stuff
-        }
-
-        // otherwise you are not the person so go away
-      }
-    }
   }
 }
 
