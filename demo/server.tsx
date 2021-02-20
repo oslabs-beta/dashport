@@ -3,6 +3,8 @@ import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
+import LocalStrategy from '../lib/strategies/localstrategy.ts';
+import pgclient from './models/userModel.ts'
 
 const port = 3000;
 const app: Application = new Application();
@@ -32,6 +34,16 @@ dashport.addStrategy('google', new GoogleStrat({
   grant_type: 'authorization_code',
 }));
 
+dashport.addStrategy('local', new LocalStrategy({
+  usernamefield:'username', 
+  passwordfield:'password', 
+  authorize: async (curData:any) =>{
+    const data = await pgclient.queryArray(`SELECT * FROM users WHERE username='${curData.username}' AND password='${curData.password}'`) || null;
+    if (!data.rows) return new Error("Username or Password is incorrect");
+    const userInfo:any = {provider:'local', providerUserId:data.rows[0][0], displayName:data.rows[0][1]};
+    return userInfo; 
+  }, }));
+
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/test', 
@@ -43,23 +55,26 @@ router.get('/test',
   }
 )
 
-// router.get('/testing',
-//   async (ctx: any, next: any) => {
-//     console.log('ctx.locals in first middleware:', ctx.locals);
-//     ctx.locals = {};
-//     console.log('ctx.locals after adding in first middleware:', ctx.locals);
-//     await next();
-//   },
-//   async (ctx: any, next: any) => {
-//     console.log('ctx.locals in second middleware:', ctx.locals);
-//     ctx.locals.test = 'hurrah';
-//     console.log('ctx.locals should have {test: \'hurrah\'} in second middleware:', ctx.locals);
-//     await next();
-//   },
-//   async (ctx: any, next: any) => {
-//     ctx.body = "Hello made it";
-//   }
-// )
+router.post('/local', 
+  dashport.authenticate('local'),
+  (ctx: any, next: any) => {
+    ctx.response.type = 'text/json';
+    ctx.response.body = JSON.stringify(true);
+  }
+);
+
+router.post('/signup', 
+  async (ctx:any, next: any)=>{ 
+    let userInfo:any = await ctx.request.body(true).value;
+    console.log(userInfo);
+    pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`)
+  }, 
+  dashport.authenticate('local'),
+  (ctx: any, next: any) => {
+    ctx.response.type = 'text/json';
+    ctx.response.body = JSON.stringify(true);
+  }
+  );
 
 router.get('/protected',
   (ctx: any, next: any) => {
@@ -68,9 +83,9 @@ router.get('/protected',
     } else {
       ctx.response.type = `text/html`
       ctx.response.body = protectedPage
-    }
+    };
   }
-)
+);
 
 //response tracking
 app.use(async (ctx: any, next: any) => {
