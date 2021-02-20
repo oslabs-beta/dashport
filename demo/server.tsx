@@ -99,7 +99,7 @@ app.use(async (ctx: any) => {
    }  else if (ctx.request.url.pathname === '/style.css') {
       ctx.response.type = "text/css"
       await send(ctx, ctx.request.url.pathname, {
-        // FIX ISSUE: Currently have to "deno run --unstable -A demo/server.tsx" from /dashport
+        // TODO FIX: Currently have to "deno run --unstable -A demo/server.tsx" from /dashport
         // Unable to "deno run --unstable -A server.tsx" from /dashport/demo
         root: join(Deno.cwd(), "demo/views/assets"),
       });
