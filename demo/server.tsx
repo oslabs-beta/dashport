@@ -38,7 +38,7 @@ dashport.addStrategy('local', new LocalStrategy({
   usernamefield:'username', 
   passwordfield:'password', 
   authorize: async (curData:any) =>{
-    const data = await pgclient.queryArray(`SELECT * FROM users WHERE username='${curData.username}' AND password='${curData.password}'`)
+    const data = await pgclient.queryArray(`SELECT * FROM users WHERE username='${curData.username}' AND password='${curData.password}'`) || null;
     if (!data.rows) return new Error("Username or Password is incorrect");
     const userInfo:any = {provider:'local', providerUserId:data.rows[0][0], displayName:data.rows[0][1]};
     return userInfo; 
@@ -58,11 +58,23 @@ router.get('/test',
 router.post('/local', 
   dashport.authenticate('local'),
   (ctx: any, next: any) => {
-    if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
-    };
+    ctx.response.type = 'text/json';
+    ctx.response.body = JSON.stringify(true);
   }
 );
+
+router.post('/signup', 
+  async (ctx:any, next: any)=>{ 
+    let userInfo:any = await ctx.request.body(true).value;
+    console.log(userInfo);
+    pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`)
+  }, 
+  dashport.authenticate('local'),
+  (ctx: any, next: any) => {
+    ctx.response.type = 'text/json';
+    ctx.response.body = JSON.stringify(true);
+  }
+  );
 
 router.get('/protected',
   (ctx: any, next: any) => {

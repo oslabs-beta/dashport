@@ -40,6 +40,21 @@ const NavBar = () => {
     return setLoginData(oldLoginData);
   }
 
+  const localSignUp = () => {
+    const postOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: loginData[0],
+        password: loginData[1]
+      })
+    };
+    console.log('sending user data');
+    fetch(`http://localhost:3000/signup`, postOptions)
+    .then( data => data.json())
+    .then (parsed => setLogin(parsed));
+  };
+
   const localLogin = () => {
     // if (!user || !pass ) {
       // console.log(document.querySelector('#username').nodeValue);
@@ -56,8 +71,8 @@ const NavBar = () => {
     };
     console.log('abouttofetch');
     fetch(`http://localhost:3000/local`, postOptions)
-      // .then( res => (console.log(res), res.json()))
-      // .then( parsed => console.log(parsed))
+    .then( data => data.json())
+    .then (parsed => setLogin(parsed));
       // .catch((error) => console.log('error: ', error));
   };
   
@@ -76,7 +91,7 @@ const NavBar = () => {
                 <input type='password' id='password' onChange={inputgetter} placeholder='Password'/>
               </div>
               <button type='button' onClick={localLogin} id='login'>Login</button>
-              <button type='button' id='signIn'>Sign Up</button>
+              <button type='button' onClick={localSignUp} id='signIn'>Sign Up</button>
             </form>
               <span>
                   <a href="/test">
