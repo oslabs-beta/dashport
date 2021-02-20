@@ -43,7 +43,7 @@ export default class TemplateStrategy {
     // ACTION NEEDED: 
       // If there are any variables in options that aren't needed for your first endpoint (but will be needed later), 
       // add them as an array of strings (even if there's only 1 item)
-    this.uriFromParams = this.constr/*  */uctURI(this.options);
+    this.uriFromParams = this.constructURI(this.options);
   }
 
   constructURI(options:any, skip?:string[]): any{
@@ -98,7 +98,7 @@ export default class TemplateStrategy {
     // GO_Step 1 Request Permission
     if(!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 3 Exchange code for Token
-    // ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
+    // ?ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
     if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
     // if(ctx.request.url.search.slice) -- error
   }
