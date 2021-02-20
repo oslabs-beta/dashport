@@ -200,7 +200,7 @@ class Dashport {
       throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
     }
 
-    delete this._strategies[serializerName];
+    delete this._serializers[serializerName];
   }
 
   /**
