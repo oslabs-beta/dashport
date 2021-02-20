@@ -19,6 +19,7 @@ class Dashport {
   public logOut: Function;
 
   constructor(frmwrk: string) {
+    frmwrk = frmwrk.toLowerCase();
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
     this.logOut = this._sm.logOut;
