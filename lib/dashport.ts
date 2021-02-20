@@ -137,7 +137,7 @@ class Dashport {
           // if serializedId is an Error, throw it to be caught
           if (serializedId instanceof Error) throw serializedId;
           if (typeof serializedId !== 'string') {
-            throw new Error('ERROR in authenticate: serializedId returned from serializer must be a string.')
+            throw new Error('ERROR in authenticate: serializedId returned from serializer must be a string or an Error.')
           }
 
           // use SessionManager's logIn method to create a session object on
