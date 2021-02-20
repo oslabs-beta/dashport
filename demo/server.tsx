@@ -3,6 +3,7 @@ import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
+import GitHubStrategy from '../lib/strategies/Github.ts'
 
 const port = 3000;
 const app: Application = new Application();
@@ -33,10 +34,27 @@ dashport.addStrategy('google', new GoogleStrat({
   grant_type: 'authorization_code',
 }));
 
+dashport.addStrategy('github', new GitHubStrategy({
+  client_id:'b3e8f06ac81ab03c46ca', 
+  client_secret: 'b9cc08bb3318a27a8306e4fa74fc22758d29b3fc', 
+  redirect_uri: 'http://localhost:3000/github', 
+  response_type: 'code', //TBD
+  scope: 'read:user',  
+  grant_type: 'authorization_code', // TBD
+}));
+
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/test', 
   dashport.authenticate('google'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
+router.get('/github', 
+  dashport.authenticate('github'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
       ctx.response.redirect('/protected');

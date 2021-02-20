@@ -124,12 +124,20 @@ export interface AuthData {
 
 export interface GitHubOptions {
   client_id: string;
+  client_secret: string;
   redirect_uri: string;
-  login: string;
+  response_type: string;
   scope: string;
-  state: string;
+  login?: string;
+  state?: string;
   allow_signup?: string;
+  grant_type?: string;
 }
+
+/**
+ * Github Strategy options  
+ */
+
 export interface FBTokenData {
   access_token: string;
   token_type: string;

@@ -43,7 +43,7 @@ export default class TemplateStrategy {
     // ACTION NEEDED: 
       // If there are any variables in options that aren't needed for your first endpoint (but will be needed later), 
       // add them as an array of strings (even if there's only 1 item)
-    this.uriFromParams = this.constructURI(this.options);
+    this.uriFromParams = this.constr/*  */uctURI(this.options);
   }
 
   constructURI(options:any, skip?:string[]): any{
