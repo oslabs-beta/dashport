@@ -135,7 +135,7 @@ class Dashport {
           // ctx.state._dashport and to assign serializedId to the _sId property
           // of this instance of Dashport
           self._sm.logIn(ctx, self, serializedId);
-          console.log('dp 127', ctx.state);
+
           return await next();
         }
         else {
