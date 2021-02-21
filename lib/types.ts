@@ -137,7 +137,7 @@ export interface AppOptions {
   grant_type: string;
 }
 export interface LinkedInAuthData{
-  tokenData: FBTokenData;
+  tokenData: LinkedInTokenData;
   userInfo?: UserProfile;
 }
 
@@ -147,4 +147,12 @@ export interface LinkedInOptions{
     redirect_uri: string;
     response_type: string;
     scope: string;
+}
+
+export interface LinkedInTokenData {
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  token_type: string;
+  id_token: string;
 }

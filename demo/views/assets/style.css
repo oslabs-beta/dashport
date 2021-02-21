@@ -32,17 +32,20 @@ button:hover {
   color: white;
 }
 
-#googleIcon {
+.signinIcons {
   position: relative;
   border: solid 2px #d3d3d3;
   transition-duration: 0.2s;
   border-radius: 5px;
   left: 1rem;
   margin-top: 1rem;
+  width: 12.5rem;
+  height: 2.5rem;
 }
-#googleIcon:hover {
+.signinIcons:hover {
   border-color: #555555;
 }
+
 
 input {
   width: 17%;

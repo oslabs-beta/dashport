@@ -84,7 +84,6 @@ export default class GoogleStrategy {
   // handle oauth 2.0 server response (step 4)
   async getAuthToken(ctx: OakContext, next: any) {
     const OGURI: string = ctx.request.url.search;
-
     // splits the string at the =, storing the first part in URI1[0] and the part we want in URI1[1]
     let URI1: string[] = OGURI.split('=');
     // splits the string at the ampersand(&), storing the string with the access_token in URI2[0] 
@@ -107,6 +106,7 @@ export default class GoogleStrategy {
     try {
       let data: any = await fetch('https://oauth2.googleapis.com/token', options);
       data = await data.json();
+      
       return this.getAuthData(data);
     } catch(err) {
       return new Error(`ERROR: ${err}`);

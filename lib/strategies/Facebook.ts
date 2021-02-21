@@ -178,7 +178,7 @@ export default class FacebookStrategy {
       data = await data.json();
       console.log('data line 141', data);
       authData.userInfo = {
-        provder: this.name,
+        provider: this.name,
         providerUserId: data.data.user_id
       };
 

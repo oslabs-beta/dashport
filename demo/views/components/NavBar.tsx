@@ -93,13 +93,24 @@ const NavBar = () => {
               <button type='button' onClick={localLogin} id='login'>Login</button>
               <button type='button' onClick={localSignUp} id='signIn'>Sign Up</button>
             </form>
-              <span>
-                  <a href="/test">
-                    <img id='googleIcon'
-                      src="https://i.imgur.com/PHJ6j1E.png"
-                    ></img>
-                  </a>
-              </span>
+              <div>
+                  <span>
+                      <a href="/test">
+                        <img className='signinIcons'
+                          src="https://i.imgur.com/PHJ6j1E.png"
+                        ></img>
+                      </a>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                      <a href="/linkedin">
+                        <img className='signinIcons'
+                          src="https://i.imgur.com/A3cF63u.png"
+                        ></img>
+                      </a>
+                  </span>
+                </div>
             </div>
           )}
       </div>
