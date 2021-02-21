@@ -85,6 +85,10 @@ export interface GoogOptions {
 }
 
 /**
+ * Google Strategy options that should be specified by the developer when adding
+ */
+
+/**
  * Facebook Strategy options that should be specified by the developer when adding
  */
 export interface FacebookOptions {
@@ -118,26 +122,33 @@ export interface AuthData {
   userInfo?: UserProfile;
 }
 
-/**
- * Google Strategy options that should be specified by the developer when adding
- */
 
+/**
+ * Github Strategy options below
+ */
 export interface GitHubOptions {
   client_id: string;
-  client_secret: string;
   redirect_uri: string;
-  response_type: string;
-  scope: string;
   login?: string;
+  scope: string;
+  client_secret: string;
   state?: string;
   allow_signup?: string;
-  grant_type?: string;
+}
+export interface GHTokenData {
+  access_token: string;
+  token_type: string;
+  expires_in?: string;
+  scope?: string;
+} 
+export interface GHAuthData {
+  tokenData: GHTokenData;
+  userInfo?: UserProfile;
 }
 
 /**
- * Github Strategy options  
+ * Github Strategy options above 
  */
-
 export interface FBTokenData {
   access_token: string;
   token_type: string;
