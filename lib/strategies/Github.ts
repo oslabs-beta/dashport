@@ -189,7 +189,7 @@ export default class GitHubStrategy {
     }
   }
 
-  //*************** getAuthData **********************/
+  //-------------------------------- getAuthData --------------------------------//
 
   // STEP 4 get the access token from the returned data
   // STEP 4.5 exchange access token for user info
@@ -209,11 +209,10 @@ export default class GitHubStrategy {
     // ACTION REQUIRED: 
       // fill in the fields for auth options with whatever information is required by your OAuth service
       // authOptions constructs the uri for your final fetch request
-    // const authOptions: any = {
-    //   input_token: authData.tokenData.access_token,
+      // const authOptions: any = {
+      //  input_token: authData.tokenData.access_token,
     //   access_token: this.options.client_id + '|' + this.options.client_secret
     // };
-    console.log('line 235');
     
     // DEBUGGING: console.log('uri being used line 137', 'this.authDataUrl' + this.constructURI(authOptions))
     try {
@@ -235,7 +234,7 @@ export default class GitHubStrategy {
         name: {
           familyName: data.name,
         },
-        emails: [data.email]
+        emails: [data.email],
       };
 
       return authData;
