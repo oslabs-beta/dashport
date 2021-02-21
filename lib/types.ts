@@ -16,6 +16,7 @@ export interface OakContext {
   throw: Function;
   upgrade: Function;
   params: any;
+  locals?: any;
 }
 
 /**
@@ -39,10 +40,11 @@ export interface UserProfile {
 }
 
 /**
- * The _serializers object on Dashport that contains serializer functions
+ * The _serializers object or _deserializers object on Dashport that contains
+ * serializer functions or deserializer functions respectively
  */
-export interface Serializers {
-  [serializerName: string]: Function;
+export interface Translators {
+  [TranslatorName: string]: Function;
 }
 
 /**

@@ -1,94 +1,86 @@
+import { assertEquals, assertThrows } from "https://deno.land/std@0.87.0/testing/asserts.ts"
 import Dashport from '../dashport.ts';
-import { assertEquals, assertNotEquals, assertThrows, assertThrowsAsync } from '../../deps.ts';
+import { OakContext } from '../types.ts';
 
-class TestStrat {
-  async router(ctx: any, next: any) {
-    return {
-      userInfo: {
-        provider: 'test',
-        providerUserId: '12345',
-        displayName: 'Dashport',
-        name: {
-          familyName: 'port',
-          givenName: 'Dash',
-        }
-      }
-    };
+Deno.test({
+  name: "addDeserializer method should throw an error if exactly 1 parameter is not provided",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    assertThrows(() => oakTestDp.addDeserializer('test', () => '{userInfo}'));
+    assertThrows(() => oakTestDp.addDeserializer('tester', (test: any, testing: any) => '{userInfo}'));
   }
-}
+})
 
 Deno.test({
-  name: "A new Dashport instance should include properties _sId, initialize, authenticate, " +
-  "addSerializer, removeSerializer, addStrategy, removeStrategy, and getUserInfo.",
+  name: "addDeserializer method should throw an error if a name already exists",
   fn(): void {
-    const oakTestDash = new Dashport('oak');
+    const oakTestDp = new Dashport('oak');
 
-    assertEquals(oakTestDash._sId, '');
-    assertNotEquals(oakTestDash.initialize, undefined);
-    assertNotEquals(oakTestDash.authenticate, undefined)
-    assertNotEquals(oakTestDash.addSerializer, undefined)
-    assertNotEquals(oakTestDash.removeSerializer, undefined)
-    assertNotEquals(oakTestDash.addStrategy, undefined)
-    assertNotEquals(oakTestDash.removeStrategy, undefined)
-    assertNotEquals(oakTestDash.getUserInfo, undefined)
-  },
-});
+    oakTestDp.addDeserializer('test', (serializedId: string) => '{userInfo}');
+    assertThrows(() => oakTestDp.addDeserializer('test', (serializedId: string) => '{userInfo}'));
+  }
+})
 
 Deno.test({
-  name: "when Dashport is invoked with 'oak', initialize should create a _dashport object on ctx.state",
+  name: "removeDeserializer method should throw an error if a name does not exist",
   fn(): void {
-    const oakTestDash = new Dashport('oak');
-    const fakeOakCtx = {
+    const oakTestDp = new Dashport('oak');
+
+    oakTestDp.addDeserializer('test', (serializedId: string) => '{userInfo}');
+    assertThrows(() => oakTestDp.removeDeserializer('testing'));
+  }
+})
+
+Deno.test({
+  name: "removeDeserializer method should throw an error if trying to remove a deserializer twice",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    oakTestDp.addDeserializer('test', (serializedId: string) => '{userInfo}');
+    oakTestDp.removeDeserializer('test');
+    assertThrows(() => oakTestDp.removeDeserializer('test'));
+  }
+})
+
+Deno.test({
+  name: "deserialize \"method\" should store userInfo on ctx.locals if serializedId on session object matches _sId",
+  async fn() {
+    const oakTestDp = new Dashport('oak');
+    const fakeOakCtx: OakContext = {
       app: {},
       cookies: {},
       request: {},
       respond: {},
       response: {},
       socket: {},
-      state: {},
+      state: {
+        _dashport: {
+          session: '12345'
+        }
+      },
       assert: () => 1,
       send: () => 2,
       sendEvents: () => 3,
       throw: () => 4,
       upgrade: () => 5,
       params: {}
-    };
+    }
     const fakeNext = () => 1;
 
-    assertEquals(Object.keys(fakeOakCtx.state).length, 0);
-    oakTestDash.initialize(fakeOakCtx, fakeNext);
-    assertEquals(Object.keys(fakeOakCtx.state)[0], '_dashport');
-  },
+    oakTestDp.authenticate = function(stratName: string) {
+      this._sId = '12345';
+      return () => {};
+    };
+    
+    oakTestDp.authenticate('test'); // should make oakTestDp._sId = '12345'
+    oakTestDp.addDeserializer('test', (serializedId: string) => '{userInfo}');
+    await oakTestDp.deserialize(fakeOakCtx, fakeNext);
+    assertEquals(fakeOakCtx.locals, '{userInfo}');
+  }
 });
 
-Deno.test({
-  name: "Authenticate method should check if strategy name passed in exists in _strategies",
-  fn(): void {
-    const oakTestDash = new Dashport('oak');
-
-    oakTestDash.addStrategy('testStrat', new TestStrat());
-    assertThrows(() => oakTestDash.authenticate('hi'));
-  },
-});
-
-Deno.test({
-  name: "If _dashport has not been initialized in state, authenticate method should throw an error",
-  fn(): void {
-    const oakTestDash = new Dashport('oak');
-    const fakeOakCtx = {
-      app: {},
-      cookies: {},
-      request: {},
-      respond: {},
-      response: {},
-      socket: {},
-      state: { _dashport: '' },
-      assert: () => 1,
-      send: () => 2,
-      sendEvents: () => 3,
-      throw: () => 4,
-      upgrade: () => 5,
-      params: {}
+/*
     };
     const fakeNext = () => 1;
 
@@ -160,3 +152,4 @@ Deno.test({
 
 //   },
 // });
+*/

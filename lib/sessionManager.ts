@@ -1,4 +1,4 @@
-import { OakContext, Serializers, UserProfile } from './types.ts';
+import { OakContext, Translators, UserProfile } from './types.ts';
 import Dashport from './dashport.ts';
 
 /**
@@ -52,18 +52,19 @@ class SessionManager {
 
   /**
    * Takes in the name of the framework the developer is using and returns a
-   * function that will delete the session object on the browser's http object
+   * middleware that will delete the session object on the browser's http object
    * 
    * TODO: Add other frameworks
    * 
    * @param {string} framework - Name of the framework the developer is using
-   * @returns {Function} The function that deletes the session object from the
+   * @returns {Function} The middleware that deletes the session object from the
    *   browser's http object
    */
   private _logOutDecider(framework: string): Function {
     if (framework = 'oak') {
-      return function(ctx: OakContext): void {
+      return async (ctx: OakContext, next: any) => {
         delete ctx.state._dashport.session;
+        await next();
       }
     }
 
@@ -75,7 +76,8 @@ class SessionManager {
    * the first one to create a serialized ID and return it.
    * 
    * TODO: Allow a 'name' parameter to be passed in that specifies which
-   * serializer to use. If name === 'all', use all the serializers in a chain.
+   * serializer to use
+   * TODO: If name === 'all', use all the serializers in a chain.
    * 
    * TODO: Allow optional parameters to be passed into the serializer to be
    * used. If chaining multiple serializers is implemented, pass params into the
@@ -85,7 +87,7 @@ class SessionManager {
    * @param {Object} userData - An object containing the authenticated user data
    * @returns {string} A serialized ID
    */
-  public serialize(serializers: Serializers, userData: UserProfile): string {
+  public serialize(serializers: Translators, userData: UserProfile): string {
     if (Object.values(serializers).length === 0) {
       throw new Error('ERROR in serialize: No serializers.');
     }

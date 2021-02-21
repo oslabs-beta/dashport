@@ -1,7 +1,7 @@
 import { assertEquals, assertNotEquals } from '../../deps.ts';
 import SessionManager from '../sessionManager.ts';
 import Dashport from '../dashport.ts';
-import { OakContext, Serializers, UserProfile } from "../types.ts";
+import { OakContext, Translators, UserProfile } from "../types.ts";
 
 const oakTestSM = new SessionManager('oak');
 
@@ -96,7 +96,7 @@ Deno.test({
       return '2468';
     };
 
-    const testSerializers: Serializers = {
+    const testSerializers: Translators = {
       '1': testFunc
     };
 

@@ -1,8 +1,9 @@
-import { OakContext, Serializers, Strategies, Strategy } from './types.ts';
+import { OakContext, Translators, Strategies } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
-  private _serializers: Serializers = {};
+  private _serializers: Translators = {};
+  private _deserializers: Translators = {};
   private _strategies: Strategies = {};
   private _framework: string;
   private _sm: SessionManager;
@@ -10,25 +11,33 @@ class Dashport {
   // developer should not access it
   public _sId: string = '';
   public initialize: any;
+  // Note to help clear any confusion - the purpose of deserialize is NOT to
+  // remove the serializedId. High-level explanation:
+  //   serialize takes in user info and outputs a serializedId
+  //   deserialize takes in a serializedId and outputs user info
+  public deserialize: any;
+  public logOut: Function;
 
   constructor(frmwrk: string) {
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
+    this.logOut = this._sm.logOut;
     this.initialize = this._initializeDecider(frmwrk);
+    this.deserialize = this._deserializeDecider(frmwrk);
     this.authenticate = this.authenticate.bind(this);
   }
 
   /**
-   * Takes in a framework and the current instance of dashport and returns a
-   * function that will become dashport's initialize method. This method is run
-   * inside the constructor of a new Dashport instance.
+   * Takes in a framework and returns a function that will become dashport's
+   * initialize method. _initializeDecider runs inside the constructor of a new
+   * Dashport instance.
    * 
    * TODO: Add other frameworks
    * 
    * @param {string} framework - The server framework that will be used
-   * @returns {Function} The async function that will be dashport's intialize method
+   * @returns {*} The async function that will be dashport's intialize method
    */
-  private _initializeDecider(framework: string): Function {
+  private _initializeDecider(framework: string) {
     if (framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state === undefined) {
@@ -45,7 +54,7 @@ class Dashport {
       }
     }
 
-    throw new Error('ERROR constructing Dashport: Name of framework passed in is not supported.');
+    throw new Error('ERROR in constructor of Dashport: Name of framework passed in is not supported.');
   }
 
   /**
@@ -163,12 +172,12 @@ class Dashport {
    */
   public addSerializer(serializerName: string, serializer: Function): void {
     if (serializer.length !== 1) {
-      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter.');
+      throw new Error('ERROR in addSerializer: Serializer function must have 1 parameter that is the userInfo.');
     }
 
     // the below if statement is currently not needed. TODO in SessionManager.serialize method
     // if (serializerName === 'all') {
-    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a special keyword Dashport uses.')
+    //   throw new Error('ERROR in addSerializer: Cannot use the name \'all\'. It is a reserved keyword Dashport uses.')
     // }
 
     if (this._serializers[serializerName] !== undefined) {
@@ -192,7 +201,135 @@ class Dashport {
       throw new Error('ERROR in removeSerializer: The specified serializer does not exist.');
     }
 
-    delete this._strategies[serializerName];
+    delete this._serializers[serializerName];
+  }
+
+  /**
+   * Takes in a framework and returns a function that will become dashport's
+   * deserialize method. _deserializeDecider runs inside the constructor of a new
+   * Dashport instance.
+   * 
+   * dashport.deserialize will act as middleware and invoke the specified
+   * deserializer(s) if the serialized ID on the session object matches the
+   * serialized ID on the current instance of Dashport
+   * 
+   * EXAMPLE: Using Oak as server framework
+   * 
+   * // Below code written in a dashport configuration file
+   *   dashport.addDeserializer('A', (serializedId) => {
+   *     // code code code
+   *   })
+   * 
+   * // Below code written in a router file
+   *   router.get('/iWantUserInfo',
+   *     dashport.deserialize('A'),
+   *     (ctx: OakContext, next: any) => {
+   *       ctx.response.body = 'Data was deserialized in previous middleware';
+   *     }
+   *   )
+   * 
+   * TODO: Add other frameworks
+   * 
+   * TODO: Current deserialize method for Oak uses the first deserializer in
+   * _deserializers. Extend code to take in an extra parameter (a name) that 
+   * specifies which deserializer to use
+   * 
+   * @param {string} framework - The server framework that will be used
+   * @returns {*} The async function that will be dashport's deserialize method
+   */
+  private _deserializeDecider(framework: string) {
+    const self: Dashport = this;
+
+    if (framework === 'oak') {
+      return async (ctx: OakContext, next: any) => {
+        if (Object.values(self._deserializers).length === 0) {
+          throw new Error('ERROR in deserialize: No deserializers.');
+        }
+
+        let userInfo: any;
+
+        if (ctx.state._dashport.session === undefined) {
+          userInfo = new Error('ERROR in deserialize: No session exists');
+        } else if (self._sId === ctx.state._dashport.session) {
+          // a deserializer should either return the user info in an object or
+          // an Error
+          userInfo = Object.values(self._deserializers)[0](ctx.state._dashport.session);
+        } else {
+          userInfo = new Error('ERROR in deserialize: serializedId cannot be authenticated');
+        }
+
+        // store the userInfo or the error in ctx.locals for next middleware to
+        // access
+        ctx.locals = userInfo;
+        return await next();
+      }
+    }
+
+    throw new Error('ERROR in _deserializeDecider: Name of current framework is not supported.');
+  }
+
+/**
+   * Takes in a name for a deserializer function and the deserializer function
+   * the developer specifies. Deserializer function needs to do 3 things below
+   * 
+   * 1. The deserializer function needs to take in one parameter which will be
+   * the serialized ID
+   * 2. The deserializer function needs to specify what the developer wants to
+   * do with the serialized ID to obtain user info (e.g. fetch the userData from
+   * a database)
+   * 3. The deserializer function needs to return the user info or an Error
+   * 
+   * EXAMPLE
+   * 
+   *   dashport.addDeserializer('A', (serializedId) => {
+   *     // handle getting userInfo from a serializedId here. e.g. taking the ID
+   *     // and querying a DB for the info. If userInfo comes back successfully,
+   *     // return it. Otherwise return an error
+   *     try {
+   *       const userInfo = await (look up serializedId in a db here);
+   *       return userInfo;
+   *     } catch(err) {
+   *       return err;
+   *     }
+   *   })
+   * 
+   * @param {string} deserializerName - A name to give the deserializer if it
+   *   needs to be deleted later
+   * @param {Function} deserializer - The function that will take a serialized ID
+   *   and return the user info in an object or an Error
+   */
+  public addDeserializer(deserializerName: string, deserializer: Function): void {
+    if (deserializer.length !== 1) {
+      throw new Error('ERROR in addDeserializer: Deserializer function must have 1 parameter that is the serializedId.');
+    }
+
+    // the below if statement is currently not needed. TODO in Dashport._deserializeDecider method
+    // if (deserializerName === 'all') {
+    //   throw new Error('ERROR in addDeserializer: Cannot use the name \'all\'. It is a reserved keyword Dashport uses.')
+    // }
+
+    if (this._deserializers[deserializerName] !== undefined) {
+      throw new Error('ERROR in addDeserializer: A deserializer with this name already exists.');
+    }
+
+    this._deserializers[deserializerName] = deserializer;
+  }
+
+  /**
+   * Removes a deserializer from the this._deserializers object.
+   * 
+   * EXAMPLE
+   * 
+   *   dashport.removeDeserializer('A');
+   * 
+   * @param {string} deserializerName - The name of the serializer to remove
+   */
+  public removeDeserializer(deserializerName: string): void  {
+    if (this._deserializers[deserializerName] === undefined) {
+      throw new Error('ERROR in removeDeserializer: The specified deserializer does not exist.');
+    }
+
+    delete this._deserializers[deserializerName];
   }
 
   /**
@@ -235,34 +372,6 @@ class Dashport {
     }
 
     delete this._strategies[stratName];
-  }
-
-  /**
-   * --- Currently in process for configuring for Oak ---
-   * 
-   * Takes in a serialized ID and compares it to the _sId. If they match, allow
-   * permission
-   * 
-   * TODO: Configure for other server frameworks
-   * 
-   * @param {Object} ctx - The Oak context object
-   * @param {string} idToCompare - The ID to compare to _sId
-   * @returns {} 
-   */
-  public getUserInfo(ctx: OakContext, idToCompare: string) {
-    if (ctx.state._dashport === undefined) {
-      throw new Error('ERROR in getUserInfo: Dashport must be initialized')
-    }
-
-    if (ctx.state._dashport.session === undefined) {
-      // There is no session, so person is not logged in, so redirect to login
-    }
-
-    if (idToCompare === this._sId) {
-      // nice go ahead grant access to secret stuff
-    }
-
-    // otherwise you are not the person so go away
   }
 }
 
