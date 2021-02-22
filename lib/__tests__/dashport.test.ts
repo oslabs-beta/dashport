@@ -2,6 +2,49 @@ import { assertEquals, assertThrows } from "https://deno.land/std@0.87.0/testing
 import Dashport from '../dashport.ts';
 import { OakContext } from '../types.ts';
 
+//SERIALIZER TESTS
+Deno.test({
+  name: "addSerializer method should throw an error if exactly 1 parameter is not provided",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    assertThrows(() => oakTestDp.addSerializer('serializer1', () => 1));
+    assertThrows(() => oakTestDp.addSerializer('serializer2', (test: any, testing: any) => 2));
+  }
+})
+
+Deno.test({
+  name: "addSerializer method should throw an error if a name already exists",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    oakTestDp.addSerializer('serializer1', (userInfo: string) => 1);
+    assertThrows(() => oakTestDp.addSerializer('serializer1', (userInfo: string) => 2));
+  }
+})
+
+Deno.test({
+  name: "removeSerializer method should throw an error if a name does not exist",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    oakTestDp.addSerializer('serializer1', (userInfo: string) => 1);
+    assertThrows(() => oakTestDp.removeSerializer('serializer2'));
+  }
+})
+
+Deno.test({
+  name: "removeSerializer method should throw an error if trying to remove a Serializer twice",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    oakTestDp.addSerializer('serializer1', (userInfo: string) => 1);
+    oakTestDp.removeSerializer('serializer1');
+    assertThrows(() => oakTestDp.removeSerializer('serializer1'));
+  }
+})
+
+//DESERIALIZER TESTS
 Deno.test({
   name: "addDeserializer method should throw an error if exactly 1 parameter is not provided",
   fn(): void {
@@ -43,6 +86,54 @@ Deno.test({
   }
 })
 
+//STRATEGY TESTS
+Deno.test({
+  name: "addStrategy method should throw an error if a name already exists",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+    class TestStrat{
+      async router(ctx:any) {
+        return 'test'
+      }
+    }
+
+    oakTestDp.addStrategy('Strategy1', new TestStrat());
+    assertThrows(() => oakTestDp.addStrategy('Strategy1', new TestStrat()));
+  }
+})
+
+Deno.test({
+  name: "removeStrategy method should throw an error if a name does not exist",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+
+    class TestStrat{
+      async router(ctx:any) {
+        return 'test'
+      }
+    }
+
+    oakTestDp.addStrategy('Strategy1', new TestStrat());
+    assertThrows(() => oakTestDp.removeStrategy('Strategy2'));
+  }
+})
+
+Deno.test({
+  name: "removeStrategy method should throw an error if trying to remove a Strategy twice",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+    class TestStrat{
+      async router(ctx:any) {
+        return 'test'
+      }
+    }
+
+    oakTestDp.addStrategy('Strategy1', new TestStrat());
+    oakTestDp.removeStrategy('Strategy1');
+    assertThrows(() => oakTestDp.removeStrategy('Strategy1'));
+  }
+})
+
 Deno.test({
   name: "deserialize \"method\" should store userInfo on ctx.locals if serializedId on session object matches _sId",
   async fn() {
@@ -80,14 +171,7 @@ Deno.test({
   }
 });
 
-/*
-    };
-    const fakeNext = () => 1;
 
-    oakTestDash.addStrategy('testStrat', new TestStrat());
-    assertThrowsAsync(async () => await oakTestDash.authenticate('testStrat')(fakeOakCtx, fakeNext));
-  },
-});
 
 // Deno.test({
 //   name: "If a session object exists on ctx.state._dashport, authenticate method " + 
@@ -152,4 +236,3 @@ Deno.test({
 
 //   },
 // });
-*/

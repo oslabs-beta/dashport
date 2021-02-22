@@ -325,7 +325,7 @@ class Dashport {
    * @param {string} deserializerName - The name of the serializer to remove
    */
   public removeDeserializer(deserializerName: string): void  {
-    if (this._deserializers[deserializerName] === undefined) {
+    if (this._deserializers[deserializerName] === undefined || this._deserializers[deserializerName] === null) {
       throw new Error('ERROR in removeDeserializer: The specified deserializer does not exist.');
     }
 
@@ -354,6 +354,10 @@ class Dashport {
       throw new Error('ERROR in addStrategy: This strategy does not have a \'router\' method.');
     }
 
+    if (this._strategies[stratName] !== undefined) {
+      throw new Error('ERROR in addStrategy: This strategy already exists.');
+    }
+
     this._strategies[stratName] = strategy;
   }
 
@@ -369,6 +373,10 @@ class Dashport {
   public removeStrategy(stratName: string): void {
     if (stratName === undefined) {
       throw new Error('ERROR in removeStrategy: A strategy name must be provided.');
+    }
+
+    if (this._strategies[stratName] === undefined) {
+      throw new Error('ERROR in removeStrategy: The specified strategy does not exist.');
     }
 
     delete this._strategies[stratName];
