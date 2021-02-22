@@ -39,7 +39,7 @@ app.use(router.allowedMethods());
 dashport.addStrategy('github', new GitHubStrategy({
   client_id:'b3e8f06ac81ab03c46ca', 
   client_secret: 'b9cc08bb3318a27a8306e4fa74fc22758d29b3fc', 
-  redirect_uri: 'http://localhost:3000/test', 
+  redirect_uri: 'http://localhost:3000/github', 
   scope: 'read:user',  
 }));
 
@@ -64,6 +64,15 @@ dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 //   }
 // )
 router.get('/test', 
+  dashport.authenticate('github'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
+
+router.get('/github', 
   dashport.authenticate('github'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){

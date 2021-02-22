@@ -69,7 +69,7 @@ export default class GitHubStrategy {
     if(paramString[paramString.length - 1] === '&'){
       paramString = paramString.slice(0, -1);
     }
-    console.log("0.5 paramString:", paramString);
+    // console.log("0.5 paramString:", paramString);
     return paramString;
   }
      
@@ -103,14 +103,14 @@ export default class GitHubStrategy {
   // ENTRY POINT
   async router(ctx: OakContext, next: any) {
     // DEBUGGING: 
-    console.log('0.9 url returned from auth request in ctx.request.url.search:', ctx.request.url.search)
+    // console.log('0.9 url returned from auth request in ctx.request.url.search:', ctx.request.url.search)
     // GO_Step 1 Request Permission
     if(!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 3 Exchange code for Token
     // ?ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
     
     if(ctx.request.url.search.slice(1, 5)=== 'code') {
-      console.log("1.0 line 116 we got the code!");
+      // console.log("1.0 line 116 we got the code!");
       return this.getAuthToken(ctx, next)};
     // if(ctx.request.url.search.slice) -- error
   }
@@ -143,11 +143,11 @@ export default class GitHubStrategy {
     // splits the string at the ampersand(&), storing the string with the access_token in URI2[0] 
     // and the other parameters at URI2[n]
     const URI2: string[] = URI1[1].split('&');
-    // console.log('uri on line 99', URI2[0])
+    // Debug // console.log('uri on line 99', URI2[0])
     // PARSE THE URI
     const code: string = this.parseCode(URI2[0]);
-    console.log("1.5 UR1:", URI1);
-    console.log("1.5 UR2:", URI2);
+    // Debug // console.log("1.5 UR1:", URI1);
+    // Debug // console.log("1.5 UR2:", URI2);
     console.log("1.5 the code is:", code);
     // STEP 3.5
     // ACTION REQUIRED: add or remove the parameters needed to send your token request
@@ -161,8 +161,7 @@ export default class GitHubStrategy {
 
     // SEND A FETCH REQ FOR TOKEN
     try {
-      // DEBUGGING 
-      console.log('2.0 url-sent-to-request-token, tokenOptions are: ', tokenOptions)
+      // console.log('2.0 url-sent-to-request-token, tokenOptions are: ', tokenOptions)
       const options: any = {
         method: 'POST',
         headers: {
@@ -170,22 +169,21 @@ export default class GitHubStrategy {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(tokenOptions
-          // authentication: this.tokenURL+this.constructURI(tokenOptions)
         )
       };
 
       let data: any = await fetch('https://github.com/login/oauth/access_token', options);
-      console.log('2.1 Line 177 Github data status', data.status);
+      // console.log('2.1 Line 177 Github data status', data.status);
       data = await data.json();
       if (data.type === 'oAuthException') return console.log('token request threw oauth exception')
-      console.log('2.1 line178', data);
+      // console.log('2.1 line178', data);
 
       // DEBUGGING 
       if (data.type === 'oAuthException') return console.log('token request threw oauth exception')
       // PASSES TOKEN ON TO STEP 4
       return this.getAuthData(data);
     } catch(err) {
-      console.log('2.3 Line 207 Fetch Req For Token Error MESSAGE : '+ err)
+      // console.log('2.3 Line 207 Fetch Req For Token Error MESSAGE : '+ err)
     }
   }
 
@@ -223,7 +221,6 @@ export default class GitHubStrategy {
       };
       let data: any = await fetch('https://api.github.com/user', authOptions);
       data = await data.json();
-      // DEBIGGING 
       console.log('auth data returned: ', data);
       // ACTION REQUIRED:
         // Add whatever data you requested and want to pass back to dashport.ts here
