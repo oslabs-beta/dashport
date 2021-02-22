@@ -43,6 +43,7 @@ export default class LinkedInStrategy {
         paramString += value;
       }
     }
+
     this.uriFromParams = paramString;
   }
 
@@ -80,7 +81,6 @@ export default class LinkedInStrategy {
     try {
       let data: any = await fetch(`https://www.linkedin.com/oauth/v2/accessToken?grant_type=${this.options.grant_type}&redirect_uri=${this.options.redirect_uri}&client_id=${this.options.client_id}&client_secret=${this.options.client_secret}&code=${code}`)
       data = await data.json();
-      console.log('THIS IS THE DATAAAAAAAAAAA', data)
       return this.getAuthData(data);
     } catch(err) {
       console.log('error: line 141 of scratchGoogle'+ err)
@@ -114,7 +114,7 @@ export default class LinkedInStrategy {
 
       return authData;
     } catch(err) {
-      console.log('getAuthData error on line 153 of scratchGoogle', err);
+      console.log('getAuthData error on line 153 of LinkedIn', err);
     }
   }
 
