@@ -147,12 +147,10 @@ export interface LinkedInOptions{
     redirect_uri: string;
     response_type: string;
     scope: string;
+    grant_type: string;
 }
 
 export interface LinkedInTokenData {
   access_token: string;
   expires_in: number;
-  scope: string;
-  token_type: string;
-  id_token: string;
 }

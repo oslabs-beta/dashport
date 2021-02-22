@@ -49,9 +49,9 @@ dashport.addStrategy('local', new LocalStrategy({
     client_id:'788zz8dnnxjo4s',
     redirect_uri: 'http://localhost:3000/linkedin', 
     response_type: 'code', 
-    scope: 'r_liteprofile%20r_emailaddress',
+    scope: 'r_liteprofile%20r_emailaddress%20w_member_social',
     client_secret: 'FHhQQW3BaNQCFilA',
-    // grant_type: 'authorization_code',
+    grant_type: 'authorization_code',
   }));
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);

@@ -1,4 +1,4 @@
-import FacebookStrategy from '../strategies/Facebook.ts';
+import LinkedInStrategy from '../strategies/Facebook.ts';
 import Dashport from '../dashport.ts'
 import { assertEquals, assertNotEquals } from "https://deno.land/std@0.87.0/testing/asserts.ts"
 
@@ -11,7 +11,7 @@ const options = {
   response_type: 'code', 
   scope: 'email',
 }
-const facebook = new FacebookStrategy(options)
+const facebook = new LinkedInStrategy(options)
 const fakeOakCtx = {
   app: {},
   cookies: {},
