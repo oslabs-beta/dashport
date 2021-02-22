@@ -95,7 +95,7 @@ const NavBar = () => {
             </form>
               <div>
                 <span>
-                    <a href="/test">
+                    <a href="/google">
                       <img id='googleIcon'
                         src="https://imgur.com/RYSAZ5u.png"
                       ></img>
