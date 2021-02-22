@@ -111,6 +111,15 @@ const NavBar = () => {
                     </a>
                 </span>
               </div>
+              <div>
+                <span>
+                    <a href="/spotify">
+                      <img id='spotifyIcon'
+                        src="https://imgur.com/tyzNIXw.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
               
             </div>
           )}
