@@ -2,7 +2,7 @@ import { Application, send, join } from './deps.ts'
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
-import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
+import SpotifyStrategy from '../lib/strategies/Spotify.ts'
 
 const port = 3000;
 const app: Application = new Application();
@@ -23,19 +23,21 @@ app.use(dashport.initialize);
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-dashport.addStrategy('google', new GoogleStrat({
-  client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
-  redirect_uri: 'http://localhost:3000/test', 
+const options = {
+  client_id:'646f25f80fc84e0e993f8216bdeee1ae',
   response_type: 'code', 
-  scope: 'profile email openid',
-  client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
-  grant_type: 'authorization_code',
-}));
+  redirect_uri: 'http://localhost:3000/test', 
+  scope: 'user-read-email user-read-private',
+  state: '2021',
+  client_secret: '7e142bb9057d406fbcdaf48bebc10808',
+}
+
+dashport.addStrategy('spotify', new SpotifyStrategy(options));
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/test', 
-  dashport.authenticate('google'),
+  dashport.authenticate('spotify'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
       ctx.response.redirect('/protected');
