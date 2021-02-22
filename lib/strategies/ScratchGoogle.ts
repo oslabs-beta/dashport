@@ -176,3 +176,66 @@ export default class GoogleStrategy {
     return encodedCode; 
   }
 }
+<<<<<<< HEAD
+    /**
+     *  exchange autorization code for refresh and access tokens (step 5)
+     * To exchange an authorization code for an access token, 
+     * call the https://oauth2.googleapis.com/token endpoint and set the following parameters:
+        * client_id
+        * client_secret
+        * code
+        * grant_type
+        * redirect_uri
+        * client_id.
+     * SAMPLE REQ: 
+     *    POST /token HTTP/1.1
+          Host: oauth2.googleapis.com
+          Content-Type: application/x-www-form-urlencoded
+
+          code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7&
+          client_id=your_client_id&
+          client_secret=your_client_secret&
+          redirect_uri=https%3A//oauth2.example.com/code&
+          grant_type=authorization_code
+     * 
+     * Google responds to this request by returning a JSON object 
+     * that contains a short-lived access token and a refresh token. 
+     * Note that the refresh token is only returned if your application set the access_type parameter to offline
+     * the response contains the following fields: 
+     * access_token
+     * expires_in
+     * refresh_token
+     * scope
+     * token_type
+     * sample: 
+     * {
+          "access_token": "1/fFAGRNJru1FTz70BzhT3Zg",
+          "expires_in": 3920,
+          "token_type": "Bearer",
+          "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
+          "refresh_token": "1//xEoDL4iW3cxlI7yDbSRFYNG01kVKM2C-259HOF2aQbI"
+        }
+    */
+
+
+///redirect to 
+/*https://accounts.google.com/o/oauth2/v2/auth?
+  scope=https%3A//www.googleapis.com/auth/drive.metadata.readonly&
+  access_type=offline&
+  include_granted_scopes=true&
+  response_type=code&
+  state=state_parameter_passthrough_value&
+  redirect_uri=https%3A//oauth2.example.com/code&
+  client_id=client_id
+*/
+
+//with options 
+
+// then returns with callback url with added token data
+//${RedirectURI}#access_token=4/P7q7W91&token_type=Bearer&expires_in=3600
+/*  access_token:string: 4/P7q7W91 
+    token_type:string: 'Bearer'
+    expires_in:number: 3600    
+*/
+=======
+>>>>>>> 60873ecc2e78ac5cb467641d8b4e29ec8053feef

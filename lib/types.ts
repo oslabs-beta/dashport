@@ -107,6 +107,15 @@ export interface TemplateOptions {
   redirect_uri: string;
 }
 
+export interface SpotifyOptions {
+  client_id: string;
+  response_type: string;
+  redirect_uri: string;
+  state: string;
+  scope: string;
+  client_secret: string;
+}
+
 export interface TokenData {
   access_token: string;
   expires_in: number;
@@ -126,8 +135,21 @@ export interface FBTokenData {
   expires_in: string;
 } 
 
+export interface SpotifyTokenData {
+  access_token: string;
+  token_type: string;
+  scope: string;
+  expires_in: string;
+  refresh_token: string;
+} 
+
 export interface FBAuthData {
   tokenData: FBTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface SpotifyAuthData {
+  tokenData: SpotifyTokenData;
   userInfo?: UserProfile;
 }
 

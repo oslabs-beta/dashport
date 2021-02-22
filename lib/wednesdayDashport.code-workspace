@@ -2,6 +2,18 @@
   "folders": [
     {
       "path": ".."
+<<<<<<< HEAD
+=======
+    },
+    {
+      "path": "../../../junior/assessments/app-assessment-mod-1"
+    },
+    {
+      "path": "../../../junior/assessments/take-2"
+    },
+    {
+      "path": "../../../junior/hack-hour-ny-23"
+>>>>>>> spotify
     }
   ]
 }

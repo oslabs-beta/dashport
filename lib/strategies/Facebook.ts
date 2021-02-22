@@ -50,7 +50,7 @@ export default class FacebookStrategy {
     this.options = options;
     this.authURL = 'https://www.facebook.com/v9.0/dialog/oauth?'
     this.tokenURL = 'https://graph.facebook.com/v9.0/oauth/access_token?'
-    this.authDataURL ='https://graph.facebook.com/debug_token?'
+    this.authDataURL = 'https://graph.facebook.com/debug_token?'
 
     // preStep1 request permission 
     // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
