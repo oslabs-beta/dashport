@@ -3,8 +3,10 @@ import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts'
 import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
+import GitHubStrategy from '../lib/strategies/Github.ts'
 import LocalStrategy from '../lib/strategies/localstrategy.ts';
 import pgclient from './models/userModel.ts'
+import SpotifyStrategy from '../lib/strategies/Spotify.ts'
 
 const port = 3000;
 const app: Application = new Application();
@@ -12,6 +14,7 @@ const dashport = new Dashport('oak');
 
 // Error handling
 app.use(async (ctx: any, next: any) => {
+  debugger;
   try{
     await next();
   } catch (error) {
@@ -27,11 +30,27 @@ app.use(router.allowedMethods());
 
 dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
-  redirect_uri: 'http://localhost:3000/test', 
+  redirect_uri: 'http://localhost:3000/google', 
   response_type: 'code', 
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
   grant_type: 'authorization_code',
+}));
+
+dashport.addStrategy('github', new GitHubStrategy({
+  client_id:'b3e8f06ac81ab03c46ca', 
+  client_secret: 'b9cc08bb3318a27a8306e4fa74fc22758d29b3fc', 
+  redirect_uri: 'http://localhost:3000/github', 
+  scope: 'read:user',  
+}));
+
+dashport.addStrategy('spotify', new SpotifyStrategy({
+  client_id:'646f25f80fc84e0e993f8216bdeee1ae',
+  response_type: 'code', 
+  redirect_uri: 'http://localhost:3000/spotify', 
+  scope: 'user-read-email user-read-private',
+  state: '2021',
+  client_secret: '7e142bb9057d406fbcdaf48bebc10808',
 }));
 
 dashport.addStrategy('local', new LocalStrategy({
@@ -46,8 +65,35 @@ dashport.addStrategy('local', new LocalStrategy({
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
-router.get('/test', 
+// router.get('/test', 
+//   dashport.authenticate('google'),
+//   (ctx: any, next: any) => {
+//     if(ctx.state._dashport.session){
+//       ctx.response.redirect('/protected');
+//     }
+//   }
+// )
+
+router.get('/google', 
   dashport.authenticate('google'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
+
+router.get('/spotify', 
+  dashport.authenticate('spotify'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
+
+router.get('/github', 
+  dashport.authenticate('github'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
       ctx.response.redirect('/protected');
