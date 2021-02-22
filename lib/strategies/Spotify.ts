@@ -4,7 +4,6 @@ import { Base64 } from '../../deps.ts';
 /**
  * Creates an instance of `SpotifyStrategy`.
  * 
- *
  * * Options:
  *
  *   -  client_id: string;
@@ -141,28 +140,28 @@ export default class SpotifyStrategy {
 
     // STEP 3.5
     // ACTION REQUIRED: add or remove the parameters needed to send your token request
+    const bodyOptions = {
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: this.options.redirect_uri
+    }
     const b64 = Base64.fromString(this.options.client_id + ':' + this.options.client_secret).toString();
     const tokenOptions: any = {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${b64}`,
-        "Content-Type": "application/x-www-form-urlencoded"
+        'Authorization': `Basic ${b64}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: this.options.redirect_uri,
-        // client_id: this.options.client_id,
-        // client_secret: this.options.client_secret
-      })
+      body: this.constructURI(bodyOptions)
     }
 
     // SEND A FETCH REQ FOR TOKEN
     try {
-      // DEBUGGING console.log('url sent to request token', this.tokenURL+this.constructURI(tokenOptions))
+      // DEBUGGING 
+      console.log('url sent to request token', this.tokenURL + tokenOptions.headers + tokenOptions.body)
       let data: any = await fetch(this.tokenURL, tokenOptions);
       console.log('data1: ', data)
-      data = await data.text();
+      data = await data.json();
       console.log('data2: ', data)
       // DEBUGGING console.log('returned token obj', data);
       if (data.type === 'oAuthException') return console.log('token request threw oauth exception')
@@ -209,7 +208,7 @@ export default class SpotifyStrategy {
       // ACTION REQUIRED:
         // Add whatever data you requested and want to pass back to dashport.ts here
       authData.userInfo = {
-        providerUserId: data.data.user_id
+        providerUserId: data.id
       };
 
       return authData;
