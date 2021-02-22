@@ -99,7 +99,6 @@ export interface FacebookOptions {
   state?: string;
   client_secret: string;
   response_type?: string;
-  scope: string;
 }
 
 /**

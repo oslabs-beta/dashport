@@ -32,7 +32,7 @@ app.use(router.allowedMethods());
 
 dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
-  redirect_uri: 'http://localhost:3000/googl', 
+  redirect_uri: 'http://localhost:3000/google', 
   response_type: 'code', 
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
@@ -43,8 +43,7 @@ dashport.addStrategy('facebook', new FacebookStrategy({
   client_id: '176079343994638', 
   client_secret: 'ed0e2c29eae5394c332a83129a52ff59', 
   redirect_uri: 'http://localhost:3000/facebook', 
-  state: '12345', 
-  scope: 'read:user', 
+  state: '12345'
 }));
 
 dashport.addStrategy('github', new GitHubStrategy({

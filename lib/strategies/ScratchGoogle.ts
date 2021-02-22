@@ -61,7 +61,7 @@ export default class GoogleStrategy {
   async getAuthToken(ctx:any, next:Function){
     const OGURI: string = ctx.request.url.search;
     if(OGURI.includes('error')){
-      console.log('broke the code again');
+      return new Error('Error in getting an auth token.');
     }
 
     let URI1: string[] = OGURI.split('=');
@@ -82,10 +82,9 @@ export default class GoogleStrategy {
     try {
       let data: any = await fetch('https://oauth2.googleapis.com/token', options)
       data = await data.json();
-      console.log('THIS IS THE DATAAAAAAAAAAA', data)
       return this.getAuthData(data);
     } catch(err) {
-      console.log('error: line 141 of scratchGoogle'+ err)
+      return err;
     }
   }
 
@@ -119,7 +118,7 @@ export default class GoogleStrategy {
 
       return authData;
     } catch(err) {
-      console.log('getAuthData error on line 153 of scratchGoogle', err);
+      return err;
     }
   }
 
