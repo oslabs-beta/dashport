@@ -129,7 +129,7 @@ class Dashport {
         if (authData !== undefined) {
           // serializedId will be obtained by calling SessionManager's serialize
           // function, which will invoke the serializer(s) the developer specified
-          const serializedId: string = self._sm.serialize(self._serializers, authData.userInfo);
+          const serializedId: number = self._sm.serialize(self._serializers, authData.userInfo);
 
           // use SessionManager's logIn method to create a session object on
           // ctx.state._dashport and to assign serializedId to the _sId property

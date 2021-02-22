@@ -67,7 +67,8 @@ router.post('/signup',
   async (ctx:any, next: any)=>{ 
     let userInfo:any = await ctx.request.body(true).value;
     console.log(userInfo);
-    pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`)
+    await pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`);
+    return next();
   }, 
   dashport.authenticate('local'),
   (ctx: any, next: any) => {
