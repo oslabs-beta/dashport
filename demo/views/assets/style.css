@@ -35,7 +35,7 @@ button:hover {
 #googleIcon {
   width: 200px;
   position: relative;
-  border: solid 2px #d3d3d3;
+  border: solid 1px #d3d3d3;
   transition-duration: 0.2s;
   border-radius: 10px;
   left: 1rem;
@@ -45,16 +45,55 @@ button:hover {
   border-color: #555555;
 }
 
+#facebookIcon {
+  width: 200px;
+  position: relative;
+  border: solid 1px #d3d3d3;
+  transition-duration: 0.2s;
+  border-radius: 10px;
+  left: 1rem;
+  margin-top: 1rem;
+}
+#facebookIcon:hover {
+  border-color: #555555;
+}
+
 #githubIcon {
   width: 200px;
   position: relative;
-  border: solid 2px #d3d3d3;
+  border: solid 1px #d3d3d3;
   transition-duration: 0.2s;
   border-radius: 10px;
   left: 1rem;
   margin-top: 1rem;
 }
 #githubIcon:hover {
+  border-color: #555555;
+}
+
+#spotifyIcon {
+  width: 200px;
+  position: relative;
+  border: solid 1px #d3d3d3;
+  transition-duration: 0.2s;
+  border-radius: 10px;
+  left: 1rem;
+  margin-top: 1rem;
+}
+#spotifyIcon:hover {
+  border-color: #555555;
+}
+
+#linkedinIcon {
+  width: 200px;
+  position: relative;
+  border: solid 1px #d3d3d3;
+  transition-duration: 0.2s;
+  border-radius: 10px;
+  left: 1rem;
+  margin-top: 1rem;
+}
+#linkedinIcon:hover {
   border-color: #555555;
 }
 
