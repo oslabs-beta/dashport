@@ -208,7 +208,8 @@ export default class SpotifyStrategy {
       // ACTION REQUIRED:
         // Add whatever data you requested and want to pass back to dashport.ts here
       authData.userInfo = {
-        providerUserId: data.id
+        provider: this.name,
+        providerUserId: data.id,
       };
 
       return authData;
