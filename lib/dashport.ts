@@ -125,7 +125,7 @@ class Dashport {
         // call the requested strategy's 'router' method. authData must contain
         // a userInfo property in the form of UserProfile
         const authData: any = await self._strategies[stratName].router(ctx, next);
-        console.log('authData on line 118 of dashport', authData)
+        console.log('dashport.ts_128: authData :', authData)
 
         if (authData !== undefined) {
           // serializedId will be obtained by calling SessionManager's serialize
@@ -136,7 +136,8 @@ class Dashport {
 
           // if serializedId is an Error, throw it to be caught
           if (serializedId instanceof Error) throw serializedId;
-          if (typeof serializedId !== 'string') {
+          if (typeof serializedId !== 'string' && typeof serializedId !== 'number') {
+            console.log('type of serializedId: ', typeof serializedId);
             throw new Error('ERROR in authenticate: serializedId returned from serializer must be a string or an Error.')
           }
 
@@ -148,7 +149,7 @@ class Dashport {
           return await next();
         }
         else {
-          console.log('we didn\'t get authData back (dash 133)')
+          console.log('dashport.ts_133: !we didn\'t get authData back')
         }
       }
     }
