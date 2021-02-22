@@ -30,7 +30,7 @@ app.use(router.allowedMethods());
 
 dashport.addStrategy('google', new GoogleStrat({
   client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
-  redirect_uri: 'http://localhost:3000/test', 
+  redirect_uri: 'http://localhost:3000/google', 
   response_type: 'code', 
   scope: 'profile email openid',
   client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
@@ -47,7 +47,7 @@ dashport.addStrategy('github', new GitHubStrategy({
 dashport.addStrategy('spotify', new SpotifyStrategy({
   client_id:'646f25f80fc84e0e993f8216bdeee1ae',
   response_type: 'code', 
-  redirect_uri: 'http://localhost:3000/test', 
+  redirect_uri: 'http://localhost:3000/spotify', 
   scope: 'user-read-email user-read-private',
   state: '2021',
   client_secret: '7e142bb9057d406fbcdaf48bebc10808',
@@ -74,7 +74,16 @@ dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 //   }
 // )
 
-router.get('/test', 
+router.get('/google', 
+  dashport.authenticate('google'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
+
+router.get('/spotify', 
   dashport.authenticate('spotify'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
@@ -104,7 +113,8 @@ router.post('/signup',
   async (ctx:any, next: any)=>{ 
     let userInfo:any = await ctx.request.body(true).value;
     console.log(userInfo);
-    pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`)
+    await pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`);
+    return next();
   }, 
   dashport.authenticate('local'),
   (ctx: any, next: any) => {

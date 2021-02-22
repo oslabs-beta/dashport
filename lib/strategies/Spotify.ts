@@ -15,7 +15,7 @@ import { Base64 } from '../../deps.ts';
  *
  */
 export default class SpotifyStrategy {
-  name: string = ''
+  name: string = 'spotify'
   options: SpotifyOptions;
   uriFromParams: string;
   authURL: string;

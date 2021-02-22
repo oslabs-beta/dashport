@@ -63,9 +63,9 @@ export default class GoogleStrategy {
       if (i < paramArray.length - 1) paramString += (value + '&');
       else paramString += value;
     }
-      if(paramString[paramString.length - 1] === '&'){
-      paramString = paramString.slice(0, -1);
-    }
+//       if(paramString[paramString.length - 1] === '&'){
+//       paramString = paramString.slice(0, -1);
+//     }
 
     this.uriFromParams = paramString;
   }
@@ -90,7 +90,6 @@ export default class GoogleStrategy {
       // do error handling
       console.log('broke the code again');
     }
-
     // splits the string at the =, storing the first part in URI1[0] and the part we want in URI1[1]
     let URI1: string[] = OGURI.split('=');
     // splits the string at the ampersand(&), storing the string with the access_token in URI2[0] 
@@ -100,7 +99,7 @@ export default class GoogleStrategy {
 
     const options: any = {
       method: 'POST',
-      headers: { 'content-type': "application/x-www-form-urlencoded" },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         client_id: this.options.client_id,
         client_secret: this.options.client_secret,
@@ -109,7 +108,6 @@ export default class GoogleStrategy {
         redirect_uri: this.options.redirect_uri
       })
     }
-
     try {
       let data: any = await fetch('https://oauth2.googleapis.com/token', options);
       data = await data.json();
@@ -132,7 +130,6 @@ export default class GoogleStrategy {
     const options: any = {
       headers: { 'Authorization': 'Bearer '+ parsed.access_token }
     };
-
     try {
       let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', options);
       data = await data.json();
