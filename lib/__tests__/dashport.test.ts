@@ -171,6 +171,20 @@ Deno.test({
   }
 });
 
+Deno.test({
+  name: "Authenticate method should throw an error if the strategy name does not exist.",
+  fn(): void {
+    const oakTestDp = new Dashport('oak');
+    class TestStrat{
+      async router(ctx:any) {
+        return 'test'
+      }
+    }
+
+    oakTestDp.addStrategy('Strategy1', new TestStrat());
+    assertThrows(() => oakTestDp.authenticate('Strategy2')); 
+  },
+});
 
 
 // Deno.test({
@@ -196,39 +210,8 @@ Deno.test({
 //   },
 // });
 
-// Deno.test({
-//   name: "addSerializer method should .....",
-//   fn(): void {
-
-//   },
-// });
-
-// Deno.test({
-//   name: "removeSerializer method should .....",
-//   fn(): void {
-
-//   },
-// });
 
 
-// Deno.test({
-//   name: "addStrategy method should .....",
-//   fn(): void {
-//     const oakTestDash = new Dashport('oak');
-//     const fakeStrat = new TestStrat();
-
-//     assertEquals(oakTestDash[_strategies], {});
-//     oakTestDash.addStrategy('test', fakeStrat);
-//     assertEquals(oakTestDash[_strategies], { test: fakeStrat });
-//   },
-// });
-
-// Deno.test({
-//   name: "removeStrategy method should .....",
-//   fn(): void {
-
-//   },
-// });
 
 // Deno.test({
 //   name: "getUserInfo method should .....",
