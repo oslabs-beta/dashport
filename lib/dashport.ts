@@ -19,6 +19,7 @@ class Dashport {
   public logOut: Function;
 
   constructor(frmwrk: string) {
+    frmwrk = frmwrk.toLowerCase();
     this._framework = frmwrk;
     this._sm = new SessionManager(frmwrk);
     this.logOut = this._sm.logOut;
@@ -86,7 +87,7 @@ class Dashport {
    *   );
    * 
    * TODO: Add optional parameter for options in case developers want to have
-   *   different strategy options for a particular route
+   *   different strategy options for a particular route.
    * 
    * @param {string} stratName - The name of a strategy that was added
    * @returns {Function} The middleware function (differs depending on server framework)
@@ -128,8 +129,16 @@ class Dashport {
 
         if (authData !== undefined) {
           // serializedId will be obtained by calling SessionManager's serialize
-          // function, which will invoke the serializer(s) the developer specified
-          const serializedId: string = self._sm.serialize(self._serializers, authData.userInfo);
+          // function, which will invoke the serializer(s) the developer specified.
+          // serializedId is type 'any' because lefthand side of instanceof must
+          // be type 'any'
+          const serializedId: any = self._sm.serialize(self._serializers, authData.userInfo);
+
+          // if serializedId is an Error, throw it to be caught
+          if (serializedId instanceof Error) throw serializedId;
+          if (typeof serializedId !== 'string') {
+            throw new Error('ERROR in authenticate: serializedId returned from serializer must be a string or an Error.')
+          }
 
           // use SessionManager's logIn method to create a session object on
           // ctx.state._dashport and to assign serializedId to the _sId property
@@ -149,28 +158,28 @@ class Dashport {
 
   /**
    * Takes in a name for a serializer function and the serializer function the 
-   * developer specifies. Serializer function needs to do 4 things below
+   * developer specifies. Serializer function needs to do 4 things below:
    * 
    * 1. The serializer function needs to take in one parameter which will be the
    * user data in the form of an object.
    * 2. The serializer function needs to specify what the developer wants to do
    * with the user data (store it somewhere, add some info to response body, 
    * etc).
-   * 3. The serializer function needs to specify how to create a serialized ID.
-   * 4. The serializer function needs to return the serialized ID.
+   * 3. The serializer function should to specify how to create a serialized ID.
+   * 4. The serializer function should return the serialized ID or an error.
    * 
    * EXAMPLE
    * 
    *   dashport.addSerializer('1', (userInfo) => { 
-   *     function getSerializedId () {
-   *       return Math.random() * 10000;
+   *     const serializedId = Math.random() * 10000;
+   * 
+   *     try {
+   *       // do something with userInfo like store in a database
+   *       return serializedId;
+   *     } catch(err) {
+   *       // err should be an instance of 'Error'
+   *       return err;
    *     }
-   * 
-   *     const serializedId = getSerializedId();
-   * 
-   *     // do something with userInfo like store in a database
-   * 
-   *     return serializedId;
    *   });
    * 
    * @param {string} serializerName - A name to give the serializer if it needs
@@ -213,12 +222,12 @@ class Dashport {
 
   /**
    * Takes in a framework and returns a function that will become dashport's
-   * deserialize method. _deserializeDecider runs inside the constructor of a new
-   * Dashport instance.
+   * deserialize method. _deserializeDecider runs inside the constructor of a
+   * new Dashport instance.
    * 
    * dashport.deserialize will act as middleware and invoke the specified
    * deserializer(s) if the serialized ID on the session object matches the
-   * serialized ID on the current instance of Dashport
+   * serialized ID on the current instance of Dashport.
    * 
    * EXAMPLE: Using Oak as server framework
    * 
@@ -239,7 +248,7 @@ class Dashport {
    * 
    * TODO: Current deserialize method for Oak uses the first deserializer in
    * _deserializers. Extend code to take in an extra parameter (a name) that 
-   * specifies which deserializer to use
+   * specifies which deserializer to use.
    * 
    * @param {string} framework - The server framework that will be used
    * @returns {*} The async function that will be dashport's deserialize method
@@ -277,14 +286,14 @@ class Dashport {
 
 /**
    * Takes in a name for a deserializer function and the deserializer function
-   * the developer specifies. Deserializer function needs to do 3 things below
+   * the developer specifies. Deserializer function needs to do 3 things below:
    * 
    * 1. The deserializer function needs to take in one parameter which will be
-   * the serialized ID
+   * the serialized ID.
    * 2. The deserializer function needs to specify what the developer wants to
    * do with the serialized ID to obtain user info (e.g. fetch the userData from
-   * a database)
-   * 3. The deserializer function needs to return the user info or an Error
+   * a database).
+   * 3. The deserializer function needs to return the user info or an Error.
    * 
    * EXAMPLE
    * 
