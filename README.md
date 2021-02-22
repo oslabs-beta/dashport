@@ -2,7 +2,7 @@
   <img src="https://i.imgur.com/3FndGDl.png" alt="Dashport logo"/>
 </p>
 
-<h2 style="text-align: center; font-style: italic;">Authentication middleware for Deno</h2>
+<p style="text-align: center; font-style: italic;">Authentication middleware for Deno</p>
 
 # Features
 - A Dashport class that handles authentication and serialization.
@@ -39,7 +39,7 @@ dashport.addSerializer('serializer-1', (userInfo) => {
   userInfo.id = serializedId;
 
   try {
-    const fakeUser = await fakeDbCreateUpsert(userInfo);
+    const exampleUser = await exampleDbCreateUpsert(userInfo);
     return serializedId;
   } catch(err) {
     return err;
@@ -49,7 +49,7 @@ dashport.addSerializer('serializer-1', (userInfo) => {
 
 dashport.addDeserializer('deserializer-1', (serializedId) => {
   try {
-    const fakeUserInfo = await fakeDbFind({ id: serializedId });
+    const exampleUserInfo = await exampleDbFind({ id: serializedId });
     return userInfo;
   } catch(err) {
     return err;
