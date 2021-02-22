@@ -170,7 +170,7 @@ app.use(async (ctx: any) => {
 
 // listening on port
 app.addEventListener('listen', () => { console.log(`Server live on port ${port}`) });
-await app.listen({ port });
+app.listen({ port });
 
 // denon run --allow-all --unstable demo/server.tsx
 // deno install -qAf --unstable https://deno.land/x/denon/denon.ts
