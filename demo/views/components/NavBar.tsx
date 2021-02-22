@@ -94,23 +94,50 @@ const NavBar = () => {
               <button type='button' onClick={localSignUp} id='signIn'>Sign Up</button>
             </form>
               <div>
-                  <span>
-                      <a href="/test">
-                        <img className='signinIcons'
-                          src="https://i.imgur.com/PHJ6j1E.png"
-                        ></img>
-                      </a>
-                  </span>
-                </div>
-                <div>
-                  <span>
-                      <a href="/linkedin">
-                        <img className='signinIcons'
-                          src="https://i.imgur.com/A3cF63u.png"
-                        ></img>
-                      </a>
-                  </span>
-                </div>
+                <span>
+                    <a href="/google">
+                      <img id='googleIcon'
+                        src="https://imgur.com/RYSAZ5u.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
+              <div>
+                <span>
+                    <a href="/facebook">
+                      <img id='facebookIcon'
+                        src="https://imgur.com/op8yWLb.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
+              <div>
+                <span>
+                    <a href="/github">
+                      <img id='githubIcon'
+                        src="https://imgur.com/aMAH3BW.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
+              <div>
+                <span>
+                    <a href="/spotify">
+                      <img id='spotifyIcon'
+                        src="https://imgur.com/tyzNIXw.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
+              <div>
+                <span>
+                    <a href="/linkedin">
+                      <img id='linkedinIcon'
+                        src="https://imgur.com/9qcbtcv.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
             </div>
           )}
       </div>

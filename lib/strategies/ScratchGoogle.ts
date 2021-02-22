@@ -43,6 +43,7 @@ export default class GoogleStrategy {
         paramString += value;
       }
     }
+
     this.uriFromParams = paramString;
   }
 
@@ -62,12 +63,13 @@ export default class GoogleStrategy {
     if(OGURI.includes('error')){
       console.log('broke the code again');
     }
+
     let URI1: string[] = OGURI.split('=');
     const URI2: string[] = URI1[1].split('&');
     const code: string = this.parseCode(URI2[0]);
     const options:object = {
       method: 'POST',
-      headers: { "content_type": "application/x-www-form-urlencoded"},
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         client_id: this.options.client_id,
         client_secret: this.options.client_secret,
@@ -75,7 +77,7 @@ export default class GoogleStrategy {
         grant_type: this.options.grant_type,
         redirect_uri: this.options.redirect_uri
       })
-    } 
+    }
 
     try {
       let data: any = await fetch('https://oauth2.googleapis.com/token', options)
@@ -86,7 +88,6 @@ export default class GoogleStrategy {
       console.log('error: line 141 of scratchGoogle'+ err)
     }
   }
-
 
   async getAuthData(parsed: any){ 
     const authData: AuthData = { 
@@ -101,7 +102,6 @@ export default class GoogleStrategy {
     const options: any = {
       headers: { 'Authorization': 'Bearer '+ parsed.access_token }
     };
-
     try {
       let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', options);
       data = await data.json();
