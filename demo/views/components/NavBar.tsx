@@ -104,6 +104,15 @@ const NavBar = () => {
               </div>
               <div>
                 <span>
+                    <a href="/facebook">
+                      <img id='facebookIcon'
+                        src="https://imgur.com/op8yWLb.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
+              <div>
+                <span>
                     <a href="/github">
                       <img id='githubIcon'
                         src="https://imgur.com/aMAH3BW.png"
@@ -116,6 +125,15 @@ const NavBar = () => {
                     <a href="/spotify">
                       <img id='spotifyIcon'
                         src="https://imgur.com/tyzNIXw.png"
+                      ></img>
+                    </a>
+                </span>
+              </div>
+              <div>
+                <span>
+                    <a href="/linkedin">
+                      <img id='linkedinIcon'
+                        src="https://imgur.com/9qcbtcv.png"
                       ></img>
                     </a>
                 </span>
