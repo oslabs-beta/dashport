@@ -1,9 +1,9 @@
-import { OakContext, GoogOptions, AuthData } from '../types.ts';
+import { OakContext, LinkedInOptions, LinkedInAuthData } from '../types.ts';
 /**
  * 788zz8dnnxjo4s
  * FHhQQW3BaNQCFilA
  * 
- * Creates an instance of `GoogleStrategy`.
+ * Creates an instance of `LinkedInStrategy`.
  * 
  *
  * * Options:
@@ -13,16 +13,16 @@ import { OakContext, GoogOptions, AuthData } from '../types.ts';
  *   - redirect_uri: string               Required
  *
  */
-export default class GoogleStrategy {
-  name: string = 'google'
-  options: GoogOptions;
+export default class LinkedInStrategy {
+  name: string = 'linkedIn'
+  options: LinkedInOptions;
   uriFromParams:string;
   /**
    * @constructor
    * @param {Object} options
    * @api public
    */
-  constructor (options: GoogOptions) {
+  constructor (options: LinkedInOptions) {
     if(!options.client_id || !options.redirect_uri || !options.response_type || !options.scope || !options.client_secret){
       throw new Error('Missing required arguments');
     }
@@ -43,7 +43,7 @@ export default class GoogleStrategy {
         paramString += value;
       }
     }
-    
+
     this.uriFromParams = paramString;
   }
 
@@ -52,73 +52,69 @@ export default class GoogleStrategy {
     if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
   }
 
-
   async authorize(ctx: OakContext, next: any) {
-    console.log('in GoogleStrategy.authorize');
-    return await ctx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + this.uriFromParams);                   
+    return await ctx.response.redirect('https://www.linkedin.com/oauth/v2/authorization?' + this.uriFromParams);                   
   }
 
   async getAuthToken(ctx:any, next:Function){
     const OGURI: string = ctx.request.url.search;
     if(OGURI.includes('error')){
-      return new Error('Error in getting an auth token.');
+      console.log('broke the code again');
     }
 
     let URI1: string[] = OGURI.split('=');
+
     const URI2: string[] = URI1[1].split('&');
     const code: string = this.parseCode(URI2[0]);
     const options:object = {
       method: 'POST',
-      headers: { "content-type": "application/json" },
+      headers: { "Content-Type": "x-www-form-urlencoded"},
       body: JSON.stringify({
+        grant_type: this.options.grant_type,
         client_id: this.options.client_id,
         client_secret: this.options.client_secret,
         code: code,
-        grant_type: this.options.grant_type,
         redirect_uri: this.options.redirect_uri
       })
-    }
+    } 
 
     try {
-      let data: any = await fetch('https://oauth2.googleapis.com/token', options)
+      let data: any = await fetch(`https://www.linkedin.com/oauth/v2/accessToken?grant_type=${this.options.grant_type}&redirect_uri=${this.options.redirect_uri}&client_id=${this.options.client_id}&client_secret=${this.options.client_secret}&code=${code}`)
       data = await data.json();
       return this.getAuthData(data);
     } catch(err) {
-      return err;
+      console.log('error: line 141 of scratchGoogle'+ err)
     }
   }
 
+
   async getAuthData(parsed: any){ 
-    const authData: AuthData = { 
+    const authData: LinkedInAuthData = { 
       tokenData: {
         access_token: parsed.access_token,
         expires_in: parsed.expires_in,
-        scope: parsed.scope,
-        token_type: parsed.token_type,
-        id_token: parsed.id_token
       }
     };
     const options: any = {
       headers: { 'Authorization': 'Bearer '+ parsed.access_token }
     };
+
     try {
-      let data: any = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', options);
+      let data: any = await fetch(`https://api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))&oauth2_access_token=${parsed.access_token}`);
+      let emailData: any = await fetch(`https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))&oauth2_access_token=${parsed.access_token}`)
       data = await data.json();
+      emailData = await emailData.json()
 
       authData.userInfo = {
-        provider: 'google',
+        provider: 'linkedin',
         providerUserId: data.id,
-        displayName: data.name,
-        name: {
-          familyName: data.family_name,
-          givenName: data.given_name,
-        },
-        emails: [data.email]
+        displayName: data.firstName.localized.en_US + ' ' + data.lastName.localized.en_US,
+        emails: [emailData.elements[0]['handle~'].emailAddress]
       };
 
       return authData;
     } catch(err) {
-      return err;
+      console.log('getAuthData error on line 153 of LinkedIn', err);
     }
   }
 

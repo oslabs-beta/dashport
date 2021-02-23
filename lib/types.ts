@@ -50,7 +50,7 @@ export interface Translators {
 /**
  * All Dashport strategies are classes that must contain a router method
  */
-interface Strategy {
+export interface Strategy {
   router: Function;
 }
 
@@ -99,7 +99,6 @@ export interface FacebookOptions {
   client_secret: string;
   state?: string;
   response_type?: string;
-  scope?: string;
 }
 
 /**
@@ -188,4 +187,22 @@ export interface AppOptions {
   client_id: string;
   client_secret: string;
   grant_type: string;
+}
+export interface LinkedInAuthData{
+  tokenData: LinkedInTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface LinkedInOptions{
+    client_id: string;
+    client_secret: string;
+    redirect_uri: string;
+    response_type: string;
+    scope: string;
+    grant_type: string;
+}
+
+export interface LinkedInTokenData {
+  access_token: string;
+  expires_in: number;
 }

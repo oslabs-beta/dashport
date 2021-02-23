@@ -1,5 +1,4 @@
 import GoogleStrategy from '../strategies/ScratchGoogle.ts';
-import Dashport from '../dashport.ts'
 import { assertEquals, assertNotEquals } from "https://deno.land/std@0.87.0/testing/asserts.ts"
 
 const fakeOptions = {
@@ -53,6 +52,8 @@ Deno.test({
 Deno.test({
   name: "goog.authorize, should redirect to Google for client authorization",
   async fn(): Promise<any>{
+    const goog = new GoogleStrategy(fakeOptions);
+
     assertEquals(await goog.authorize(fakeOakCtx, fakeNext), fakeOakCtx.response.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + goog.uriFromParams));
   }
 });
