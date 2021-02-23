@@ -1,13 +1,16 @@
 import { Application, send, join } from './deps.ts'
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
+import {googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets} from './demoSecrets.ts'
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts';
-import GoogleStrat from '../../strategyMods/google/googleStrategy.ts';
-import FacebookStrategy from '../../strategyMods/facebook/Facebook.ts';
-import GitHubStrategy from '../../strategyMods/github/githubStrategy.ts';
-import LocalStrategy from '../../strategyMods/localauth/localStrategy.ts';
+import GoogleStrat from '../../strategyMods/dashport-googlestrategy/googleStrategy.ts';
+import FacebookStrategy from '../../strategyMods/dashport-facebookstrategy/facebookStrategy.ts';
+import GitHubStrategy from '../../strategyMods/dashport-githubstrategy/githubStrategy.ts';
+import LocalStrategy from '../../strategyMods/dashport-localauthstrategy/localStrategy.ts';
+import SpotifyStrategy from '../../strategyMods/dashport-spotifystrategy/spotifyStrategy.ts';
+import LinkedIn from '../../strategyMods/dashport-linkedinstrategy/linkedinStrategy.ts'
 import pgclient from './models/userModel.ts'
-import SpotifyStrategy from '../../strategyMods/spotify/spotifyStrategy.ts';
+
 
 const port = 3000;
 const app: Application = new Application();
@@ -19,10 +22,13 @@ app.use(async (ctx: any, next: any) => {
   try{
     await next();
   } catch (error) {
-    console.log('server 51', error);
+    console.log('server err', error);
     throw error;
   }
 });
+
+
+
 
 app.use(dashport.initialize);
 
@@ -30,36 +36,35 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 dashport.addStrategy('google', new GoogleStrat({
-  client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
-  redirect_uri: 'http://localhost:3000/google', 
+  client_id:googleSecrets.client_id,
+  redirect_uri: googleSecrets.redirect_uri, 
   response_type: 'code', 
   scope: 'profile email openid',
-  client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
+  client_secret: googleSecrets.client_secret,
   grant_type: 'authorization_code',
 }));
 
 dashport.addStrategy('facebook', new FacebookStrategy({
-  client_id: '176079343994638', 
-  client_secret: 'ed0e2c29eae5394c332a83129a52ff59', 
-  redirect_uri: 'http://localhost:3000/facebook', 
-  state: '12345', 
-  scope: 'read:user', 
+  client_id: facebookSecrets.client_id, 
+  client_secret: facebookSecrets.client_secret, 
+  redirect_uri: facebookSecrets.redirect_uri, 
+  state: '12345'
 }));
 
 dashport.addStrategy('github', new GitHubStrategy({
-  client_id:'b3e8f06ac81ab03c46ca', 
-  client_secret: 'b9cc08bb3318a27a8306e4fa74fc22758d29b3fc', 
-  redirect_uri: 'http://localhost:3000/github', 
+  client_id: gitHubSecrets.client_id, 
+  client_secret: gitHubSecrets.client_secret, 
+  redirect_uri: gitHubSecrets.redirect_uri,
   scope: 'read:user',  
 }));
 
 dashport.addStrategy('spotify', new SpotifyStrategy({
-  client_id:'646f25f80fc84e0e993f8216bdeee1ae',
+  client_id: spotifySecrets.client_id, 
+  client_secret: spotifySecrets.client_secret, 
+  redirect_uri: spotifySecrets.redirect_uri,
   response_type: 'code', 
-  redirect_uri: 'http://localhost:3000/spotify', 
   scope: 'user-read-email user-read-private',
   state: '2021',
-  client_secret: '7e142bb9057d406fbcdaf48bebc10808',
 }));
 
 dashport.addStrategy('local', new LocalStrategy({
@@ -72,16 +77,24 @@ dashport.addStrategy('local', new LocalStrategy({
     return userInfo; 
   }, }));
 
+  dashport.addStrategy('linkedin', new LinkedIn({
+    client_id: linkedInSecrets.client_id, 
+    client_secret: linkedInSecrets.client_secret, 
+    redirect_uri: linkedInSecrets.redirect_uri, 
+    response_type: 'code', 
+    scope: 'r_liteprofile%20r_emailaddress%20w_member_social',
+    grant_type: 'authorization_code',
+  }));
+
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
-// router.get('/test', 
-//   dashport.authenticate('google'),
-//   (ctx: any, next: any) => {
-//     if(ctx.state._dashport.session){
-//       ctx.response.redirect('/protected');
-//     }
-//   }
-// )
+
+function init (app:any) {
+  router.get('/newDynamic', (ctx:any, next:Function) => ctx.response.redirect('/protected'));
+}
+
+router.get('/dynamic', (ctx:any, next:Function) => { init(app); ctx.response.redirect('/')})
+
 
 router.get('/google', 
   dashport.authenticate('google'),
@@ -126,6 +139,15 @@ router.post('/local',
     ctx.response.body = JSON.stringify(true);
   }
 );
+
+router.get('/linkedin', 
+  dashport.authenticate('linkedin'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
 
 router.post('/signup', 
   async (ctx:any, next: any)=>{ 

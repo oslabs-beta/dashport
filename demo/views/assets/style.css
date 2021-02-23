@@ -40,6 +40,8 @@ button:hover {
   border-radius: 10px;
   left: 1rem;
   margin-top: 1rem;
+  width: 12.5rem;
+  height: 2.5rem;
 }
 #googleIcon:hover {
   border-color: #555555;

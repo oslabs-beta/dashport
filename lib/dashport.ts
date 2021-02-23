@@ -1,4 +1,4 @@
-import { OakContext, Translators, Strategies } from './types.ts';
+import { OakContext, Translators, Strategies, Strategy } from './types.ts';
 import SessionManager from './sessionManager.ts';
 
 class Dashport {
@@ -98,7 +98,7 @@ class Dashport {
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
-
+    
     // ALL strategies made for Dashport MUST have a 'router' method that on
     // successful authentication, returns an authData object with a userInfo
     // property in the form of UserProfile
@@ -106,10 +106,11 @@ class Dashport {
       throw new Error('ERROR in authenticate: This strategy does not have a \'router\' method.');
     }
 
+
     if (this._framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
         if (ctx.state._dashport === undefined) {
-          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with dashport.initialize().');
+          throw new Error('ERROR in authenticate: Dashport needs to be initialized first with app.use(dashport.initialize).');
         }
 
         // check if a session object exists (created by SessionManager.logIn).
@@ -125,7 +126,6 @@ class Dashport {
         // call the requested strategy's 'router' method. authData must contain
         // a userInfo property in the form of UserProfile
         const authData: any = await self._strategies[stratName].router(ctx, next);
-        console.log('dashport.ts_128: authData :', authData)
 
         if (authData !== undefined) {
           // serializedId will be obtained by calling SessionManager's serialize
@@ -147,9 +147,6 @@ class Dashport {
           self._sm.logIn(ctx, self, serializedId);
 
           return await next();
-        }
-        else {
-          console.log('dashport.ts_133: !we didn\'t get authData back')
         }
       }
     }
@@ -342,7 +339,7 @@ class Dashport {
    * @param {string} deserializerName - The name of the serializer to remove
    */
   public removeDeserializer(deserializerName: string): void  {
-    if (this._deserializers[deserializerName] === undefined) {
+    if (this._deserializers[deserializerName] === undefined || this._deserializers[deserializerName] === null) {
       throw new Error('ERROR in removeDeserializer: The specified deserializer does not exist.');
     }
 
@@ -357,11 +354,22 @@ class Dashport {
    *   dashport.addStrategy('google', new GoogleStrategy());
    * 
    * @param {string} stratName - The name that will be used to reference this strategy
-   * @param {Function} strategy - The imported OAuth strategy module to be used
+   * @param {Class} strategy - The imported OAuth strategy module to be used
    */
-  public addStrategy(stratName: string, strategy: any): void {
+  public addStrategy(stratName: string, strategy: Strategy): void {
     if (stratName === undefined || strategy === undefined) {
       throw new Error('ERROR in addStrategy: A strategy name and a strategy must be provided.');
+    }
+
+    // ALL strategies made for Dashport MUST have a 'router' method that on
+    // successful authentication, returns an authData object with a userInfo
+    // property in the form of UserProfile
+    if (typeof(strategy.router) !== 'function') {
+      throw new Error('ERROR in addStrategy: This strategy does not have a \'router\' method.');
+    }
+
+    if (this._strategies[stratName] !== undefined) {
+      throw new Error('ERROR in addStrategy: This strategy already exists.');
     }
 
     this._strategies[stratName] = strategy;
@@ -379,6 +387,10 @@ class Dashport {
   public removeStrategy(stratName: string): void {
     if (stratName === undefined) {
       throw new Error('ERROR in removeStrategy: A strategy name must be provided.');
+    }
+
+    if (this._strategies[stratName] === undefined) {
+      throw new Error('ERROR in removeStrategy: The specified strategy does not exist.');
     }
 
     delete this._strategies[stratName];
