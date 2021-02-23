@@ -98,6 +98,14 @@ class Dashport {
     if (this._strategies[stratName] === undefined) {
       throw new Error('ERROR in authenticate: This strategy name has not been specified for use.');
     }
+    
+    // ALL strategies made for Dashport MUST have a 'router' method that on
+    // successful authentication, returns an authData object with a userInfo
+    // property in the form of UserProfile
+    if (this._strategies[stratName].router === undefined) {
+      throw new Error('ERROR in authenticate: This strategy does not have a \'router\' method.');
+    }
+
 
     if (this._framework === 'oak') {
       return async (ctx: OakContext, next: any) => {
