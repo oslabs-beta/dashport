@@ -6,7 +6,7 @@ import Dashport from '../lib/dashport.ts';
 import GoogleStrat from '../../strategyMods/dashport-googlestrategy/googleStrategy.ts';
 import FacebookStrategy from '../../strategyMods/dashport-facebookstrategy/facebookStrategy.ts';
 import GitHubStrategy from '../../strategyMods/dashport-githubstrategy/githubStrategy.ts';
-import LocalStrategy from '../../strategyMods/dashport-localauthstrategy/localStrategy.ts';
+import LocalStrategy from '../../strategyMods/dashport-localstrategy/localStrategy.ts';
 import SpotifyStrategy from '../../strategyMods/dashport-spotifystrategy/spotifyStrategy.ts';
 import LinkedIn from '../../strategyMods/dashport-linkedinstrategy/linkedinStrategy.ts'
 import pgclient from './models/userModel.ts'
