@@ -6,6 +6,7 @@ import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
 import FacebookStrategy from '../lib/strategies/Facebook.ts'
 import GitHubStrategy from '../lib/strategies/Github.ts'
 import LocalStrategy from '../lib/strategies/localstrategy.ts';
+import LinkedIn from '../lib/strategies/LinkedIn.ts'
 import pgclient from './models/userModel.ts'
 import SpotifyStrategy from '../lib/strategies/Spotify.ts'
 
@@ -19,7 +20,7 @@ app.use(async (ctx: any, next: any) => {
   try{
     await next();
   } catch (error) {
-    console.log('server 51', error);
+    console.log('server err', error);
     throw error;
   }
 });
@@ -42,8 +43,7 @@ dashport.addStrategy('facebook', new FacebookStrategy({
   client_id: '176079343994638', 
   client_secret: 'ed0e2c29eae5394c332a83129a52ff59', 
   redirect_uri: 'http://localhost:3000/facebook', 
-  state: '12345', 
-  scope: 'read:user', 
+  state: '12345'
 }));
 
 dashport.addStrategy('github', new GitHubStrategy({
@@ -72,16 +72,16 @@ dashport.addStrategy('local', new LocalStrategy({
     return userInfo; 
   }, }));
 
-dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
+  dashport.addStrategy('linkedin', new LinkedIn({
+    client_id:'788zz8dnnxjo4s',
+    redirect_uri: 'http://localhost:3000/linkedin', 
+    response_type: 'code', 
+    scope: 'r_liteprofile%20r_emailaddress%20w_member_social',
+    client_secret: 'FHhQQW3BaNQCFilA',
+    grant_type: 'authorization_code',
+  }));
 
-// router.get('/test', 
-//   dashport.authenticate('google'),
-//   (ctx: any, next: any) => {
-//     if(ctx.state._dashport.session){
-//       ctx.response.redirect('/protected');
-//     }
-//   }
-// )
+dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
 
 router.get('/google', 
   dashport.authenticate('google'),
@@ -126,6 +126,15 @@ router.post('/local',
     ctx.response.body = JSON.stringify(true);
   }
 );
+
+router.get('/linkedin', 
+  dashport.authenticate('linkedin'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      ctx.response.redirect('/protected');
+    }
+  }
+)
 
 router.post('/signup', 
   async (ctx:any, next: any)=>{ 

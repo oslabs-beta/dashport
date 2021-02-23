@@ -1,5 +1,4 @@
 import {React} from "../deps.ts";
-import MainContainer from '../views/components/MainContainer.tsx'
 import NavBar from '../views/components/NavBar.tsx'
 
 declare global {
@@ -28,7 +27,6 @@ function App() {
           <div id='homeContainer'>
             <div>Welcome to Dashport!</div>
             <NavBar/>
-            {/* <MainContainer/> */}
           </div>
       </div>
     </div>
