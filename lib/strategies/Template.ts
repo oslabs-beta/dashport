@@ -98,7 +98,7 @@ export default class TemplateStrategy {
     // GO_Step 1 Request Permission
     if(!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 3 Exchange code for Token
-    // ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
+    // ?ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
     if(ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
     // if(ctx.request.url.search.slice) -- error
   }

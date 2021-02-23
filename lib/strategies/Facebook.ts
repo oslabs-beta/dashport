@@ -10,8 +10,8 @@ import { OakContext, FacebookOptions, FBAuthData, FBTokenData, AppOptions } from
  *   - client_secret: string              Required
  *   - redirect_uri: string               Required
  *   - state: string                      Required
- *   - response_type: string              O
  *   - scope: string                      O
+ *   - response_type: string              O
  *
  * Examples:
  * 
@@ -56,6 +56,8 @@ export default class FacebookStrategy {
     // CONSTRUCTS THE REDIRECT URI FROM THE PARAMETERS PROVIDED
 
     this.uriFromParams = this.constructURI(this.options, 'client_secret');
+    // console.log('this.uriFromParams', this.uriFromParams);
+    
   }
 
   constructURI(options:any, skip?:string): any{
@@ -103,7 +105,8 @@ export default class FacebookStrategy {
 
   // ENTRY POINT
   async router(ctx: OakContext, next: any) {
-    // DEBUGGING: console.log('url returned from auth request', ctx.request.url.search)
+    // DEBUGGING:
+    console.log('url returned from auth request', ctx.request.url.search)
     // GO_Step 2 Request Permission
     if(!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 4 Exchange code for Token
@@ -121,7 +124,9 @@ export default class FacebookStrategy {
   // STEP 4: handle oauth 2.0 server response containing auth code
   // STEP 4.5: request access token in exchange for auth code
   async getAuthToken(ctx: OakContext, next: any) {
+    
     const OGURI: string = ctx.request.url.search;
+    console.log("2.1 :", OGURI);
 
     if (OGURI.includes('error')) {
       // do error handling
@@ -147,7 +152,7 @@ export default class FacebookStrategy {
 
     // SEND A FETCH REQ FOR TOKEN
     try {
-      // DEBUGGING console.log('url line 113', this.tokenURL+this.constructURI(tokenOptions))
+      // DEBUGGING console.log('url line 150', this.tokenURL+this.constructURI(tokenOptions))
       let data: any = await fetch(this.tokenURL+this.constructURI(tokenOptions));
       data = await data.json();
       // DEBUGGING console.log('returned token obj', data);
@@ -180,7 +185,7 @@ export default class FacebookStrategy {
       data = await data.json();
       console.log('data line 141', data);
       authData.userInfo = {
-        provder: this.name,
+        provider: this.name,
         providerUserId: data.data.user_id
       };
 

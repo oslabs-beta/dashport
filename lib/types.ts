@@ -50,7 +50,7 @@ export interface Translators {
 /**
  * All Dashport strategies are classes that must contain a router method
  */
-interface Strategy {
+export interface Strategy {
   router: Function;
 }
 
@@ -87,15 +87,18 @@ export interface GoogOptions {
 }
 
 /**
+ * Google Strategy options that should be specified by the developer when adding
+ */
+
+/**
  * Facebook Strategy options that should be specified by the developer when adding
  */
 export interface FacebookOptions {
   client_id: string;
-  client_secret: string;
   redirect_uri: string;
   state?: string;
-  response_type: string;
-  scope: string;
+  client_secret: string;
+  response_type?: string;
 }
 
 /**
@@ -129,6 +132,33 @@ export interface AuthData {
   userInfo?: UserProfile;
 }
 
+
+/**
+ * Github Strategy options below
+ */
+export interface GitHubOptions {
+  client_id: string;
+  redirect_uri: string;
+  login?: string;
+  scope: string;
+  client_secret: string;
+  state?: string;
+  allow_signup?: string;
+}
+export interface GHTokenData {
+  access_token: string;
+  token_type: string;
+  expires_in?: string;
+  scope?: string;
+} 
+export interface GHAuthData {
+  tokenData: GHTokenData;
+  userInfo?: UserProfile;
+}
+
+/**
+ * Github Strategy options above 
+ */
 export interface FBTokenData {
   access_token: string;
   token_type: string;
@@ -157,4 +187,22 @@ export interface AppOptions {
   client_id: string;
   client_secret: string;
   grant_type: string;
+}
+export interface LinkedInAuthData{
+  tokenData: LinkedInTokenData;
+  userInfo?: UserProfile;
+}
+
+export interface LinkedInOptions{
+    client_id: string;
+    client_secret: string;
+    redirect_uri: string;
+    response_type: string;
+    scope: string;
+    grant_type: string;
+}
+
+export interface LinkedInTokenData {
+  access_token: string;
+  expires_in: number;
 }
