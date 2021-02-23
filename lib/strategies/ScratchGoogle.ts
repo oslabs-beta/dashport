@@ -43,7 +43,7 @@ export default class GoogleStrategy {
         paramString += value;
       }
     }
-
+    
     this.uriFromParams = paramString;
   }
 

@@ -20,7 +20,7 @@ app.use(async (ctx: any, next: any) => {
   try{
     await next();
   } catch (error) {
-    console.log('server 51', error);
+    console.log('server err', error);
     throw error;
   }
 });
