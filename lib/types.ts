@@ -96,10 +96,10 @@ export interface GoogOptions {
 export interface FacebookOptions {
   client_id: string;
   redirect_uri: string;
-  state?: string;
   client_secret: string;
+  state?: string;
   response_type?: string;
-  scope: string;
+  scope?: string;
 }
 
 /**

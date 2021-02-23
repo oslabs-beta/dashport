@@ -43,7 +43,6 @@ dashport.addStrategy('facebook', new FacebookStrategy({
   client_secret: 'ed0e2c29eae5394c332a83129a52ff59', 
   redirect_uri: 'http://localhost:3000/facebook', 
   state: '12345', 
-  scope: 'read:user', 
 }));
 
 dashport.addStrategy('github', new GitHubStrategy({
