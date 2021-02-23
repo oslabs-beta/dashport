@@ -1,13 +1,13 @@
 import { Application, send, join } from './deps.ts'
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import router from "./routes.ts";
-import Dashport from '../lib/dashport.ts'
-import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
-import FacebookStrategy from '../lib/strategies/Facebook.ts'
-import GitHubStrategy from '../lib/strategies/Github.ts'
-import LocalStrategy from '../lib/strategies/localstrategy.ts';
+import Dashport from '../lib/dashport.ts';
+import GoogleStrat from '../../strategyMods/google/googleStrategy.ts';
+import FacebookStrategy from '../../strategyMods/facebook/Facebook.ts';
+import GitHubStrategy from '../../strategyMods/github/githubStrategy.ts';
+import LocalStrategy from '../../strategyMods/localauth/localStrategy.ts';
 import pgclient from './models/userModel.ts'
-import SpotifyStrategy from '../lib/strategies/Spotify.ts'
+import SpotifyStrategy from '../../strategyMods/spotify/spotifyStrategy.ts';
 
 const port = 3000;
 const app: Application = new Application();
