@@ -144,8 +144,9 @@ export default class TemplateStrategy {
       let data: any = await fetch(this.tokenURL + this.constructURI(tokenOptions));
       data = await data.json();
 
-      ////////////////////////////////////////////////////////
-      if (data.type === 'oAuthException') return console.log('token request threw oauth exception')
+      if (data.type === 'oAuthException') {
+        return new Error('ERROR: Token request threw OAuth exception.');
+      }
 
       // PASSES TOKEN ON TO STEP 4
       return this.getAuthData(data);
