@@ -44,7 +44,7 @@ export default class TemplateStrategy {
   }
 
   constructURI(options: any, skip?: string[]): any {
-    let paramArray: string[][] = Object.entries(options);
+    const paramArray: string[][] = Object.entries(options);
     let paramString: string = '';
 
     for (let i = 0; i < paramArray.length; i++) {
