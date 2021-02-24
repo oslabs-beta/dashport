@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertThrows, assertThrowsAsync } from "https://deno.land/std@0.87.0/testing/asserts.ts"
+import { assert, assertEquals, assertThrows, assertThrowsAsync } from "../../deps.ts";
 import Dashport from '../dashport.ts';
 import { OakContext } from '../types.ts';
 
@@ -33,6 +33,7 @@ function fakeDeserializer(serializedId: string) {
 
 const fakeNext: any = () => 'fakeNext was invoked';
 
+
 Deno.test({
   name: "An instance of Dashport should throw an error if the framework is not supported.",
   fn(): void {
@@ -62,6 +63,7 @@ Deno.test({
     assertThrowsAsync(async () => await oakTestDp.initialize(fakeOakCtx, fakeNext));
   },
 });
+
 
 // AUTHENTICATE TESTS
 Deno.test({
@@ -165,6 +167,7 @@ Deno.test({
   },
 });
 
+
 // SERIALIZER TESTS
 Deno.test({
   name: "addSerializer method should throw an error if exactly 1 parameter is not provided",
@@ -206,6 +209,7 @@ Deno.test({
     assertThrows(() => oakTestDp.removeSerializer('serializer1'));
   }
 });
+
 
 // DESERIALIZER TESTS
 Deno.test({

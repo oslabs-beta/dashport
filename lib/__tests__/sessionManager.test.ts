@@ -49,7 +49,7 @@ Deno.test({
 
 Deno.test({
   name: "When invoked, logOut method should delete the session property on ctx.state._dashport",
-  fn(): void {
+  async fn(): Promise<void> {
     const fakeOakCtx: OakContext = {
       app: {},
       cookies: {},
@@ -69,9 +69,10 @@ Deno.test({
       upgrade: () => 5,
       params: {}
     }
+    const fakeNext: any = () => 'fakeNext was invoked';
 
     assertEquals(fakeOakCtx.state._dashport.session, '123');
-    oakTestSM.logOut(fakeOakCtx);
+    await oakTestSM.logOut(fakeOakCtx, fakeNext);
     assertEquals(fakeOakCtx.state._dashport.session, undefined);
   }
 });

@@ -62,147 +62,29 @@ export interface Strategies {
 }
 
 /**
- * 
- * client_id: string                 identifies client to service provider - Required
- *   - client_secret: string              Required
- *   - redirect_uri: string               Required
- *   - state: string                      Required
- *   - response_type: string              O
- *   - scope: string
- * 
- * Google Strategy options that should be specified by the developer when adding
+ * All OAuth 2.0 providers will provide access tokens
  */
-export interface GoogOptions {
-  client_id: string;
-  redirect_uri: string;
-  response_type: string;
-  scope: string;
-  client_secret: string;
-  access_type?: string;
-  state?: string;
-  included_granted_scopes?: string;
-  login_hint?: string;
-  prompt?: string;
-  grant_type?: string;
-}
-
-/**
- * Google Strategy options that should be specified by the developer when adding
- */
-
-/**
- * Facebook Strategy options that should be specified by the developer when adding
- */
-export interface FacebookOptions {
-  client_id: string;
-  redirect_uri: string;
-  state?: string;
-  client_secret: string;
-  response_type?: string;
-}
-
-/**
- * Template Strategy options that should be specified by the developer when adding
- */
-export interface TemplateOptions {
-  client_id: string;
-  client_secret: string;
-  redirect_uri: string;
-}
-
-export interface SpotifyOptions {
-  client_id: string;
-  response_type: string;
-  redirect_uri: string;
-  state: string;
-  scope: string;
-  client_secret: string;
-}
-
 export interface TokenData {
   access_token: string;
-  expires_in: number;
-  scope: string;
-  token_type: string;
-  id_token: string;
+  [options: string]: string;
 }
 
+/**
+ * The form the information from strategies should come back in
+ */
 export interface AuthData {
-  tokenData?: TokenData;
-  userInfo?: UserProfile;
+  tokenData: TokenData;
+  userInfo: UserProfile;
 }
 
-
 /**
- * Github Strategy options below
+ * At the bare minimum, OAuth 2.0 providers will require a client ID, client
+ * secret, and redirect URI. The remaining options depend on the OAuth 2.0
+ * provider, such as scope or state
  */
-export interface GitHubOptions {
+export interface StrategyOptions {
   client_id: string;
+  client_secret: string;
   redirect_uri: string;
-  login?: string;
-  scope: string;
-  client_secret: string;
-  state?: string;
-  allow_signup?: string;
-}
-export interface GHTokenData {
-  access_token: string;
-  token_type: string;
-  expires_in?: string;
-  scope?: string;
-} 
-export interface GHAuthData {
-  tokenData: GHTokenData;
-  userInfo?: UserProfile;
-}
-
-/**
- * Github Strategy options above 
- */
-export interface FBTokenData {
-  access_token: string;
-  token_type: string;
-  expires_in: string;
-} 
-
-export interface SpotifyTokenData {
-  access_token: string;
-  token_type: string;
-  scope: string;
-  expires_in: string;
-  refresh_token: string;
-} 
-
-export interface FBAuthData {
-  tokenData: FBTokenData;
-  userInfo?: UserProfile;
-}
-
-export interface SpotifyAuthData {
-  tokenData: SpotifyTokenData;
-  userInfo?: UserProfile;
-}
-
-export interface AppOptions {
-  client_id: string;
-  client_secret: string;
-  grant_type: string;
-}
-export interface LinkedInAuthData{
-  tokenData: LinkedInTokenData;
-  userInfo?: UserProfile;
-}
-
-export interface LinkedInOptions{
-    client_id: string;
-    client_secret: string;
-    redirect_uri: string;
-    response_type: string;
-    scope: string;
-    grant_type: string;
-}
-
-export interface LinkedInTokenData {
-  access_token: string;
-  expires_in: number;
+  [option: string]: string;
 }
