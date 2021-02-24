@@ -3,12 +3,12 @@ import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import {googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets} from './demoSecrets.ts'
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts';
-import GoogleStrat from '../../strategyMods/dashport-googlestrategy/googleStrategy.ts';
-import FacebookStrategy from '../../strategyMods/dashport-facebookstrategy/facebookStrategy.ts';
-import GitHubStrategy from '../../strategyMods/dashport-githubstrategy/githubStrategy.ts';
-import LocalStrategy from '../../strategyMods/dashport-localstrategy/localStrategy.ts';
-import SpotifyStrategy from '../../strategyMods/dashport-spotifystrategy/spotifyStrategy.ts';
-import LinkedIn from '../../strategyMods/dashport-linkedinstrategy/linkedinStrategy.ts'
+import GoogleStrat from '../../dashport-strategies/google/googleStrategy.ts';
+import FacebookStrategy from '../../dashport-strategies/facebook/facebookStrategy.ts';
+import GitHubStrategy from '../../dashport-strategies/github/githubStrategy.ts';
+import LocalStrategy from '../../dashport-strategies/localauth/localStrategy.ts';
+import SpotifyStrategy from '../../dashport-strategies/spotify/spotifyStrategy.ts';
+import LinkedIn from '../../dashport-strategies/linkedin/linkedinStrategy.ts';
 import pgclient from './models/userModel.ts'
 
 
