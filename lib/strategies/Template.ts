@@ -167,6 +167,10 @@ export default class TemplateStrategy {
         access_token: parsed.access_token,
         token_type: parsed.token_type,
         expires_in: parsed.expires_in,
+      },
+      userInfo: {
+        provider: '',
+        providerUserId: ''
       }
     }
 
