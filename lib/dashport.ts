@@ -222,7 +222,7 @@ class Dashport {
    * 
    * // Below code written in a dashport configuration file
    *   dashport.addDeserializer('A', (serializedId) => {
-   *     // code code code
+   *     // code to specify how to obtain user info from serialized ID
    *   })
    * 
    * // Below code written in a router file
