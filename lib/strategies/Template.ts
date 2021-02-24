@@ -195,8 +195,7 @@ export default class TemplateStrategy {
 
       return authData;
     } catch(err) {
-      ////////////////////////////////////////////////////////
-      console.log('getAuthData fetch error', err);
+      return new Error(`ERROR: Unable to obtain auth data - ${err}`);
     }
   }
 }
