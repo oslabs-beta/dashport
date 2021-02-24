@@ -1,6 +1,6 @@
 import { Application, send, join } from './deps.ts'
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
-import {googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets} from './demoSecrets.ts'
+import { googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets } from './demoSecrets.ts'
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts';
 import GoogleStrat from '../../dashport-strategies/google/googleStrategy.ts';
@@ -10,7 +10,6 @@ import LocalStrategy from '../../dashport-strategies/localauth/localStrategy.ts'
 import SpotifyStrategy from '../../dashport-strategies/spotify/spotifyStrategy.ts';
 import LinkedIn from '../../dashport-strategies/linkedIn/linkedInStrategy.ts';
 import pgclient from './models/userModel.ts'
-
 
 const port = 3000;
 const app: Application = new Application();
@@ -26,9 +25,6 @@ app.use(async (ctx: any, next: any) => {
     throw error;
   }
 });
-
-
-
 
 app.use(dashport.initialize);
 
@@ -147,12 +143,11 @@ router.get('/linkedin',
       ctx.response.redirect('/protected');
     }
   }
-)
+);
 
 router.post('/signup', 
   async (ctx:any, next: any)=>{ 
     let userInfo:any = await ctx.request.body(true).value;
-    console.log(userInfo);
     await pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`);
     return next();
   }, 
@@ -161,7 +156,7 @@ router.post('/signup',
     ctx.response.type = 'text/json';
     ctx.response.body = JSON.stringify(true);
   }
-  );
+);
 
 router.get('/protected',
   (ctx: any, next: any) => {
