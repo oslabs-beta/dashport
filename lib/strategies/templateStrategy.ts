@@ -15,9 +15,13 @@ export default class TemplateStrategy {
   name: string = '';
   options: StrategyOptions;
   uriFromParams: string;
-  authURL: string;
-  tokenURL: string;
-  authDataURL: string;
+  // ACTION NEEDED:
+  //   add the url for the first endpoint here
+  authURL: string = ''
+  //   add the url to exchange the auth code for a token here
+  tokenURL: string = ''
+  //   add the url to exchange the token for auth data here
+  authDataURL: string = ''
   /**
    * @constructor
    * @param {Object} options
@@ -30,13 +34,6 @@ export default class TemplateStrategy {
     }
 
     this.options = options;
-    // ACTION NEEDED:
-      // add the url for the first endpoint here
-    this.authURL = ''
-      // add the url to exchange the auth code for a token here
-    this.tokenURL = ''
-      // add the url to exchange the token for auth data here
-    this.authDataURL = ''
 
     // PRE STEP 1: 
       // Constructs the second half of the authURL for developer's first endpoint from the info put into 'options'
