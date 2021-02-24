@@ -159,3 +159,16 @@ input:focus {
   justify-content: center;
   align-items: center;
 }
+
+#modalWindow{ 
+  position: absolute;
+  /* background-color: red; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 35rem;
+  height: 50rem;
+  top: 25%;
+  left: -222.5%;
+  z-index: 90;
+}

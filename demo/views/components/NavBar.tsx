@@ -2,15 +2,17 @@
   // if they aren't, load  the login button
   // if they are, load a logout button and a button that routes to the protected page
 
-
 import { React } from '../../deps.ts';
+import Modal from '../components/Modal.tsx';
 
 const NavBar = () => {
   const [clicked, setClick] = (React as any).useState(false)
   const [loggedIn, setLogin] = (React as any).useState(false)
   const [loginData, setLoginData] = (React as any).useState(['','']);
   // const [password, setPassword] = (React as any).useState('');
-
+  // (React as any).useEffect(() => loggedIn ? )  
+  
+  
   const openLogin = () => {
     if (clicked === false) {
       setClick(true)
@@ -76,12 +78,31 @@ const NavBar = () => {
       // .catch((error) => console.log('error: ', error));
   };
   
-  if (!loggedIn) {
+  // if (!loggedIn) {
     return (
       <div>
           <button onClick={setUserLogin} className='button'>Change Page View</button>
           <button onClick={openLogin} id='loginButton'>Login/Sign In Options</button>
-          {clicked && (
+          <Modal setLogin={setLogin} />
+      </div>
+    )
+}
+
+export default NavBar;
+
+  // } 
+  // else {
+  //   return (
+  //     <div>
+  //         <button onClick={setUserLogin} className='button'>Change Page View</button>
+  //         <button onClick={openLogin} className='button'>Log Out</button>
+  //         <button>Redirect to Protected Page</button>
+  //     </div>
+  //   )
+  // }
+
+
+            {/* {clicked && (
             <div>
             <form id='form'>
               <div id='userForm'>
@@ -139,18 +160,4 @@ const NavBar = () => {
                 </span>
               </div>
             </div>
-          )}
-      </div>
-    )
-  } else {
-    return (
-      <div>
-          <button onClick={setUserLogin} className='button'>Change Page View</button>
-          <button onClick={openLogin} className='button'>Log Out</button>
-          <button>Redirect to Protected Page</button>
-      </div>
-    )
-  }
-}
-
-export default NavBar;
+          )} */}
