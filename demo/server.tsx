@@ -8,7 +8,7 @@ import FacebookStrategy from '../../dashport-strategies/facebook/facebookStrateg
 import GitHubStrategy from '../../dashport-strategies/gitHub/gitHubStrategy.ts';
 import LocalStrategy from '../../dashport-strategies/localauth/localStrategy.ts';
 import SpotifyStrategy from '../../dashport-strategies/spotify/spotifyStrategy.ts';
-import LinkedIn from '../../dashport-strategies/linkedin/linkedinStrategy.ts';
+import LinkedIn from '../../dashport-strategies/linkedIn/linkedInStrategy.ts';
 import pgclient from './models/userModel.ts'
 
 
