@@ -151,8 +151,7 @@ export default class TemplateStrategy {
       // PASSES TOKEN ON TO STEP 4
       return this.getAuthData(data);
     } catch(err) {
-      ////////////////////////////////////////////////////////
-      console.log('YOUR ERROR MESSAGE'+ err)
+      return new Error(`ERROR: Unable to obtain token - ${err}`);
     }
   }
 
