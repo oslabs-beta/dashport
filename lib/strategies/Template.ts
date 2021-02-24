@@ -24,14 +24,14 @@ export default class TemplateStrategy {
    * @api public
    */
   constructor (options: StrategyOptions) {
-    // customize with whatever fields are required to send your first redirect
+    // customize with whatever fields are required to send to first redirect
     if (!options.client_id || !options.redirect_uri || !options.client_secret) {
       throw new Error('Missing required arguments');
     }
 
     this.options = options;
     // ACTION NEEDED:
-      // add the url for your first endpoint here
+      // add the url for the first endpoint here
     this.authURL = ''
       // add the url to exchange the auth code for a token here
     this.tokenURL = ''
@@ -60,7 +60,7 @@ export default class TemplateStrategy {
       paramString += (value + '&');
     }
 
-    // removes the '&' we just placed at the end of the string
+    // removes the '&' that was just placed at the end of the string
     if (paramString[paramString.length - 1] === '&') {
       paramString = paramString.slice(0, -1);
     }
@@ -178,7 +178,7 @@ export default class TemplateStrategy {
 
     // STEP 4.5: request user info
     // ACTION REQUIRED: 
-      // fill in the fields for auth options with whatever information is required by requested OAuth service
+      // fill in the fields for auth options with the information required by requested OAuth service
       // authOptions constructs the uri for the final fetch request
     const authOptions: any = {
       input_token: authData.tokenData.access_token,
@@ -190,7 +190,7 @@ export default class TemplateStrategy {
       data = await data.json();
 
       // ACTION REQUIRED:
-        // Add whatever data you requested and want to pass back to dashport.ts here
+        // Add any data to pass back to dashport's authenticate method here
       authData.userInfo = {
         provider: this.name,
         providerUserId: data.data.user_id
