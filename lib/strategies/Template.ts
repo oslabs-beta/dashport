@@ -98,7 +98,7 @@ export default class TemplateStrategy {
     // GO_Step 1 Request Permission
     if (!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 3 Exchange code for Token
-    // ?ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
+    // ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
     if (ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
   }
   
@@ -115,10 +115,8 @@ export default class TemplateStrategy {
     // the URI sent back to the endpoint provided in step 1
     const OGURI: string = ctx.request.url.search;
 
-    ////////////////////////////////////////////////////////
     if (OGURI.includes('error')) {
-      // do error handling
-      console.log('RECEIVED AN ERROR FROM AUTH CODE REQUEST');
+      return new Error('ERROR: Received an error from auth token code request.')
     }
 
     // EXTRACT THE AUTH CODE
