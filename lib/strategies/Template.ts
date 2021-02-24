@@ -132,7 +132,7 @@ export default class TemplateStrategy {
 
     // STEP 3.5
     // ACTION REQUIRED: add or remove the parameters needed to send as response to token request
-    const tokenOptions: StrategyOptions = {
+    const tokenOptions: any = {
       client_id: this.options.client_id,
       redirect_uri: this.options.redirect_uri,
       client_secret: this.options.client_secret,
