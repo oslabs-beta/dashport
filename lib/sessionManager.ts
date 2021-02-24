@@ -18,7 +18,7 @@ import Dashport from './dashport.ts';
 class SessionManager {
   public logIn: Function;
   public logOut: Function;
-  
+
   constructor(framework: string) {
     this.logIn = this._logInDecider(framework);
     this.logOut = this._logOutDecider(framework);
