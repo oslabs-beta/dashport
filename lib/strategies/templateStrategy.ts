@@ -26,7 +26,7 @@ export default class TemplateStrategy {
   constructor (options: StrategyOptions) {
     // customize with whatever fields are required to send to first redirect
     if (!options.client_id || !options.redirect_uri || !options.client_secret) {
-      throw new Error('Missing required arguments');
+      throw new Error('ERROR in TemplateStrategy constructor: Missing required arguments');
     }
 
     this.options = options;
@@ -116,7 +116,7 @@ export default class TemplateStrategy {
     const OGURI: string = ctx.request.url.search;
 
     if (OGURI.includes('error')) {
-      return new Error('ERROR: Received an error from auth token code request.')
+      return new Error('ERROR in getAuthToken: Received an error from auth token code request.')
     }
 
     // EXTRACT THE AUTH CODE
@@ -145,13 +145,13 @@ export default class TemplateStrategy {
       data = await data.json();
 
       if (data.type === 'oAuthException') {
-        return new Error('ERROR: Token request threw OAuth exception.');
+        return new Error('ERROR in getAuthToken: Token request threw OAuth exception.');
       }
 
       // PASSES TOKEN ON TO STEP 4
       return this.getAuthData(data);
     } catch(err) {
-      return new Error(`ERROR: Unable to obtain token - ${err}`);
+      return new Error(`ERROR in getAuthToken: Unable to obtain token - ${err}`);
     }
   }
 
@@ -195,7 +195,7 @@ export default class TemplateStrategy {
 
       return authData;
     } catch(err) {
-      return new Error(`ERROR: Unable to obtain auth data - ${err}`);
+      return new Error(`ERROR in getAuthData: Unable to obtain auth data - ${err}`);
     }
   }
 }
