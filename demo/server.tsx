@@ -1,14 +1,16 @@
 import { Application, send, join } from './deps.ts'
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
+import {googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets} from './demoSecrets.ts'
 import router from "./routes.ts";
-import Dashport from '../lib/dashport.ts'
-import GoogleStrat from '../lib/strategies/ScratchGoogle.ts'
-import FacebookStrategy from '../lib/strategies/Facebook.ts'
-import GitHubStrategy from '../lib/strategies/Github.ts'
-import LocalStrategy from '../lib/strategies/localstrategy.ts';
-import LinkedIn from '../lib/strategies/LinkedIn.ts'
+import Dashport from '../lib/dashport.ts';
+import GoogleStrat from '../../strategyMods/dashport-googlestrategy/googleStrategy.ts';
+import FacebookStrategy from '../../strategyMods/dashport-facebookstrategy/facebookStrategy.ts';
+import GitHubStrategy from '../../strategyMods/dashport-githubstrategy/githubStrategy.ts';
+import LocalStrategy from '../../strategyMods/dashport-localstrategy/localStrategy.ts';
+import SpotifyStrategy from '../../strategyMods/dashport-spotifystrategy/spotifyStrategy.ts';
+import LinkedIn from '../../strategyMods/dashport-linkedinstrategy/linkedinStrategy.ts'
 import pgclient from './models/userModel.ts'
-import SpotifyStrategy from '../lib/strategies/Spotify.ts'
+
 
 const port = 3000;
 const app: Application = new Application();
@@ -25,41 +27,44 @@ app.use(async (ctx: any, next: any) => {
   }
 });
 
+
+
+
 app.use(dashport.initialize);
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
 dashport.addStrategy('google', new GoogleStrat({
-  client_id:'1001553106526-ri9j20c9uipsp6q5ubqojbuc5e19dkgp.apps.googleusercontent.com',
-  redirect_uri: 'http://localhost:3000/google', 
+  client_id:googleSecrets.client_id,
+  redirect_uri: googleSecrets.redirect_uri, 
   response_type: 'code', 
   scope: 'profile email openid',
-  client_secret: 'e44hA4VIInrJDu_isCDl3YCr',
+  client_secret: googleSecrets.client_secret,
   grant_type: 'authorization_code',
 }));
 
 dashport.addStrategy('facebook', new FacebookStrategy({
-  client_id: '176079343994638', 
-  client_secret: 'ed0e2c29eae5394c332a83129a52ff59', 
-  redirect_uri: 'http://localhost:3000/facebook', 
+  client_id: facebookSecrets.client_id, 
+  client_secret: facebookSecrets.client_secret, 
+  redirect_uri: facebookSecrets.redirect_uri, 
   state: '12345'
 }));
 
 dashport.addStrategy('github', new GitHubStrategy({
-  client_id:'b3e8f06ac81ab03c46ca', 
-  client_secret: 'b9cc08bb3318a27a8306e4fa74fc22758d29b3fc', 
-  redirect_uri: 'http://localhost:3000/github', 
+  client_id: gitHubSecrets.client_id, 
+  client_secret: gitHubSecrets.client_secret, 
+  redirect_uri: gitHubSecrets.redirect_uri,
   scope: 'read:user',  
 }));
 
 dashport.addStrategy('spotify', new SpotifyStrategy({
-  client_id:'646f25f80fc84e0e993f8216bdeee1ae',
+  client_id: spotifySecrets.client_id, 
+  client_secret: spotifySecrets.client_secret, 
+  redirect_uri: spotifySecrets.redirect_uri,
   response_type: 'code', 
-  redirect_uri: 'http://localhost:3000/spotify', 
   scope: 'user-read-email user-read-private',
   state: '2021',
-  client_secret: '7e142bb9057d406fbcdaf48bebc10808',
 }));
 
 dashport.addStrategy('local', new LocalStrategy({
@@ -73,15 +78,23 @@ dashport.addStrategy('local', new LocalStrategy({
   }, }));
 
   dashport.addStrategy('linkedin', new LinkedIn({
-    client_id:'788zz8dnnxjo4s',
-    redirect_uri: 'http://localhost:3000/linkedin', 
+    client_id: linkedInSecrets.client_id, 
+    client_secret: linkedInSecrets.client_secret, 
+    redirect_uri: linkedInSecrets.redirect_uri, 
     response_type: 'code', 
     scope: 'r_liteprofile%20r_emailaddress%20w_member_social',
-    client_secret: 'FHhQQW3BaNQCFilA',
     grant_type: 'authorization_code',
   }));
 
 dashport.addSerializer('mathRand', (userData: any) => Math.random() * 10000);
+
+
+function init (app:any) {
+  router.get('/newDynamic', (ctx:any, next:Function) => ctx.response.redirect('/protected'));
+}
+
+router.get('/dynamic', (ctx:any, next:Function) => { init(app); ctx.response.redirect('/')})
+
 
 router.get('/google', 
   dashport.authenticate('google'),
@@ -197,7 +210,7 @@ app.use(async (ctx: any) => {
 
 // listening on port
 app.addEventListener('listen', () => { console.log(`Server live on port ${port}`) });
-await app.listen({ port });
+app.listen({ port });
 
 // denon run --allow-all --unstable demo/server.tsx
 // deno install -qAf --unstable https://deno.land/x/denon/denon.ts

@@ -1,6 +1,7 @@
 import { Client } from "../deps.ts";
+import { PGURI } from "../demoSecrets.ts"
 
-const pgclient = new Client('postgres://jbbzinao:OslM_aTTgi71R38LFvWXUbVw2fz5HVW5@ziggy.db.elephantsql.com:5432/jbbzinao');
+const pgclient = new Client(PGURI);
 
 // const Mongo_URI: string = Deno.env.get("MONGOURI")!;
 await pgclient.connect();
