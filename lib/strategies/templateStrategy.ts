@@ -96,7 +96,7 @@ export default class TemplateStrategy {
     if (!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 3 Exchange code for Token
     // ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
-    if (ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
+    if (ctx.request.url.search.slice(1, 5) === 'code') return this.getAuthToken(ctx, next);
   }
   
   // STEP 1: sends the programatically constructed uri to an OAuth 2.0 server
