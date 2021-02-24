@@ -25,7 +25,7 @@ export default class TemplateStrategy {
    */
   constructor (options: StrategyOptions) {
     // customize with whatever fields are required to send your first redirect
-    if (!options.client_id || !options.redirect_uri || !options.state || !options.client_secret) {
+    if (!options.client_id || !options.redirect_uri || !options.client_secret) {
       throw new Error('Missing required arguments');
     }
 
