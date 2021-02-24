@@ -116,7 +116,7 @@ export default class TemplateStrategy {
     const OGURI: string = ctx.request.url.search;
 
     if (OGURI.includes('error')) {
-      return new Error('ERROR in getAuthToken: Received an error from auth token code request.')
+      return new Error('ERROR in getAuthToken: Received an error from auth token code request.');
     }
 
     // EXTRACT THE AUTH CODE
