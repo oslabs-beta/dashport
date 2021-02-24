@@ -92,7 +92,7 @@ router.get('/privatepage',
   }
 )
 ```
-After authentication, Dashport will have serialized an ID and manipulated user information based on the developer's defined serializer, and have created a session. In order to get the user information in another route, Dashport's deserialize property can be used as middleware. If the framework is Oak, deserialize will store the user information on **ctx.locals** for the next middleware to access.
+After authentication, Dashport will have serialized an ID and manipulated user information based on the developer's defined serializer, and have created a session. In order to get the user information in another route, Dashport's deserialize property can be used as middleware. If the framework is Oak, deserialize will store either the user information or an Error on **ctx.locals** for the next middleware to access.
 ```
 router.get('/user-favorites', 
   dashport.deserialize,
@@ -204,7 +204,7 @@ dashport.addDeserializer('deserializer-1', (serializedId) => {
 
 ## deserialize
 - Functionality depends on the server framework that was passed in when instantiating Dashport.
-- deserialize is an async middleware function that checks if a session exists. If a session exists, it checks if the session IDs match. If they do, it will execute the first deserializer added by the developer and store the user information for the next middleware to use. In Oak, the user information is stored on **ctx.locals**.
+- deserialize is an async middleware function that checks if a session exists. If a session exists, it checks if the session IDs match. If they do, it will execute the first deserializer added by the developer and store the user information for the next middleware to use. In Oak, if the deserialization is successful, the user information is stored on **ctx.locals**. If the deserialization is not successful, an Error will be stored on **ctx.locals**.
 ```
 router.get('/user-favorites', 
   dashport.deserialize,
