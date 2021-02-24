@@ -39,9 +39,9 @@ export default class TemplateStrategy {
     this.authDataURL = ''
 
     // PRE STEP 1: 
-      // Constructs the second half of the authURL for your first endpoint from the info you put into 'options'
+      // Constructs the second half of the authURL for developer's first endpoint from the info put into 'options'
     // ACTION NEEDED: 
-      // If there are any variables in options that aren't needed for your first endpoint (but will be needed later), 
+      // If there are any variables in options that aren't needed for developer's first endpoint (but will be needed later), 
       // add them as an array of strings (even if there's only 1 item)
     this.uriFromParams = this.constructURI(this.options);
   }
@@ -102,17 +102,17 @@ export default class TemplateStrategy {
     if (ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
   }
   
-  // STEP 1: sends the programatically constructed uri to an oauth 2.0 server
+  // STEP 1: sends the programatically constructed uri to an OAuth 2.0 server
   async authorize(ctx: OakContext, next: any) {
     return await ctx.response.redirect(this.authURL + this.uriFromParams);                   
   }
 
   // STEP 2: client says yes or no
 
-  // STEP 3: handle oauth 2.0 server response containing auth code
+  // STEP 3: handle OAuth 2.0 server response containing auth code
   // STEP 3.5: request access token in exchange for auth code
   async getAuthToken(ctx: OakContext, next: any) {
-    // the URI send back to the endpoint you provided in step 1
+    // the URI sent back to the endpoint provided in step 1
     const OGURI: string = ctx.request.url.search;
 
     ////////////////////////////////////////////////////////
@@ -122,9 +122,9 @@ export default class TemplateStrategy {
     }
 
     // EXTRACT THE AUTH CODE
-    // ACTION REQUIRED: verify that this function works for the format of the response you received. uncomment the line below to test:
-      // console.log('authorize response: ', OGURI);
-    // splits the string at the '=,' storing the first part in URI1[0] and the part we want in URI1[1]
+    // ACTION REQUIRED: verify that this function works for the format of the response received. uncomment the line below to test:
+      // console.log('AUTH RESPONSE:', OGURI);
+    // splits the string at the '=,' storing the first part in URI1[0] and the part wanted in URI1[1]
     let URI1: string[] = OGURI.split('=');
     // splits the string at the '&', storing the string with the access_token in URI2[0] 
     // and the other parameters at URI2[n]
@@ -133,7 +133,7 @@ export default class TemplateStrategy {
     const code: string = this.parseCode(URI2[0]);
 
     // STEP 3.5
-    // ACTION REQUIRED: add or remove the parameters needed to send your token request
+    // ACTION REQUIRED: add or remove the parameters needed to send as response to token request
     ////////////////////////////////////////////////////////
     const tokenOptions: any = {
       client_id: this.options.client_id,
@@ -162,8 +162,8 @@ export default class TemplateStrategy {
   // STEP 4.5 exchange access token for user info
   async getAuthData(parsed: any){ 
     // ACTION REQUIRED: 
-      // fill in the fields for tokenData based on the token obj you got back in the last step
-      // authData is what we're going to be passing back to dashport.ts
+      // fill in the fields for tokenData based on the token obj obtained in the last step
+      // authData is what is going to be passed back to dashport's authenticate method
     const authData: AuthData = {
       tokenData: {
         access_token: parsed.access_token,
@@ -178,8 +178,8 @@ export default class TemplateStrategy {
 
     // STEP 4.5: request user info
     // ACTION REQUIRED: 
-      // fill in the fields for auth options with whatever information is required by your OAuth service
-      // authOptions constructs the uri for your final fetch request
+      // fill in the fields for auth options with whatever information is required by requested OAuth service
+      // authOptions constructs the uri for the final fetch request
     const authOptions: any = {
       input_token: authData.tokenData.access_token,
       access_token: this.options.client_id + '|' + this.options.client_secret
