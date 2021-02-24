@@ -53,7 +53,7 @@ export default class TemplateStrategy {
     for (let i = 0; i < paramArray.length; i++) {
       let [key, value] = paramArray[i];
 
-      if (skip.includes(key)) continue;
+      if (skip && skip.includes(key)) continue;
       // adds the key and '=' for every member of options not in the skip array
       paramString += (key + '=');
       // adds the value and '&' for every member of options not in the skip array
