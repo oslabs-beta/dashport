@@ -273,7 +273,7 @@ class Dashport {
     throw new Error('ERROR in _deserializeDecider: Name of current framework is not supported.');
   }
 
-/**
+  /**
    * Takes in a name for a deserializer function and the deserializer function
    * the developer specifies. Deserializer function needs to do 3 things below:
    * 
