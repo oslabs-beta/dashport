@@ -10,8 +10,9 @@
 - Strategy modules that allow developers to use third-party OAuth 2.0
   - [x] Google
   - [x] Facebook
-  - [ ] Github
-  - [ ] LinkedIn
+  - [x] Github
+  - [x] LinkedIn
+  - [x] Spotify
 - Written in TypeScript.
 
 # Overview
