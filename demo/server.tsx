@@ -5,7 +5,7 @@ import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts';
 import GoogleStrat from '../../dashport-strategies/google/googleStrategy.ts';
 import FacebookStrategy from '../../dashport-strategies/facebook/facebookStrategy.ts';
-import GitHubStrategy from '../../dashport-strategies/github/githubStrategy.ts';
+import GitHubStrategy from '../../dashport-strategies/gitHub/gitHubStrategy.ts';
 import LocalStrategy from '../../dashport-strategies/localauth/localStrategy.ts';
 import SpotifyStrategy from '../../dashport-strategies/spotify/spotifyStrategy.ts';
 import LinkedIn from '../../dashport-strategies/linkedin/linkedinStrategy.ts';
