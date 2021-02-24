@@ -1,4 +1,4 @@
-import { OakContext, TemplateOptions, TemplateAuthData} from '../types.ts';
+import { OakContext, StrategyOptions, AuthData } from '../types.ts';
 
 /**
  * Creates an instance of `TemplateStrategy`.
@@ -13,7 +13,7 @@ import { OakContext, TemplateOptions, TemplateAuthData} from '../types.ts';
  */
 export default class TemplateStrategy {
   name: string = '';
-  options: TemplateOptions;
+  options: StrategyOptions;
   uriFromParams: string;
   authURL: string;
   tokenURL: string;
@@ -23,7 +23,7 @@ export default class TemplateStrategy {
    * @param {Object} options
    * @api public
    */
-  constructor (options: TemplateOptions) {
+  constructor (options: StrategyOptions) {
     // customize with whatever fields are required to send your first redirect
     if (!options.client_id || !options.redirect_uri || !options.state || !options.client_secret) {
       throw new Error('Missing required arguments');
@@ -162,7 +162,7 @@ export default class TemplateStrategy {
     // ACTION REQUIRED: 
       // fill in the fields for tokenData based on the token obj you got back in the last step
       // authData is what we're going to be passing back to dashport.ts
-    const authData: TemplateAuthData = {
+    const authData: AuthData = {
       tokenData: {
         access_token: parsed.access_token,
         token_type: parsed.token_type,
