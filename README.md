@@ -105,7 +105,7 @@ router.get('/user-favorites',
 )
 ```
 
-In order to end a session, a log out button can be routed to an endpoint that calls Dashport's logOut method. Here's an example use with Oak:
+In order to end a session, a log out button can be routed to an endpoint that calls Dashport's logOut property. Here's an example use with Oak:
 ```typescript
 router.get('/log-out',
   dashport.logOut,
