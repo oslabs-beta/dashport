@@ -1,16 +1,15 @@
 import { Application, send, join } from './deps.ts'
 import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
-import {googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets} from './demoSecrets.ts'
+import { googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets } from './demoSecrets.ts'
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts';
-import GoogleStrat from '../../dashport-strategies/google/googleStrategy.ts';
-import FacebookStrategy from '../../dashport-strategies/facebook/facebookStrategy.ts';
-import GitHubStrategy from '../../dashport-strategies/github/githubStrategy.ts';
-import LocalStrategy from '../../dashport-strategies/localauth/localStrategy.ts';
-import SpotifyStrategy from '../../dashport-strategies/spotify/spotifyStrategy.ts';
-import LinkedIn from '../../dashport-strategies/linkedin/linkedinStrategy.ts';
+import LocalStrategy from 'https://deno.land/x/dashport_localauth@v1.0.0/mod.ts'
+import GoogleStrategy from 'https://deno.land/x/dashport_google@v1.0.0/mod.ts'
+import GitHubStrategy from 'https://deno.land/x/dashport_github@v1.0.1/mod.ts';
+import FacebookStrategy from 'https://deno.land/x/dashport_facebook@v1.0.0/mod.ts'
+import LinkedInStrategy from 'https://deno.land/x/dashport_linkedin@v1.0.2/mod.ts'
+import SpotifyStrategy from 'https://deno.land/x/dashport_spotify@v1.0.0/mod.ts'
 import pgclient from './models/userModel.ts'
-
 
 const port = 3000;
 const app: Application = new Application();
@@ -27,15 +26,12 @@ app.use(async (ctx: any, next: any) => {
   }
 });
 
-
-
-
 app.use(dashport.initialize);
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-dashport.addStrategy('google', new GoogleStrat({
+dashport.addStrategy('google', new GoogleStrategy({
   client_id:googleSecrets.client_id,
   redirect_uri: googleSecrets.redirect_uri, 
   response_type: 'code', 
@@ -77,7 +73,7 @@ dashport.addStrategy('local', new LocalStrategy({
     return userInfo; 
   }, }));
 
-  dashport.addStrategy('linkedin', new LinkedIn({
+  dashport.addStrategy('linkedin', new LinkedInStrategy({
     client_id: linkedInSecrets.client_id, 
     client_secret: linkedInSecrets.client_secret, 
     redirect_uri: linkedInSecrets.redirect_uri, 
@@ -147,12 +143,11 @@ router.get('/linkedin',
       ctx.response.redirect('/protected');
     }
   }
-)
+);
 
 router.post('/signup', 
   async (ctx:any, next: any)=>{ 
     let userInfo:any = await ctx.request.body(true).value;
-    console.log(userInfo);
     await pgclient.queryArray(`INSERT INTO users(username, password) VALUES ('${userInfo.username}', '${userInfo.password}')`);
     return next();
   }, 
@@ -161,7 +156,7 @@ router.post('/signup',
     ctx.response.type = 'text/json';
     ctx.response.body = JSON.stringify(true);
   }
-  );
+);
 
 router.get('/protected',
   (ctx: any, next: any) => {
