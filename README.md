@@ -229,7 +229,7 @@ dashport.removeDeserializer('deserializer-1');
 ## addStrategy
 - Strategies are the modules that can be imported with Dashport to allow third-party OAuth. They specify the authentication logic for the given OAuth service provider. 
 - addStrategy is a function that takes two arguments. The first argument is the name the developer wants to call the strategy. The second argument is a new instance of the strategy with its options passed in. Strategy classes need to:
-  1. Have a router method that ultimately returns an Error or the user information returned by the third-party OAuth in the form of Dashport's defined [AuthData](#authdata) interface. AuthData needs to have a **userInfo** property in the form of [UserProfile](#userprofile) and an optional **tokenData** property in the form of [TokenData](#tokendata).
+  1. Have a router method that ultimately returns an Error or the user information returned by the third-party OAuth in the form of Dashport's defined [AuthData](#authdata) interface. AuthData needs to have a **userInfo** property in the form of [UserProfile](#userprofile) and a **tokenData** property in the form of [TokenData](#tokendata).
   2. Take in any options that are needed for the specific third-party OAuth to authenticate.
 ```typescript
 dashport.addStrategy('goog', new GoogleStrategy({
@@ -261,7 +261,7 @@ router.get('/log-out',
 ```
 
 # AuthData
-When a strategy successfully authenticates a user, the information given by the third-party provider should be returned on the AuthData object. This object should have an optional [tokenData](#tokendata) property and a required userInfo property in the form of [UserProfile](#userprofile). This contains the information for the [authenticate](#authenticate) method to use. The interface for AuthData is:
+When a strategy successfully authenticates a user, the information given by the third-party provider should be returned on the AuthData object. This object should have a [tokenData](#tokendata) property and a userInfo property in the form of [UserProfile](#userprofile). This contains the information for the [authenticate](#authenticate) method to use. The interface for AuthData is:
 ```typescript
 interface AuthData {
   tokenData: TokenData;
