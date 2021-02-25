@@ -2,7 +2,11 @@
   <img src="https://i.imgur.com/3FndGDl.png" alt="Dashport logo"/>
 </p>
 
-*<h3 align="center">Authentication middleware for Deno</h3>*
+<h1 align="center">
+  <a href='https://www.dashport.org/'>Dashport</a>
+</h1>
+
+*<h3 align="center">Authentication middleware for <a href='https://deno.land/x/dashport'>Deno</a></h3>*
 
 <p align="center">
   </br>
@@ -40,7 +44,7 @@ Dashport was inspired by [Passport](http://www.passportjs.org/), the golden stan
 To get started, import Dashport. For easier configuration, import Dashport into its own file.
 
 ```typescript
-import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
+import Dashport from 'https://deno.land/x/dashport/mod.ts';
 
 ```
 
@@ -49,8 +53,8 @@ Next, instantiate Dashport, passing in the name of the server framework being us
 ```typescript
 // 'dashportconfig.ts' file
 
-import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
-import GoogleStrategy from 'https://deno.land/x/dashport_google@v1.0.0/mod.ts';
+import Dashport from 'https://deno.land/x/dashport/mod.ts';
+import GoogleStrategy from 'https://deno.land/x/dashport_google/mod.ts';
 
 const dashport = new Dashport('oak');
 
@@ -92,7 +96,7 @@ export default dashport;
 Dashport then needs to be initialized in the server file.
 
 ```typescript
-import { Application, Router } from 'https://deno.land/x/oak@v6.3.1/mod.ts';
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
 import dashport from './dashportconfig.ts';
 
 const app = new Application();
@@ -147,8 +151,8 @@ router.get('/log-out',
 ```typescript
 // Oak example
 
-import { Application, Router } from 'https://deno.land/x/oak@v6.3.1/mod.ts';
-import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
+import { Application, Router } from 'https://deno.land/x/mod.ts';
+import Dashport from 'https://deno.land/x/dashport/mod.ts';
 
 const app = new Application();
 const dashport = new Dashport('oak');
@@ -165,8 +169,8 @@ app.use(dashport.initialize);
 ```typescript
 // Oak example
 
-import { Application, Router } from 'https://deno.land/x/oak@v6.3.1/mod.ts';
-import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
+import Dashport from 'https://deno.land/x/dashport/mod.ts';
 
 const app = new Application();
 const router = new Router();
