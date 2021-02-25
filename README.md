@@ -26,7 +26,7 @@ To get started, import Dashport. For easier configuration, imported Dashport int
 import { Dashport } from '[Dashport's denoland URI here]';
 ```
 
-Next instantiate Dashport, passing in the name of the server framework being used (Dashport currently only supports Oak). Then begin adding configurations for a serializer, deserializer, and strategy. Any errors returned from serializers and deserializers should be instances of 'Error'.
+Next, instantiate Dashport, passing in the name of the server framework being used (Dashport currently only supports Oak). Then begin adding configurations for a serializer, deserializer, and strategy. Any errors returned from serializers and deserializers should be instances of 'Error'.
 ```typescript
 // 'dashportconfig.ts' file
 
