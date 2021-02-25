@@ -21,7 +21,7 @@ Dashport is a module that simplifies authentication in Deno. Currently, the serv
 Dashport was inspired by [Passport](http://www.passportjs.org/), the golden standard of authentication middleware for Node.js.
 
 # Getting Started
-To get started, import Dashport. For easier configuration, imported Dashport into its own file.
+To get started, import Dashport. For easier configuration, import Dashport into its own file.
 ```typescript
 import { Dashport } from '[Dashport's denoland URI here]';
 ```
