@@ -14,6 +14,10 @@ export {
 // PostgreSQL
 export { Client } from "https://deno.land/x/postgres/mod.ts";
 
+
+// Strategies
+// export { GithubStrategy } from 'https://deno.land/x/dashport_github/mod.ts';
+
 export { default as React } from "https://dev.jspm.io/react@16.14.0";
 
 export { default as ReactDOMServer } from "https://dev.jspm.io/react-dom@16.14.0/server";

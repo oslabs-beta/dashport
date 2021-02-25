@@ -6,158 +6,37 @@ import { React } from '../../deps.ts';
 import Modal from '../components/Modal.tsx';
 
 const NavBar = () => {
-  const [clicked, setClick] = (React as any).useState(false)
-  const [loggedIn, setLogin] = (React as any).useState(false)
-  const [loginData, setLoginData] = (React as any).useState(['','']);
-  // const [password, setPassword] = (React as any).useState('');
-  // (React as any).useEffect(() => loggedIn ? )  
-  
-  
-  const openLogin = () => {
-    if (clicked === false) {
-      setClick(true)
-    } else {
-      setClick(false)
-    }
-  }
+  const [loggedIn, setLogin] = (React as any).useState([false,'']);
 
-  const setUserLogin = () => {
-    if(!loggedIn) setLogin(true);
-    else setLogin(false);
-  } 
+  (React as any).useEffect(() => {
+    fetch('http://localhost:3000/authcheck')
+      .then( data => data.json())
+      .then( parsed => setLogin(parsed))
+  },loggedIn);
 
-  const test = () => {
-    if (!loggedIn) {
-      setLogin(true)
-    } else if(loggedIn) {
-      setLogin(false)
-    }
-  }
-
-  const inputgetter = (event:any) => {
-    console.log(loginData)
-    const oldLoginData = loginData;
-    if (event.target.id === 'username') oldLoginData[0] = event.target.value;
-    if (event.target.id === 'password') oldLoginData[1] = event.target.value;
-    return setLoginData(oldLoginData);
-  }
-
-  const localSignUp = () => {
-    const postOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: loginData[0],
-        password: loginData[1]
-      })
-    };
-    console.log('sending user data');
-    fetch(`http://localhost:3000/signup`, postOptions)
-    .then( data => data.json())
-    .then (parsed => setLogin(parsed));
-  };
-
-  const localLogin = () => {
-    // if (!user || !pass ) {
-      // console.log(document.querySelector('#username').nodeValue);
-    //   document.querySelector('#password').classList.toggle('error');
-    //   return console.log('error')
-    // }
-    const postOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: loginData[0],
-        password: loginData[1]
-      })
+  const logOut = () => {
+    const options = {
+      method:'DELETE'
     };
     console.log('abouttofetch');
-    fetch(`http://localhost:3000/local`, postOptions)
+    fetch(`http://localhost:3000/logout`, options)
     .then( data => data.json())
-    .then (parsed => setLogin(parsed));
-      // .catch((error) => console.log('error: ', error));
+    .then (parsed => setLogin(parsed))
   };
-  
-  // if (!loggedIn) {
+
+
     return (
       <div>
-          <button onClick={setUserLogin} className='button'>Change Page View</button>
-          <button onClick={openLogin} id='loginButton'>Login/Sign In Options</button>
-          <Modal setLogin={setLogin} />
+      {!loggedIn[0] && (<Modal setLogin={setLogin} />)}
+      {loggedIn[0] && (
+        <div>
+           <p id='authorizedstatement'>You have been authorized by {loggedIn[1]}!</p>
+          <img src='https://i.imgur.com/86nba6E.png' id='authorizedimg' />
+          <button onClick={logOut} id='logOutButton'>Log Out</button> 
+        </div>
+      )}
       </div>
     )
 }
 
 export default NavBar;
-
-  // } 
-  // else {
-  //   return (
-  //     <div>
-  //         <button onClick={setUserLogin} className='button'>Change Page View</button>
-  //         <button onClick={openLogin} className='button'>Log Out</button>
-  //         <button>Redirect to Protected Page</button>
-  //     </div>
-  //   )
-  // }
-
-
-            {/* {clicked && (
-            <div>
-            <form id='form'>
-              <div id='userForm'>
-                <input id='username' onChange={inputgetter} placeholder='Username'/>
-              </div>
-              <div id='passForm'>
-                <input type='password' id='password' onChange={inputgetter} placeholder='Password'/>
-              </div>
-              <button type='button' onClick={localLogin} id='login'>Login</button>
-              <button type='button' onClick={localSignUp} id='signIn'>Sign Up</button>
-            </form>
-              <div>
-                <span>
-                    <a href="/google">
-                      <img id='googleIcon'
-                        src="https://imgur.com/RYSAZ5u.png"
-                      ></img>
-                    </a>
-                </span>
-              </div>
-              <div>
-                <span>
-                    <a href="/facebook">
-                      <img id='facebookIcon'
-                        src="https://imgur.com/op8yWLb.png"
-                      ></img>
-                    </a>
-                </span>
-              </div>
-              <div>
-                <span>
-                    <a href="/github">
-                      <img id='githubIcon'
-                        src="https://imgur.com/aMAH3BW.png"
-                      ></img>
-                    </a>
-                </span>
-              </div>
-              <div>
-                <span>
-                    <a href="/spotify">
-                      <img id='spotifyIcon'
-                        src="https://imgur.com/tyzNIXw.png"
-                      ></img>
-                    </a>
-                </span>
-              </div>
-              <div>
-                <span>
-                    <a href="/linkedin">
-                      <img id='linkedinIcon'
-                        src="https://imgur.com/9qcbtcv.png"
-                      ></img>
-                    </a>
-                </span>
-              </div>
-            </div>
-          )} */}

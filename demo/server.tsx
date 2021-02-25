@@ -3,12 +3,12 @@ import { html, ReactComponents, protectedPage } from './ssrConstants.tsx';
 import {googleSecrets, linkedInSecrets, spotifySecrets, facebookSecrets, gitHubSecrets} from './demoSecrets.ts'
 import router from "./routes.ts";
 import Dashport from '../lib/dashport.ts';
-import GoogleStrat from '../../dashport-strategies/google/googleStrategy.ts';
-import FacebookStrategy from '../../dashport-strategies/facebook/facebookStrategy.ts';
-import GitHubStrategy from '../../dashport-strategies/github/githubStrategy.ts';
-import LocalStrategy from '../../dashport-strategies/localauth/localStrategy.ts';
-import SpotifyStrategy from '../../dashport-strategies/spotify/spotifyStrategy.ts';
-import LinkedIn from '../../dashport-strategies/linkedin/linkedinStrategy.ts';
+import GoogleStrat from '../../dashport-strategies/dashport-googlestrategy/googleStrategy.ts';
+import FacebookStrategy from '../../dashport-strategies/dashport-facebookstrategy/facebookStrategy.ts';
+import GitHubStrategy from '../../dashport-strategies/dashport-githubstrategy/githubStrategy.ts';
+import LocalStrategy from '../../dashport-strategies/dashport-localstrategy/localStrategy.ts';
+import SpotifyStrategy from '../../dashport-strategies/dashport-spotifystrategy/spotifyStrategy.ts';
+import LinkedIn from '../../dashport-strategies/dashport-linkedinstrategy/linkedinStrategy.ts';
 import pgclient from './models/userModel.ts'
 
 const port = 3000;
@@ -84,11 +84,30 @@ dashport.addStrategy('local', new LocalStrategy({
 
 dashport.addSerializer('provider', (userData: any) => userData.provider);
 
+// router.get('/', 
+//   (ctx: any, next: any) => {
+//     if(ctx.state._dashport.session){
+//       ctx.response.type = 'text/json';
+//       ctx.response.body = JSON.stringify([true, ctx.state._dashport.session]);
+//     }
+//   } /**EDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD */
+// )
+
+router.get('/authcheck', (ctx: any, next: any) => {
+  if (ctx.state._dashport.session) {
+    ctx.response.type = "text/json"
+    ctx.response.body = JSON.stringify([true, ctx.state._dashport.session])
+  } else {
+    ctx.response.type = "text/json"
+    ctx.response.body = JSON.stringify([false, '']);
+  }
+})
+
 router.get('/google', 
   dashport.authenticate('google'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
+      ctx.response.redirect('/');
     }
   }
 )
@@ -97,7 +116,7 @@ router.get('/facebook',
   dashport.authenticate('facebook'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
+      ctx.response.redirect('/');
     }
   }
 )
@@ -106,7 +125,7 @@ router.get('/spotify',
   dashport.authenticate('spotify'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
+      ctx.response.redirect('/');
     }
   }
 )
@@ -115,27 +134,39 @@ router.get('/github',
   dashport.authenticate('github'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
+      ctx.response.redirect('/');
     }
   }
 )
-
-router.post('/local', 
-  dashport.authenticate('local'),
-  (ctx: any, next: any) => {
-    ctx.response.type = 'text/json';
-    ctx.response.body = JSON.stringify(true);
-  }
-);
 
 router.get('/linkedin', 
   dashport.authenticate('linkedin'),
   (ctx: any, next: any) => {
     if(ctx.state._dashport.session){
-      ctx.response.redirect('/protected');
+      ctx.response.redirect('/');
     }
   }
 )
+router.delete('/logout',
+  dashport.logOut,
+  (ctx: any, next:any) => {
+    ctx.response.type = 'text/JSON';
+    ctx.response.body = JSON.stringify([false,'']);
+  }
+);
+
+
+
+router.post('/local', 
+  dashport.authenticate('local'),
+  (ctx: any, next: any) => {
+    if(ctx.state._dashport.session){
+      console.log('made inside', ctx.state._dashport)
+      ctx.response.type = 'text/json';
+      ctx.response.body = JSON.stringify([true, ctx.state._dashport.session]);
+    }
+  }
+);
 
 router.post('/signup', 
   async (ctx:any, next: any)=>{ 
@@ -147,7 +178,7 @@ router.post('/signup',
   dashport.authenticate('local'),
   (ctx: any, next: any) => {
     ctx.response.type = 'text/json';
-    ctx.response.body = JSON.stringify(true);
+    ctx.response.body = JSON.stringify([true, ctx.state._dashport.session]);
   }
   );
 

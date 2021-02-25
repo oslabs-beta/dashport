@@ -100,7 +100,6 @@ button:hover {
 }
 
 input {
-  width: 17%;
   padding: 12px 20px;
   margin: 8px 0;
   box-sizing: border-box;
@@ -115,10 +114,19 @@ input:focus {
   border: 2px solid #555555;
 }
 
-#form{
+#locallogin{
+  display: flex;
+  flex-direction: row;
+}
+
+#forms{
   position: relative;
   left: -3rem;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: left;
 }
 
 #passForm{
@@ -131,6 +139,12 @@ input:focus {
   margin-bottom: 1rem;
 }
 
+#buttons{
+  display:flex;
+  flex-direction: column;
+  align-items: right;
+}
+
 #homeContainer{
   position: relative;
   left: -1rem;
@@ -140,11 +154,13 @@ input:focus {
 #login{
   position: relative;
   left: 3rem;
+  height: 3rem;
 }
 
 #signIn{
   position: relative;
   left: 3rem;
+  height: 3rem;
 }
 
 #dashportIcon{
@@ -160,15 +176,45 @@ input:focus {
   align-items: center;
 }
 
+#modal{
+  position: fixed; 
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.9); 
+}
+
 #modalWindow{ 
-  position: absolute;
-  /* background-color: red; */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 35rem;
-  height: 50rem;
+  z-index: 101;
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 5rem;
+  border: 5px solid #888;
+  display: grid;
+  width: 20rem;
+  height: 35rem;
   top: 25%;
-  left: -222.5%;
-  z-index: 90;
+  left: 25%;
+}
+
+#authorizedimg{
+  position: relative;
+  width: 20rem;
+  height: 20rem;
+  left: -5rem;
+  margin: 3rem;
+}
+
+#authorizedstatement{
+  position: relative;
+  left: -3rem;
+}
+
+#logOutButton{
+  position: relative;
+  left: -30rem;
 }
