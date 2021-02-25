@@ -126,6 +126,9 @@ import { Application, Router } from 'https://deno.land/x/oak@v6.3.1/mod.ts';
 import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
 
 const app = new Application();
+const dashport = new Dashport('oak');
+
+// use addSerializer, addDeserializer, and addStrategy, to add a serializer, deserializer, and strategy, to the Dashport instance
 
 app.use(dashport.initialize);
 ```
