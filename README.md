@@ -93,7 +93,7 @@ router.get('/privatepage',
   }
 )
 ```
-After authentication, Dashport will have serialized whatever user information was returned using the developer's defined serializer and created a session. In order to get the user information in another route, Dashport's deserialize property can be used as middleware. If the framework being used is Oak, deserialize will store either the user information or an Error on **ctx.locals** for the next middleware to access.
+After authentication, Dashport will have serialized the user information that was returned using the developer's defined serializer and created a session. In order to get the user information in another route, Dashport's deserialize property can be used as middleware. If the framework being used is Oak, deserialize will store either the user information or an Error on **ctx.locals** for the next middleware to access.
 ```typescript
 router.get('/user-favorites', 
   dashport.deserialize,
