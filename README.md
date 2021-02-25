@@ -151,7 +151,7 @@ router.get('/log-out',
 ```typescript
 // Oak example
 
-import { Application, Router } from 'https://deno.land/x/mod.ts';
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
 import Dashport from 'https://deno.land/x/dashport/mod.ts';
 
 const app = new Application();
