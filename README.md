@@ -31,7 +31,7 @@ Next, instantiate Dashport, passing in the name of the server framework being us
 // 'dashportconfig.ts' file
 
 import { Dashport } from '[Dashport's denoland URI here]';
-import { GoogleStrategy } from '[GoogleStrategy's denoland URI here]';
+import { GoogleStrategy } from 'https://deno.land/x/dashport_google@v1.0.0/mod.ts';
 
 const dashport = new Dashport('oak');
 
