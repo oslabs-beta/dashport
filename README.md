@@ -159,7 +159,7 @@ router.get('/privatepage',
 
 ## addSerializer
 - After a successful authentication, Dashport will pass the obtained user information to a serializer. It is up to the developer to define serializer functions that specify what to do with user information. User information will be passed in the form of Dashport's defined [AuthData](#authdata) interface.
-- addSerializer is a function that takes two arguments. The first argument is the name a developer wants to call their serializer and the second argument is the serializer function. This serializer functions need to
+- addSerializer is a function that takes two arguments. The first argument is the name a developer wants to call their serializer and the second argument is the serializer function. This serializer function need to
   1. Accept one argument: the user data in the form of an object.
   2. Specify what the developer wants to do with the user data (store it in a database, add some info to response object, etc).
   3. Specify how to create a serialized ID.
