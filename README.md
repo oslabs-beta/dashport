@@ -23,15 +23,16 @@ Dashport was inspired by [Passport](http://www.passportjs.org/), the golden stan
 # Getting Started
 To get started, import Dashport. For easier configuration, import Dashport into its own file.
 ```typescript
-import { Dashport } from '[Dashport's denoland URI here]';
+import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
+
 ```
 
 Next, instantiate Dashport, passing in the name of the server framework being used (Dashport currently only supports Oak). Then begin adding configurations for a serializer, deserializer, and strategy. Any errors returned from serializers and deserializers should be instances of 'Error'.
 ```typescript
 // 'dashportconfig.ts' file
 
-import { Dashport } from '[Dashport's denoland URI here]';
-import { GoogleStrategy } from 'https://deno.land/x/dashport_google@v1.0.0/mod.ts';
+import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
+import GoogleStrategy from 'https://deno.land/x/dashport_google@v1.0.0/mod.ts';
 
 const dashport = new Dashport('oak');
 
@@ -122,7 +123,7 @@ router.get('/log-out',
 // Oak example
 
 import { Application, Router } from 'https://deno.land/x/oak@v6.3.1/mod.ts';
-import { Dashport } from '[Dashport's denoland URI here]';
+import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
 
 const app = new Application();
 
@@ -136,7 +137,7 @@ app.use(dashport.initialize);
 // Oak example
 
 import { Application, Router } from 'https://deno.land/x/oak@v6.3.1/mod.ts';
-import { Dashport } from '[Dashport's denoland URI here]';
+import Dashport from 'https://deno.land/x/dashport@v1.0.0/mod.ts';
 
 const app = new Application();
 const router = new Router();
