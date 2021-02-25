@@ -260,8 +260,8 @@ router.get('/log-out',
 When a strategy successfully authenticates a user, the information given by the third-party provider should be returned on the AuthData object. This object should have an optional [tokenData](#tokendata) property and a required userInfo property in the form of [UserProfile](#userprofile). This contains the information for the [authenticate](#authenticate) method to use. The interface for AuthData is:
 ```typescript
 interface AuthData {
-  tokenData?: TokenData;
-  userInfo?: UserProfile;
+  tokenData: TokenData;
+  userInfo: UserProfile;
 }
 ```
 
