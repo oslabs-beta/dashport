@@ -15,9 +15,13 @@ export default class TemplateStrategy {
   name: string = '';
   options: StrategyOptions;
   uriFromParams: string;
-  authURL: string;
-  tokenURL: string;
-  authDataURL: string;
+  // ACTION NEEDED:
+  //   add the url for the first endpoint here
+  authURL: string = ''
+  //   add the url to exchange the auth code for a token here
+  tokenURL: string = ''
+  //   add the url to exchange the token for auth data here
+  authDataURL: string = ''
   /**
    * @constructor
    * @param {Object} options
@@ -26,17 +30,10 @@ export default class TemplateStrategy {
   constructor (options: StrategyOptions) {
     // customize with whatever fields are required to send to first redirect
     if (!options.client_id || !options.redirect_uri || !options.client_secret) {
-      throw new Error('Missing required arguments');
+      throw new Error('ERROR in TemplateStrategy constructor: Missing required arguments');
     }
 
     this.options = options;
-    // ACTION NEEDED:
-      // add the url for the first endpoint here
-    this.authURL = ''
-      // add the url to exchange the auth code for a token here
-    this.tokenURL = ''
-      // add the url to exchange the token for auth data here
-    this.authDataURL = ''
 
     // PRE STEP 1: 
       // Constructs the second half of the authURL for developer's first endpoint from the info put into 'options'
@@ -47,7 +44,7 @@ export default class TemplateStrategy {
   }
 
   constructURI(options: any, skip?: string[]): any {
-    let paramArray: string[][] = Object.entries(options);
+    const paramArray: string[][] = Object.entries(options);
     let paramString: string = '';
 
     for (let i = 0; i < paramArray.length; i++) {
@@ -99,7 +96,7 @@ export default class TemplateStrategy {
     if (!ctx.request.url.search) return await this.authorize(ctx, next);
     // GO_Step 3 Exchange code for Token
     // ACTION REQUIRED: verify that a successful response from getAuthToken includes 'code' in the location specified below
-    if (ctx.request.url.search.slice(1, 5)=== 'code') return this.getAuthToken(ctx, next);
+    if (ctx.request.url.search.slice(1, 5) === 'code') return this.getAuthToken(ctx, next);
   }
   
   // STEP 1: sends the programatically constructed uri to an OAuth 2.0 server
@@ -116,7 +113,7 @@ export default class TemplateStrategy {
     const OGURI: string = ctx.request.url.search;
 
     if (OGURI.includes('error')) {
-      return new Error('ERROR: Received an error from auth token code request.')
+      return new Error('ERROR in getAuthToken: Received an error from auth token code request.');
     }
 
     // EXTRACT THE AUTH CODE
@@ -145,13 +142,13 @@ export default class TemplateStrategy {
       data = await data.json();
 
       if (data.type === 'oAuthException') {
-        return new Error('ERROR: Token request threw OAuth exception.');
+        return new Error('ERROR in getAuthToken: Token request threw OAuth exception.');
       }
 
       // PASSES TOKEN ON TO STEP 4
       return this.getAuthData(data);
     } catch(err) {
-      return new Error(`ERROR: Unable to obtain token - ${err}`);
+      return new Error(`ERROR in getAuthToken: Unable to obtain token - ${err}`);
     }
   }
 
@@ -195,7 +192,7 @@ export default class TemplateStrategy {
 
       return authData;
     } catch(err) {
-      return new Error(`ERROR: Unable to obtain auth data - ${err}`);
+      return new Error(`ERROR in getAuthData: Unable to obtain auth data - ${err}`);
     }
   }
 }
