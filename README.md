@@ -15,6 +15,17 @@
   - [x] Spotify
 - Written in TypeScript.
 
+# Developers
+Alex Nance :: [LinkedIn](https://www.linkedin.com/in/balexandernance/) | [GitHub](https://github.com/BAlexanderNance)
+
+Alvin Cheng :: [LinkedIn](https://www.linkedin.com/in/alvin-cheng/) | [GitHub](https://github.com/alcheng005)
+
+Edward Deng :: [LinkedIn](https://www.linkedin.com/in/edwarddeng-/) | [GitHub](https://github.com/ed-deng)
+
+Sam Portelance :: [LinkedIn](https://www.linkedin.com/in/sportelance/) | [GitHub](https://github.com/sportelance)
+
+Wei Huang :: [LinkedIn](https://www.linkedin.com/in/wei-waye-huang/) | [GitHub](https://github.com/waye-huang)
+
 # Overview
 Dashport is a module that simplifies adding authentication middleware for Deno. Currently, the server framework being utilized is Oak, but Dashport has been modularized so that future frameworks can be easily added.
 
@@ -299,3 +310,10 @@ export interface UserProfile {
 - Extend serializerization and deserializerization process to be able to use multiple serializers and deserializers.
 - Add more strategies.
 - Add support for other server frameworks.
+
+# How To Contribute
+We would love to hear your experience and feed back on our modules, feel free to send us any issues, concerns or suggestions in the Issues section, or simply contacts us. 
+ 
+# License
+This project is licensed under the [MIT License](https://github.com/oslabs-beta/DraQLa/blob/main/LICENSE)
+
