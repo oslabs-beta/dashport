@@ -2,7 +2,7 @@
   <img src="https://i.imgur.com/3FndGDl.png" alt="Dashport logo"/>
 </p>
 
-*<h3 align="center">Authentication middleware for Deno</h3>*
+*<h3 align="center">Local authentication and OAuth 2.0 middleware for Deno</h3>*
 
 # Features
 - A Dashport class that handles authentication and serialization.
