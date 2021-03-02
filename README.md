@@ -2,11 +2,7 @@
   <img src="https://i.imgur.com/3FndGDl.png" alt="Dashport logo"/>
 </p>
 
-<h1 align="center">
-  <a href='https://www.dashport.org/'>Dashport</a>
-</h1>
-
-*<h3 align="center">Authentication middleware for <a href='https://deno.land/x/dashport'>Deno</a></h3>*
+*<h3 align="center">Local authentication and OAuth 2.0 middleware for <a href='https://deno.land/x/dashport'>Deno</a></h3>*
 
 <p align="center">
   </br>
@@ -28,11 +24,11 @@
 - A Dashport class that handles authentication and serialization.
 - A local strategy module.
 - Strategy modules that allow developers to use third-party OAuth 2.0
-  - [x] Google
-  - [x] Facebook
-  - [x] Github
-  - [x] LinkedIn
-  - [x] Spotify
+  - [x] [Google](https://github.com/oslabs-beta/dashport-googlestrategy)
+  - [x] [Facebook](https://github.com/oslabs-beta/dashport-facebookstrategy)
+  - [x] [Github](https://github.com/oslabs-beta/dashport-githubstrategy)
+  - [x] [LinkedIn](https://github.com/oslabs-beta/dashport-linkedinstrategy)
+  - [x] [Spotify](https://github.com/oslabs-beta/dashport-spotifystrategy)
 - Written in TypeScript.
 
 # Overview
@@ -298,8 +294,10 @@ router.get('/log-out',
 )
 ```
 
-# AuthData
-When a strategy successfully authenticates a user, the information given by the third-party provider should be returned on the AuthData object. This object should have a [tokenData](#tokendata) property and a userInfo property in the form of [UserProfile](#userprofile). This contains the information for the [authenticate](#authenticate) method to use. The interface for AuthData is:
+# Interfaces
+
+## AuthData
+When a strategy successfully authenticates a user, the information given by the third-party provider should be returned in the form AuthData. The object should have an optional [tokenData](#tokendata) property and a required userInfo property in the form of [UserProfile](#userprofile). This contains the information for the [authenticate](#authenticate) method to use. The interface for AuthData is as below:
 
 ```typescript
 interface AuthData {
@@ -308,7 +306,7 @@ interface AuthData {
 }
 ```
 
-# TokenData
+## TokenData
 Any relevant token data the developer wishes to receive from the third-party OAuth should be stored in an object with the below interface:
 
 ```typescript
@@ -321,7 +319,7 @@ interface TokenData {
 }
 ```
 
-# UserProfile
+## UserProfile
 Since every OAuth provider returns information in different names and shapes, it is up to each strategy to conform the data returned into Dashport's defined UserProfile interface. This should contain all data the developer wishes to use.
 
 ```typescript
@@ -341,6 +339,27 @@ export interface UserProfile {
 # Stretch Features
 - Merge deserialize's functionality into authenticate.
 - Currently only the first serializers and deserializers added are able to be used by Dashport. Add the option to use specific serializers and deserializers by name.
-- Extend serializerization and deserializerization process to be able to use multiple serializers and deserializers.
+- Extend serialization and deserialization process to be able to use multiple serializers and deserializers.
 - Add more strategies.
 - Add support for other server frameworks.
+
+# How To Contribute
+We would love to hear your experience and get your feedback on our modules. Feel free to send us any issues, concerns, or suggestions, in our Issues section, or simply contact us through LinkedIn.
+
+# Developers
+
+[*Dashport website*](https://www.dashport.org/)
+
+Alex Nance :: [LinkedIn](https://www.linkedin.com/in/balexandernance/) | [GitHub](https://github.com/BAlexanderNance)
+
+Alvin Cheng :: [LinkedIn](https://www.linkedin.com/in/alvin-cheng/) | [GitHub](https://github.com/alcheng005)
+
+Edward Deng :: [LinkedIn](https://www.linkedin.com/in/edwarddeng-/) | [GitHub](https://github.com/ed-deng)
+
+Sam Portelance :: [LinkedIn](https://www.linkedin.com/in/sportelance/) | [GitHub](https://github.com/sportelance)
+
+Wei Huang :: [LinkedIn](https://www.linkedin.com/in/wei-waye-huang/) | [GitHub](https://github.com/waye-huang)
+ 
+# License
+This project is licensed under the [MIT License](https://github.com/oslabs-beta/DraQLa/blob/main/LICENSE)
+
