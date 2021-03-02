@@ -339,7 +339,7 @@ export interface UserProfile {
 # Stretch Features
 - Merge deserialize's functionality into authenticate.
 - Currently only the first serializers and deserializers added are able to be used by Dashport. Add the option to use specific serializers and deserializers by name.
-- Extend serializerization and deserializerization process to be able to use multiple serializers and deserializers.
+- Extend serialization and deserialization process to be able to use multiple serializers and deserializers.
 - Add more strategies.
 - Add support for other server frameworks.
 
