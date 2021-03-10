@@ -1,0 +1,58 @@
+// import Dashport from 'https://deno.land/x/dashport/mod.ts';
+import Dashport from '../mod.ts';
+import GoogleStrategy from 'https://deno.land/x/dashport_google/mod.ts';
+
+const dashport = new Dashport('oak');
+
+dashport.addSerializer('serializer-1', async (userInfo: any) => {
+  const serializedId = Math.floor(Math.random() * 1000000000);
+  userInfo.id = serializedId;
+
+  try {
+    const exampleUser = await exampleDbCreateUpsert(userInfo);
+    return serializedId;
+  } catch(err) {
+    return err;
+    // or return new Error(err);
+  }
+});
+
+dashport.addDeserializer('deserializer-1', async (serializedId: number) => {
+  try {
+    const userInfo = await exampleDbFind({ id: serializedId });
+    return userInfo;
+  } catch(err) {
+    return err;
+    // or return new Error(err);
+  }
+});
+
+dashport.addStrategy('goog', new GoogleStrategy({
+  client_id: 'client-id-here',
+  client_secret: 'client-secret-here',
+  redirect_uri: 'http://localhost:8000/privatepage',
+  response_type: 'code',
+  scope: 'profile email openid',
+  grant_type: 'authorization_code',
+}));
+
+export default dashport;
+
+// dummy DB
+
+type MyUsers = Record<number, any>;
+
+const db: MyUsers = {};
+
+async function exampleDbCreateUpsert(userInfo: any) {
+	db[userInfo.id] = userInfo;
+	console.log("addeed user", userInfo.id, userInfo);
+}
+
+async function exampleDbFind({id}: {id: number}) {
+	const user = db[id];
+	console.log("lookup user", id, user);
+	if (!user)
+		throw new Error("User not found");
+	return user;
+}
