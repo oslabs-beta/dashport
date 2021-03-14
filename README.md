@@ -212,7 +212,7 @@ dashport.addSerializer('serializer-1', async (userInfo) => {
   userInfo.id = serializedId;
 
   try {
-    const exampleUser = await exampleDbCreateUpsert(userInfo);
+    await exampleDbCreateUpsert(userInfo);
     return serializedId;
   } catch(err) {
     return err;
