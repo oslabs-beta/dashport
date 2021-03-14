@@ -240,11 +240,11 @@ dashport.addDeserializer('deserializer-1', async (serializedId) => {
   try {
     const userInfo = await exampleDbFind({ id: serializedId });
     return userInfo;
-  catch(err) {
+  } catch(err) {
     return err;
     // or return new Error(err);
   }
-})
+});
 ```
 
 ## deserialize
