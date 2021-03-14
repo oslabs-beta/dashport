@@ -119,7 +119,7 @@ Dashport is now ready to authenticate. Dashport's authenticate method acts as mi
 
 ```typescript
 router.get('/privatepage', 
-  dashport.authenticate('goog') as any,
+  dashport.authenticate('goog'),
   async (ctx: any, next: any) => {
     ctx.response.body = 'This is a private page!';
   }
@@ -142,7 +142,7 @@ In order to end a session, a log out button can be routed to an endpoint that ca
 
 ```typescript
 router.get('/log-out',
-  dashport.logOut as any,
+  dashport.logOut,
   async (ctx: any, next: any) => {
     ctx.response.body = "You've logged out";
   }
@@ -191,7 +191,7 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 router.get('/privatepage', 
-  dashport.authenticate('name-of-strategy-added') as any,
+  dashport.authenticate('name-of-strategy-added'),
   async (ctx: any, next: any) => {
     ctx.response.body = 'This is a private page!';
   }
@@ -298,7 +298,7 @@ dashport.removeStrategy('goog');
 
 ```typescript
 router.get('/log-out',
-  dashport.logOut as any,
+  dashport.logOut,
   async (ctx: any, next: any) => {
     ctx.response.body = "You've logged out";
   }
