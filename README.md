@@ -59,7 +59,7 @@ dashport.addSerializer('serializer-1', async (userInfo: any) => {
   userInfo.id = serializedId;
 
   try {
-    const exampleUser = await exampleDbCreateUpsert(userInfo);
+    await exampleDbCreateUpsert(userInfo);
     return serializedId;
   } catch(err) {
     return err;
@@ -87,29 +87,6 @@ dashport.addStrategy('goog', new GoogleStrategy({
 }));
 
 export default dashport;
-```
-
-Here is some dummy database code:
-
-```typescript
-// dummy DB
-
-type MyUsers = Record<number, any>;
-
-const db: MyUsers = {};
-
-async function exampleDbCreateUpsert(userInfo: any) {
-  db[userInfo.id] = userInfo;
-  console.log("addeed user", userInfo.id, userInfo);
-}
-
-async function exampleDbFind({id}: {id: number}) {
-  const user = db[id];
-  console.log("lookup user", id, user);
-  if (!user)
-    throw new Error("User not found");
-  return user;
-}
 ```
 
 Dashport then needs to be initialized in the server file.
