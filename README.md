@@ -22,7 +22,7 @@
 
 # Features
 - A Dashport class that handles authentication and serialization.
-- A local strategy module.
+- A [local strategy](https://github.com/oslabs-beta/dashport-localstrategy) module.
 - Strategy modules that allow developers to use third-party OAuth 2.0
   - [x] [Google](https://github.com/oslabs-beta/dashport-googlestrategy)
   - [x] [Facebook](https://github.com/oslabs-beta/dashport-facebookstrategy)
