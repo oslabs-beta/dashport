@@ -124,12 +124,12 @@ class Dashport {
           // function, which will invoke the serializer(s) the developer specified.
           // serializedId is type 'any' because lefthand side of instanceof must
           // be type 'any'
-          const serializedId: any = self._sm.serialize(self._serializers, authData.userInfo);
+          const serializedId: any = await self._sm.serialize(self._serializers, authData.userInfo);
 
           // if serializedId is an Error, throw it to be caught
           if (serializedId instanceof Error) throw serializedId;
           if (typeof serializedId !== 'string' && typeof serializedId !== 'number') {
-            throw new Error('ERROR in authenticate: serializedId returned from serializer must be a string or an Error.')
+            throw new Error('ERROR in authenticate: serializedId returned from serializer must be a string, number, or an Error.')
           }
 
           // use SessionManager's logIn method to create a session object on
@@ -258,7 +258,7 @@ class Dashport {
         } else if (self._sId === ctx.state._dashport.session) {
           // a deserializer should either return the user info in an object or
           // an Error
-          userInfo = Object.values(self._deserializers)[0](ctx.state._dashport.session);
+          userInfo = await Object.values(self._deserializers)[0](ctx.state._dashport.session);
         } else {
           userInfo = new Error('ERROR in deserialize: serializedId cannot be authenticated');
         }

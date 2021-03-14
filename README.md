@@ -54,7 +54,7 @@ import GoogleStrategy from 'https://deno.land/x/dashport_google/mod.ts';
 
 const dashport = new Dashport('oak');
 
-dashport.addSerializer('serializer-1', (userInfo) => {
+dashport.addSerializer('serializer-1', async (userInfo: any) => {
   const serializedId = Math.floor(Math.random() * 1000000000);
   userInfo.id = serializedId;
 
@@ -67,9 +67,9 @@ dashport.addSerializer('serializer-1', (userInfo) => {
   }
 });
 
-dashport.addDeserializer('deserializer-1', (serializedId) => {
+dashport.addDeserializer('deserializer-1', async (serializedId: number) => {
   try {
-    const exampleUserInfo = await exampleDbFind({ id: serializedId });
+    const userInfo = await exampleDbFind({ id: serializedId });
     return userInfo;
   } catch(err) {
     return err;
@@ -79,14 +79,37 @@ dashport.addDeserializer('deserializer-1', (serializedId) => {
 
 dashport.addStrategy('goog', new GoogleStrategy({
   client_id: 'client-id-here',
-  redirect_uri: 'redirect-uri-here', 
-  response_type: 'response-type-here', 
-  scope: 'scopes-wanted-here',
   client_secret: 'client-secret-here',
-  grant_type: 'grant-type-here',
+  redirect_uri: 'http://localhost:8000/privatepage', 
+  response_type: 'code', 
+  scope: 'profile email openid',
+  grant_type: 'authorization_code',
 }));
 
 export default dashport;
+```
+
+Here is some dummy database code:
+
+```typescript
+// dummy DB
+
+type MyUsers = Record<number, any>;
+
+const db: MyUsers = {};
+
+async function exampleDbCreateUpsert(userInfo: any) {
+  db[userInfo.id] = userInfo;
+  console.log("addeed user", userInfo.id, userInfo);
+}
+
+async function exampleDbFind({id}: {id: number}) {
+  const user = db[id];
+  console.log("lookup user", id, user);
+  if (!user)
+    throw new Error("User not found");
+  return user;
+}
 ```
 
 Dashport then needs to be initialized in the server file.
@@ -95,22 +118,33 @@ Dashport then needs to be initialized in the server file.
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
 import dashport from './dashportconfig.ts';
 
+const port = 8000;
+
 const app = new Application();
 const router = new Router();
 
 app.use(dashport.initialize);
 
+// add routes here
+
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+app.addEventListener("error", (evt) => {
+  console.log(evt.error);
+});
+
+console.log('running on port', port);
+await app.listen({ port });
 ```
 
 Dashport is now ready to authenticate. Dashport's authenticate method acts as middleware, so it can be used like so with Oak:
 
 ```typescript
 router.get('/privatepage', 
-  dashport.authenticate('goog'),
+  dashport.authenticate('goog') as any,
   async (ctx: any, next: any) => {
-    ctx.body = 'This is a private page!';
+    ctx.response.body = 'This is a private page!';
   }
 )
 ```
@@ -122,7 +156,7 @@ router.get('/user-favorites',
   dashport.deserialize,
   async (ctx: any, next: any) => {
     const displayName = ctx.locals.displayName;
-    ctx.body = `Welcome ${displayName}!`;
+    ctx.response.body = `Welcome ${displayName}!`;
   }
 )
 ```
@@ -131,9 +165,9 @@ In order to end a session, a log out button can be routed to an endpoint that ca
 
 ```typescript
 router.get('/log-out',
-  dashport.logOut,
+  dashport.logOut as any,
   async (ctx: any, next: any) => {
-    ctx.body = `You've logged out";
+    ctx.response.body = "You've logged out";
   }
 )
 ```
@@ -180,9 +214,9 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 router.get('/privatepage', 
-  dashport.authenticate('name-of-strategy-added'),
+  dashport.authenticate('name-of-strategy-added') as any,
   async (ctx: any, next: any) => {
-    ctx.body = 'This is a private page!';
+    ctx.response.body = 'This is a private page!';
   }
 )
 ```
@@ -196,7 +230,7 @@ router.get('/privatepage',
   4. Return the serialized ID or an Error.
 
 ```typescript
-dashport.addSerializer('serializer-1', (userInfo) => {
+dashport.addSerializer('serializer-1', async (userInfo) => {
   const serializedId = Math.floor(Math.random() * 1000000000);
   userInfo.id = serializedId;
 
@@ -225,7 +259,7 @@ dashport.removeSerializer('serializer-1');
   3. Return the user info or an Error.
 
 ```typescript
-dashport.addDeserializer('deserializer-1', (serializedId) => {
+dashport.addDeserializer('deserializer-1', async (serializedId) => {
   try {
     const userInfo = await exampleDbFind({ id: serializedId });
     return userInfo;
@@ -245,7 +279,7 @@ router.get('/user-favorites',
   dashport.deserialize,
   async (ctx: any, next: any) => {
     const displayName = ctx.locals.displayName;
-    ctx.body = `Welcome ${displayName}!`;
+    ctx.response.body = `Welcome ${displayName}!`;
   }
 )
 ```
@@ -266,11 +300,11 @@ dashport.removeDeserializer('deserializer-1');
 ```typescript
 dashport.addStrategy('goog', new GoogleStrategy({
   client_id: 'client-id-here',
-  redirect_uri: 'redirect-uri-here', 
-  response_type: 'response-type-here', 
-  scope: 'scopes-wanted-here',
   client_secret: 'client-secret-here',
-  grant_type: 'grant-type-here',
+  redirect_uri: 'http://localhost:8000/privatepage', 
+  response_type: 'code', 
+  scope: 'profile email openid',
+  grant_type: 'authorization_code',
 }));
 ```
 
@@ -287,9 +321,9 @@ dashport.removeStrategy('goog');
 
 ```typescript
 router.get('/log-out',
-  dashport.logOut,
+  dashport.logOut as any,
   async (ctx: any, next: any) => {
-    ctx.body = `You've logged out";
+    ctx.response.body = "You've logged out";
   }
 )
 ```
