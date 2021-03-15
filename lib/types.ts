@@ -20,6 +20,23 @@ export interface OakContext {
 }
 
 /**
+ * All Dashport strategies are classes that must contain a router method
+ */
+ export interface Strategy {
+  router: Function;
+}
+
+/**
+ * All Dashport authenticate methods must take in one object as an argument
+ * in the shape of AuthConfig. The object must have the three properties below
+ */
+export interface AuthConfig {
+  strategy: Strategy;
+  serializer: Function;
+  deserializer: Function;
+}
+
+/**
  * Different OAuths will return different user information in different
  * structures. Dashport strategies should break down and reconstruct the user
  * info into the standardized UserProfile below
@@ -39,27 +56,20 @@ export interface UserProfile {
   emails?: Array<string>;
 }
 
-/**
- * The _serializers object or _deserializers object on Dashport that contains
- * serializer functions or deserializer functions respectively
- */
-export interface Translators {
-  [TranslatorName: string]: Function;
-}
+// /**
+//  * The _serializers object or _deserializers object on Dashport that contains
+//  * serializer functions or deserializer functions respectively
+//  */
+// export interface Translators {
+//   [TranslatorName: string]: Function;
+// }
 
-/**
- * All Dashport strategies are classes that must contain a router method
- */
-export interface Strategy {
-  router: Function;
-}
-
-/**
- * The _strategies object on Dashport that contains strategy classes
- */
-export interface Strategies {
-  [stratName: string]: Strategy;
-}
+// /**
+//  * The _strategies object on Dashport that contains strategy classes
+//  */
+// export interface Strategies {
+//   [stratName: string]: Strategy;
+// }
 
 /**
  * All OAuth 2.0 providers will provide access tokens
