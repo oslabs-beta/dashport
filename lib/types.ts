@@ -56,21 +56,6 @@ export interface UserProfile {
   emails?: Array<string>;
 }
 
-// /**
-//  * The _serializers object or _deserializers object on Dashport that contains
-//  * serializer functions or deserializer functions respectively
-//  */
-// export interface Translators {
-//   [TranslatorName: string]: Function;
-// }
-
-// /**
-//  * The _strategies object on Dashport that contains strategy classes
-//  */
-// export interface Strategies {
-//   [stratName: string]: Strategy;
-// }
-
 /**
  * All OAuth 2.0 providers will provide access tokens
  */
