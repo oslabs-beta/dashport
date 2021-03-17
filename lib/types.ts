@@ -27,16 +27,6 @@ export interface OakContext {
 }
 
 /**
- * All Dashport authenticate methods must take in one object as an argument
- * in the shape of AuthConfig. The object must have the three properties below
- */
-export interface AuthConfig {
-  strategy: Strategy;
-  serializer: Function;
-  deserializer: Function;
-}
-
-/**
  * Different OAuths will return different user information in different
  * structures. Dashport strategies should break down and reconstruct the user
  * info into the standardized UserProfile below
