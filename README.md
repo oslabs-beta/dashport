@@ -21,7 +21,7 @@
 </p>
 
 # Features
-- Dashport classes that handle authentication and serialization based on the server framework (currently only a DashportOak).
+- Dashport classes that handle authentication and sessions based on the server framework (currently only Oak supported).
 - A [local strategy](https://github.com/oslabs-beta/dashport-localstrategy) module.
 - Strategy modules that allow developers to use third-party OAuth 2.0
   - [x] [Google](https://github.com/oslabs-beta/dashport-googlestrategy)
