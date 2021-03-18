@@ -21,7 +21,7 @@
 </p>
 
 # Features
-- Dashport classes that handle authentication and serialization based on the server framework (currently only a DashportOak).
+- Dashport classes that handle authentication and sessions based on the server framework (currently only Oak supported).
 - A [local strategy](https://github.com/oslabs-beta/dashport-localstrategy) module.
 - Strategy modules that allow developers to use third-party OAuth 2.0
   - [x] [Google](https://github.com/oslabs-beta/dashport-googlestrategy)
@@ -35,7 +35,7 @@
 - Updated from v1.0.1 to v.1.1.0
 - Instead of passing in the name of the server framework being used when Dashport is instantiated, Dashport now has different classes for different server frameworks. This is to support better modularity.
 - Added a Dashport class for Oak, DashportOak.
-- A template Dashport has been provided for any developers to create their own Dashport for a server framework.
+- A template Dashport has been provided for any developer to create their own Dashport for a server framework.
 - Refactored authenticate to take three arguments instead of one - the strategy, the serializer, and the deserializer to be used vs the name of the strategy.
 - Removed add/remove serializer/deserializer methods.
 - Merged deserializer's functionality into authenticate.
@@ -59,7 +59,7 @@ In the future, additional Dashports can be imported from the same mod.ts file. F
 import DashportExpress from 'https://deno.land/x/dashport/mod.ts';
 ```
 
-After importing, instantiate Dashport. In order to maintain sessions for users, this specific instance of Dashport will need to be used when calling authenticate and logOut.
+After importing, instantiate Dashport. In order to maintain sessions for users, this specific instance of Dashport will need to be used when calling the methods initialize, authenticate, and logOut.
 
 ```typescript
 // 'dashportConfig.ts' file
@@ -125,7 +125,7 @@ export const deserializerB = async (serializedId: (string | number)) => {
 }
 ```
 
-Import the instance of Dashport where needed.
+The exported instance of Dashport can now be imported where needed.
 
 ```typescript
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
