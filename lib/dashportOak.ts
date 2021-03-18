@@ -47,9 +47,9 @@ class DashportOak {
    *   1. The serializer function needs to take in one argument which will be
    *      the user data in the form of an object. This will be in the shape of
    *      the UserProfile interface
-   *   2. The serializer function needs to specify what the developer wants to
+   *   2. The serializer function should to specify how to create a serialized ID
+   *   3. The serializer function needs to specify what the developer wants to
    *      do with the user data (e.g. store in a database)
-   *   3. The serializer function should to specify how to create a serialized ID
    *   4. The serializer function should return the serialized ID or an error
    * 
    * Deserializers are functions that need to have the following functionalities:
