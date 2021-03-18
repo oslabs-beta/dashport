@@ -59,7 +59,7 @@ In the future, additional Dashports can be imported from the same mod.ts file. F
 import DashportExpress from 'https://deno.land/x/dashport/mod.ts';
 ```
 
-After importing, instantiate Dashport. In order to maintain sessions for users, this specific instance of Dashport will need to be used when calling authenticate and logOut.
+After importing, instantiate Dashport. In order to maintain sessions for users, this specific instance of Dashport will need to be used when calling the methods initialize, authenticate, and logOut.
 
 ```typescript
 // 'dashportConfig.ts' file
@@ -125,7 +125,7 @@ export const deserializerB = async (serializedId: (string | number)) => {
 }
 ```
 
-Import the instance of Dashport where needed.
+The exported instance of Dashport can now be imported where needed.
 
 ```typescript
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
