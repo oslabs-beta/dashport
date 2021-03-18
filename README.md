@@ -35,7 +35,7 @@
 - Updated from v1.0.1 to v.1.1.0
 - Instead of passing in the name of the server framework being used when Dashport is instantiated, Dashport now has different classes for different server frameworks. This is to support better modularity.
 - Added a Dashport class for Oak, DashportOak.
-- A template Dashport has been provided for any developers to create their own Dashport for a server framework.
+- A template Dashport has been provided for any developer to create their own Dashport for a server framework.
 - Refactored authenticate to take three arguments instead of one - the strategy, the serializer, and the deserializer to be used vs the name of the strategy.
 - Removed add/remove serializer/deserializer methods.
 - Merged deserializer's functionality into authenticate.
