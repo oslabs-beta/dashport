@@ -15,7 +15,7 @@ export interface OakContext {
   sendEvents: Function;
   throw: Function;
   upgrade: Function;
-  params: any;
+  params?: any;
   locals?: any;
 }
 
