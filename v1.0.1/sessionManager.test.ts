@@ -1,6 +1,6 @@
 import { assertEquals, assertNotEquals } from '../../deps.ts';
-import SessionManager from '../sessionManager.ts';
-import Dashport from '../dashport.ts';
+import SessionManager from './sessionManager.ts';
+import Dashport from './dashport.ts';
 import { OakContext, Translators, UserProfile } from "../types.ts";
 
 const oakTestSM = new SessionManager('oak');
