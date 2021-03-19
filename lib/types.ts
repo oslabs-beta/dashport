@@ -15,8 +15,15 @@ export interface OakContext {
   sendEvents: Function;
   throw: Function;
   upgrade: Function;
-  params: any;
+  params?: any;
   locals?: any;
+}
+
+/**
+ * All Dashport strategies are classes that must contain a router method
+ */
+ export interface Strategy {
+  router: Function;
 }
 
 /**
@@ -37,28 +44,6 @@ export interface UserProfile {
     middleName?: string;
   };
   emails?: Array<string>;
-}
-
-/**
- * The _serializers object or _deserializers object on Dashport that contains
- * serializer functions or deserializer functions respectively
- */
-export interface Translators {
-  [TranslatorName: string]: Function;
-}
-
-/**
- * All Dashport strategies are classes that must contain a router method
- */
-export interface Strategy {
-  router: Function;
-}
-
-/**
- * The _strategies object on Dashport that contains strategy classes
- */
-export interface Strategies {
-  [stratName: string]: Strategy;
 }
 
 /**

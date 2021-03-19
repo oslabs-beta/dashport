@@ -21,8 +21,8 @@
 </p>
 
 # Features
-- A Dashport class that handles authentication and serialization.
-- A local strategy module.
+- Dashport classes that handle authentication and sessions based on the server framework (currently only Oak supported).
+- A [local strategy](https://github.com/oslabs-beta/dashport-localstrategy) module.
 - Strategy modules that allow developers to use third-party OAuth 2.0
   - [x] [Google](https://github.com/oslabs-beta/dashport-googlestrategy)
   - [x] [Facebook](https://github.com/oslabs-beta/dashport-facebookstrategy)
@@ -31,8 +31,17 @@
   - [x] [Spotify](https://github.com/oslabs-beta/dashport-spotifystrategy)
 - Written in TypeScript.
 
+# Updates
+- Updated from v1.0.1 to v.1.1.0
+- Instead of passing in the name of the server framework being used when Dashport is instantiated, Dashport now has different classes for different server frameworks. This is to support better modularity.
+- Added a Dashport class for Oak, DashportOak.
+- A template Dashport has been provided for any developer to create their own Dashport for a server framework.
+- Refactored authenticate to take three arguments instead of one - the strategy, the serializer, and the deserializer to be used vs the name of the strategy.
+- Removed add/remove serializer/deserializer methods.
+- Merged deserializer's functionality into authenticate.
+
 # Overview
-Dashport is a module that simplifies authentication in Deno. Currently, the server framework being utilized is Oak, but Dashport has been modularized so additional frameworks can be easily added as competitors to Oak appear.
+Dashport is a module that simplifies authentication in Deno. Currently, there is only Dashport support for the server framework Oak, but there is a template Dashport class available for anyone to create their own compatible Dashport.
 
 Dashport was inspired by [Passport](http://www.passportjs.org/), the golden standard of authentication middleware for Node.js.
 
@@ -40,34 +49,68 @@ Dashport was inspired by [Passport](http://www.passportjs.org/), the golden stan
 To get started, import Dashport. For easier configuration, import Dashport into its own file.
 
 ```typescript
-import Dashport from 'https://deno.land/x/dashport/mod.ts';
-
+// 'dashportConfig.ts' file
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
 ```
 
-Next, instantiate Dashport, passing in the name of the server framework being used (Dashport currently only supports Oak). Then begin adding configurations for a serializer, deserializer, and strategy. Any errors returned from serializers and deserializers should be instances of 'Error'.
+In the future, additional Dashports can be imported from the same mod.ts file. For example if Express was supported in Deno:
 
 ```typescript
-// 'dashportconfig.ts' file
+import DashportExpress from 'https://deno.land/x/dashport/mod.ts';
+```
 
-import Dashport from 'https://deno.land/x/dashport/mod.ts';
+After importing, instantiate Dashport. In order to maintain sessions for users, this specific instance of Dashport will need to be used when calling the methods initialize, authenticate, and logOut.
+
+```typescript
+// 'dashportConfig.ts' file
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+
+const dashport = new DashportOak();
+```
+
+Then begin adding configurations for a [strategy](#strategies), [serializer](#serializers), and [deserializer](#deserializers). Developers can configure as many strategies, serializers, and deserializers, as they want, as long as they follow the specific rules for each one.
+
+```typescript
+// 'dashportConfig.ts' file
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
 import GoogleStrategy from 'https://deno.land/x/dashport_google/mod.ts';
+import GitHubStrategy from 'https://deno.land/x/dashport_github/mod.ts'
 
-const dashport = new Dashport('oak');
+export const dashport = new DashportOak();
 
-dashport.addSerializer('serializer-1', async (userInfo: any) => {
+export const googStrat = new GoogleStrategy({
+  client_id: 'client-id-here',
+  client_secret: 'client-secret-here',
+  redirect_uri: 'http://localhost:8000/privatepage',
+  response_type: 'code', 
+  scope: 'profile email openid',
+  grant_type: 'authorization_code',
+});
+
+export const ghStrat = new GitHubStrategy({
+  client_id: 'client-id-here',
+  client_secret: 'client-secret-here',
+  redirect_uri: 'http://localhost:8000/privatepage',
+})
+
+export const serializerA = async (userInfo: any) => {
   const serializedId = Math.floor(Math.random() * 1000000000);
   userInfo.id = serializedId;
 
   try {
-    const exampleUser = await exampleDbCreateUpsert(userInfo);
+    await exampleDbCreateUpsert(userInfo);
     return serializedId;
   } catch(err) {
     return err;
     // or return new Error(err);
   }
-});
+};
 
-dashport.addDeserializer('deserializer-1', async (serializedId: number) => {
+export const serializerB = async (userInfo: any) => {
+  ...
+}
+
+export const deserializerA = async (serializedId: (string | number)) => {
   try {
     const userInfo = await exampleDbFind({ id: serializedId });
     return userInfo;
@@ -75,48 +118,18 @@ dashport.addDeserializer('deserializer-1', async (serializedId: number) => {
     return err;
     // or return new Error(err);
   }
-});
+};
 
-dashport.addStrategy('goog', new GoogleStrategy({
-  client_id: 'client-id-here',
-  client_secret: 'client-secret-here',
-  redirect_uri: 'http://localhost:8000/privatepage', 
-  response_type: 'code', 
-  scope: 'profile email openid',
-  grant_type: 'authorization_code',
-}));
-
-export default dashport;
-```
-
-Here is some dummy database code:
-
-```typescript
-// dummy DB
-
-type MyUsers = Record<number, any>;
-
-const db: MyUsers = {};
-
-async function exampleDbCreateUpsert(userInfo: any) {
-  db[userInfo.id] = userInfo;
-  console.log("addeed user", userInfo.id, userInfo);
-}
-
-async function exampleDbFind({id}: {id: number}) {
-  const user = db[id];
-  console.log("lookup user", id, user);
-  if (!user)
-    throw new Error("User not found");
-  return user;
+export const deserializerB = async (serializedId: (string | number)) => {
+  ...
 }
 ```
 
-Dashport then needs to be initialized in the server file.
+The exported instance of Dashport can now be imported where needed.
 
 ```typescript
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
-import dashport from './dashportconfig.ts';
+import { dashport } from './dashportConfig.ts';
 
 const port = 8000;
 
@@ -138,190 +151,154 @@ console.log('running on port', port);
 await app.listen({ port });
 ```
 
-Dashport is now ready to authenticate. Dashport's authenticate method acts as middleware, so it can be used like so with Oak:
+Dashport is now ready to authenticate. Dashport's authenticate method acts as middleware, so it can be used like so:
 
 ```typescript
+import { dashport, googStrat, serializerA, deserializerA } from './dashportConfig.ts';
+
 router.get('/privatepage', 
-  dashport.authenticate('goog') as any,
+  dashport.authenticate(googStrat, serializerA, deserializerA),
   async (ctx: any, next: any) => {
     ctx.response.body = 'This is a private page!';
   }
 )
 ```
 
-After authentication, Dashport will have serialized the user information that was returned using the developer's defined serializer and created a session. In order to get the user information in another route, Dashport's deserialize property can be used as middleware. If the framework being used is Oak, deserialize will store either the user information or an Error on **ctx.locals** for the next middleware to access.
+After authentication, Dashport will have created an ID based on the developer's defined serializer and manipulated the data however the developer specified (such as storing user info in a database). The ID then gets stored by Dashport to create a persistent session. Dashport will then invoke the developer's defined deserializer and pass in the ID. The deserializer will take this ID and manipulate it however the developer specified (such as fetching user info from the database). The returned data from the deserializer then gets stored on **ctx.locals** so the next middleware can access it. If an error occurred in the deserializer function and gets returned, the error will be stored on **ctx.locals**.
 
 ```typescript
 router.get('/user-favorites', 
-  dashport.deserialize,
+  dashport.authenticate(googStrat, serializerA, deserializerA),
   async (ctx: any, next: any) => {
-    const displayName = ctx.locals.displayName;
-    ctx.response.body = `Welcome ${displayName}!`;
+    if (ctx.locals instanceof Error) {
+      ctx.response.body = 'An Error occurred!';
+    } else {
+      const displayName = ctx.locals.displayName;
+      ctx.response.body = `Welcome ${displayName}!`;
+    }
   }
 )
 ```
 
-In order to end a session, a log out button can be routed to an endpoint that calls Dashport's logOut property. Here's an example use with Oak:
+In order to end a session, a log out button can be routed to an endpoint that calls Dashport's logOut method. Here's an example use with Oak:
 
 ```typescript
 router.get('/log-out',
-  dashport.logOut as any,
+  dashport.logOut,
   async (ctx: any, next: any) => {
     ctx.response.body = "You've logged out";
   }
 )
 ```
 
-# Methods
-
-## initialize
-- Functionality depends on the server framework that was passed in when instantiating Dashport.
-- Initialize is an asynchronous middleware function that creates a persistent Dashport object across multiple HTTP requests. For Oak, Dashport takes advantage of the persistent ctx.state and adds a Dashport key to it. This bypasses the need to do any monkey patching.
-
-```typescript
-// Oak example
-
-import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
-import Dashport from 'https://deno.land/x/dashport/mod.ts';
-
-const app = new Application();
-const dashport = new Dashport('oak');
-
-// use addSerializer, addDeserializer, and addStrategy, to add a serializer, deserializer, and strategy, to the Dashport instance
-
-app.use(dashport.initialize);
-```
-
-## authenticate
-- Functionality depends on the server framework that was passed in when instantiating Dashport.
-- Authenticate is the asynchronous middleware function that powers Dashport. It takes in one argument: the name of the strategy to be used. Authenticate first checks if a session exists. If a session does not exist, it begins the authentication process for the specified strategy.
-
-```typescript
-// Oak example
-
-import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
-import Dashport from 'https://deno.land/x/dashport/mod.ts';
-
-const app = new Application();
-const router = new Router();
-const dashport = new Dashport('oak');
-
-// use addSerializer, addDeserializer, and addStrategy, to add a serializer, deserializer, and strategy, to the Dashport instance
-
-app.use(dashport.initialize);
-
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-router.get('/privatepage', 
-  dashport.authenticate('name-of-strategy-added') as any,
-  async (ctx: any, next: any) => {
-    ctx.response.body = 'This is a private page!';
-  }
-)
-```
-
-## addSerializer
-- After a successful authentication, Dashport will pass the obtained user information to a serializer. It is up to the developer to define serializer functions that specify what to do with user information. User information will be passed in the form of Dashport's defined [AuthData](#authdata) interface.
-- addSerializer is a function that takes two arguments. The first argument is the name a developer wants to call their serializer and the second argument is the serializer function. Serializer functions need to
-  1. Accept one argument: the user data in the form of an object.
-  2. Specify what the developer wants to do with the user data (store it in a database, add some info to response object, etc).
-  3. Specify how to create a serialized ID.
-  4. Return the serialized ID or an Error.
-
-```typescript
-dashport.addSerializer('serializer-1', async (userInfo) => {
-  const serializedId = Math.floor(Math.random() * 1000000000);
-  userInfo.id = serializedId;
-
-  try {
-    const exampleUser = await exampleDbCreateUpsert(userInfo);
-    return serializedId;
-  } catch(err) {
-    return err;
-    // or return new Error(err);
-  }
-});
-```
-
-## removeSerializer
-- removeSerializer is a function that takes one argument: the name of the serializer to be removed.
-
-```typescript
-dashport.removeSerializer('serializer-1');
-```
-
-## addDeserializer
-- Deserializers are developer-defined functions that take in a serialized ID and return the user information that the developer wants to access in the next middleware. The shape of the return value is up to the developer.
-- addDeserializer is a function that takes two arguments. The first argument is the name a developer wants to call their deserializer and the second argument is the deserializer function. Deserializer functions need to
-  1. Take in one argument: the serialized ID.
-  2. Specify what the developer wants to do with the serialized ID to obtain user info (e.g. fetch the user info from a database).
-  3. Return the user info or an Error.
-
-```typescript
-dashport.addDeserializer('deserializer-1', async (serializedId) => {
-  try {
-    const userInfo = await exampleDbFind({ id: serializedId });
-    return userInfo;
-  catch(err) {
-    return err;
-    // or return new Error(err);
-  }
-})
-```
-
-## deserialize
-- Functionality depends on the server framework that was passed in when instantiating Dashport.
-- deserialize is an asynchronous middleware function that checks if a session exists. If a session exists, it checks if the session IDs match. If they do, it will execute the first deserializer added by the developer and store the user information for the next middleware to use. In Oak, if the deserialization is successful, the user information is stored on **ctx.locals**. If the deserialization is not successful, an Error will be stored on **ctx.locals**.
-
-```typescript
-router.get('/user-favorites', 
-  dashport.deserialize,
-  async (ctx: any, next: any) => {
-    const displayName = ctx.locals.displayName;
-    ctx.response.body = `Welcome ${displayName}!`;
-  }
-)
-```
-
-## removeDeserializer
-- removeDeserializer is a function that takes one argument. It will remove a deserializer by name that was added.
-
-```typescript
-dashport.removeDeserializer('deserializer-1');
-```
-
-## addStrategy
-- Strategies are the modules that can be imported with Dashport to allow third-party OAuth. They specify the authentication logic for the given OAuth service provider. 
-- addStrategy is a function that takes two arguments. The first argument is the name the developer wants to call the strategy. The second argument is a new instance of the strategy with its options passed in. Strategy classes need to:
+# Strategies
+- Strategies are the modules that can be imported with Dashport to allow third-party OAuth. They specify the authentication logic for a given OAuth service provider.
+- Strategy classes need to follow two rules:
   1. Have a router method that ultimately returns an Error or the user information returned by the third-party OAuth in the form of Dashport's defined [AuthData](#authdata) interface. AuthData needs to have a **userInfo** property in the form of [UserProfile](#userprofile) and a **tokenData** property in the form of [TokenData](#tokendata).
-  2. Take in any options that are needed for the specific third-party OAuth to authenticate.
+  2. When instantiated, take in the options that are needed for the specific third-party OAuth to authenticate.
 
 ```typescript
-dashport.addStrategy('goog', new GoogleStrategy({
+const googStrat = new GoogleStrategy({
   client_id: 'client-id-here',
   client_secret: 'client-secret-here',
   redirect_uri: 'http://localhost:8000/privatepage', 
   response_type: 'code', 
   scope: 'profile email openid',
   grant_type: 'authorization_code',
-}));
+});
 ```
 
-## removeStrategy
-- removeStrategy is a function that takes one parameter: the name of the strategy to remove.
+# Serializers
+- After a successful authentication, Dashport will pass the obtained user information to a serializer. It is up to the developer to define serializer functions that specify what to do with user information. User information will be passed in the form of Dashport's defined [AuthData](#authdata) interface.
+- Serializer functions need to follow four rules:
+  1. Accept one argument: the user data in the form of an object.
+  2. Specify how to create a serialized ID.
+  3. Specify what the developer wants to do with the user data (e.g. store it in a database).
+  4. Return the serialized ID or an Error.
 
 ```typescript
-dashport.removeStrategy('goog');
+const serializerA = async (userInfo: any) => {
+  const serializedId = Math.floor(Math.random() * 1000000000);
+  userInfo.id = serializedId;
+
+  try {
+    await exampleDbCreateUpsert(userInfo);
+    return serializedId;
+  } catch(err) {
+    return err;
+    // or return new Error(err);
+  }
+};
+```
+
+# Deserializers
+- After a successful authentication, Dashport will pass the serialized ID generated from the serializer to the deserializer. The developer should specify what the deserializer should do with the ID and return any data that should be available for access in the next middleware. The shape of the return value is up to the developer. In Oak, if the deserialization is successful, the data returned is stored on **ctx.locals**. If the deserialization is not successful, an Error will be stored on **ctx.locals**.
+- Deserializer functions need to follow three rules:
+  1. Accept one argument: the serialized ID.
+  2. Specify what the developer wants to do with the serialized ID (e.g. fetch user info from a database).
+  3. Return the data (e.g. user info) or an Error.
+
+```typescript
+const deserializerA = async (serializedId: (string | number)) => {
+  try {
+    const userInfo = await exampleDbFind({ id: serializedId });
+    return userInfo;
+  } catch(err) {
+    return err;
+    // or return new Error(err);
+  }
+};
+```
+
+# Dashport Methods
+
+## initialize
+- Exact functionality depends on which Dashport class is being used
+- Initialize is a middleware function that creates a persistent Dashport object across multiple HTTP requests.
+- For Oak, Dashport takes advantage of the persistent ctx.state and adds a Dashport key to it. This bypasses the need to monkey patch the HTTP object.
+
+```typescript
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+
+const app = new Application();
+const dashport = new DashportOak();
+
+app.use(dashport.initialize);
+```
+
+## authenticate
+- Exact functionality depends on which Dashport class is being used
+- Authenticate is the middleware function that powers Dashport. It takes in three arguments: the instantiation of a strategy to be used, a serializer function, and a deserializer function. Authenticate first checks if a session exists. If a session does not exist, it begins the authentication process for the specified strategy.
+
+```typescript
+// Oak example
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
+import { dashport, ghStrat, serializerB, deserializerB } from './dashportConfig.ts';
+
+const app = new Application();
+const router = new Router();
+
+app.use(dashport.initialize);
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+router.get('/secretpage', 
+  dashport.authenticate(ghStrat, serializerB, deserializerB),
+  async (ctx: any, next: any) => {
+    ctx.response.body = 'This is a secret page!';
+  }
+)
 ```
 
 ## logOut
-- Functionality depends on the server framework that was passed in when instantiating Dashport.
-- logOut is an asynchronous middleware function that ends a session. If a user logs out and logOut is used, the user will have to reauthenticate. Here is an example use with Oak:
+- Exact functionality depends on which Dashport class is being used
+- logOut is a middleware function that ends a session. If a user logs out and logOut is used, the user will have to reauthenticate. Here is an example use with Oak:
 
 ```typescript
 router.get('/log-out',
-  dashport.logOut as any,
+  dashport.logOut,
   async (ctx: any, next: any) => {
     ctx.response.body = "You've logged out";
   }
@@ -331,7 +308,7 @@ router.get('/log-out',
 # Interfaces
 
 ## AuthData
-When a strategy successfully authenticates a user, the information given by the third-party provider should be returned in the form AuthData. The object should have an optional [tokenData](#tokendata) property and a required userInfo property in the form of [UserProfile](#userprofile). This contains the information for the [authenticate](#authenticate) method to use. The interface for AuthData is as below:
+When a strategy successfully authenticates a user, the information given by the third-party provider should be returned in the form AuthData. The object should have an optional [tokenData](##tokendata) property and a required userInfo property in the form of [UserProfile](##userprofile). This contains the information for the [authenticate](##authenticate) method to use. The interface for AuthData is as below:
 
 ```typescript
 interface AuthData {
@@ -371,9 +348,6 @@ export interface UserProfile {
 ```
 
 # Stretch Features
-- Merge deserialize's functionality into authenticate.
-- Currently only the first serializers and deserializers added are able to be used by Dashport. Add the option to use specific serializers and deserializers by name.
-- Extend serialization and deserialization process to be able to use multiple serializers and deserializers.
 - Add more strategies.
 - Add support for other server frameworks.
 
