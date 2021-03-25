@@ -1,4 +1,4 @@
-import { AuthData, OakContext, Strategy } from './types.ts';
+import { AuthData, OakContext, Strategy } from '../types.ts';
 
 class DashportOak {
   private _sId: (string | number) = '';
