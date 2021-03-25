@@ -1,7 +1,13 @@
+import { Application } from "../deps.ts";
 import { AuthData, OakContext, Strategy } from '../types.ts';
 
 class DashportOak {
   private _sId: (string | number) = '';
+
+  constructor(app: Application) {
+    const self = this;
+    app.use(self.initialize);
+  }
 
   /**
    * Creates a _dashport object that will persist across multiple HTTP requests.
