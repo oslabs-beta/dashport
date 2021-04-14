@@ -54,20 +54,20 @@ Below is an example using the Oak server framework. To get started, import Dashp
 
 ```typescript
 // 'server.ts' file
-import { DashportOak } from 'https://deno.land/x/dashport/mod.ts';
+import { DashportOak } from 'https://deno.land/x/dashport@v1.2.1/mod.ts';
 ```
 
 In the future, additional Dashports can be imported from the same mod.ts file. For example if Express was supported in Deno:
 
 ```typescript
-import { DashportExpress } from 'https://deno.land/x/dashport/mod.ts';
+import { DashportExpress } from 'https://deno.land/x/dashport@v1.2.1/mod.ts';
 ```
 
 After importing Dashport, import Application from Oak and instantiate it.
 
 ```typescript
 // 'server.ts' file
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { DashportOak } from 'https://deno.land/x/dashport@v1.2.1/mod.ts';
 import { Application } from "https://deno.land/x/oak/mod.ts";
 
 const app = new Application();
@@ -77,7 +77,7 @@ Then instantiate Dashport and pass in the Application instance. This is needed i
 
 ```typescript
 // 'server.ts' file
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { DashportOak } from 'https://deno.land/x/dashport@v1.2.1/mod.ts';
 import { Application } from "https://deno.land/x/oak/mod.ts";
 
 const app = new Application();
@@ -87,7 +87,7 @@ const dashport = new DashportOak(app);
 Routes can then be added as needed
 
 ```typescript
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { DashportOak } from 'https://deno.land/x/dashport@v1.2.1/mod.ts';
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
 
 const app = new Application();
@@ -269,7 +269,7 @@ const deserializerA = async (serializedId: (string | number)) => {
 
 ```typescript
 // Oak example
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { DashportOak } from 'https://deno.land/x/dashport@v1.2.1/mod.ts';
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
 import { ghStrat, serializerB, deserializerB } from './dashportConfig.ts';
 
