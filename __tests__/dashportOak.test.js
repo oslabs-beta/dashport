@@ -1,5 +1,5 @@
 import { Application, assertEquals, assertThrows, assertThrowsAsync } from "../deps.ts";
-import DashportOak from '../frameworks/dashportOak.ts';
+import DashportOak from '../dashports/dashportOak.ts';
 
 // Mock class and functions
 class TestStrat {
