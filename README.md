@@ -54,7 +54,7 @@ Below is an example using the Oak server framework. To get started, import Dashp
 
 ```typescript
 // 'server.ts' file
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { DashportOak } from 'https://deno.land/x/dashport/mod.ts';
 ```
 
 In the future, additional Dashports can be imported from the same mod.ts file. For example if Express was supported in Deno:
