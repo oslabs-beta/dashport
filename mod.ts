@@ -1,2 +1,2 @@
-import DashportOak from './lib/dashportOak.ts';
-export default DashportOak;
+import DashportOak from './dashports/dashportOak.ts';
+export { DashportOak };

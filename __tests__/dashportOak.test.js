@@ -1,5 +1,5 @@
-import { assertEquals, assertThrows, assertThrowsAsync } from "../../deps.ts";
-import DashportOak from '../dashportOak.ts';
+import { Application, assertEquals, assertThrows, assertThrowsAsync } from "../deps.ts";
+import DashportOak from '../frameworks/dashportOak.ts';
 
 // Mock class and functions
 class TestStrat {
@@ -39,6 +39,7 @@ const fakeNext = () => 'fakeNext was invoked';
 Deno.test({
   name: "initialize should throw if ctx.state is undefined.",
   fn() {
+    const app = new Application();
     const fakeOakCtx = {
       app: {},
       cookies: {},
@@ -54,7 +55,7 @@ Deno.test({
       params: {}
     }
 
-    const testDpOak = new DashportOak();
+    const testDpOak = new DashportOak(app);
     assertThrowsAsync(async () => await testDpOak.initialize(fakeOakCtx, fakeNext));
   },
 });
@@ -62,6 +63,7 @@ Deno.test({
 Deno.test({
   name: "initialize should add a _dashport object onto ctx.state.",
   async fn() {
+    const app = new Application();
     const fakeOakCtx = {
       app: {},
       cookies: {},
@@ -78,7 +80,7 @@ Deno.test({
       state: {}
     }
 
-    const testDpOak = new DashportOak();
+    const testDpOak = new DashportOak(app);
     await testDpOak.initialize(fakeOakCtx, fakeNext);
 
     assertEquals(Object.keys(fakeOakCtx.state)[0], '_dashport');
@@ -92,7 +94,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if three arguments are not passed.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate({test: 'foobar'}));
     assertThrows(() => testDpOak.authenticate({test: 'foobar'}, fakeSerializer));
@@ -106,7 +109,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if strategy is not an object.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate('hello world', fakeSerializer, fakeDeserializer));
   },
@@ -115,7 +119,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if strategy does not have a router property.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate({ test: 'hello world' }, fakeSerializer, fakeDeserializer));
   },
@@ -124,7 +129,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if strategy's router property is not a function.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate({ router: 'hello world' }, fakeSerializer, fakeDeserializer));
   },
@@ -135,7 +141,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if serializer is not a function.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate(new TestStrat(), 'dashport', fakeDeserializer));
   },
@@ -144,7 +151,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if serializer does not take exactly 1 parameter.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate(new TestStrat(), () => 1, fakeDeserializer));
     assertThrows(() => testDpOak.authenticate(new TestStrat(), (test, testing) => 1, fakeDeserializer));
@@ -156,7 +164,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if deserializer is not a function.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate(new TestStrat(), fakeSerializer, 'dashport'));
   },
@@ -165,7 +174,8 @@ Deno.test({
 Deno.test({
   name: "authenticate should throw an error if deserializer does not take exactly 1 parameter.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
 
     assertThrows(() => testDpOak.authenticate(new TestStrat(), fakeSerializer, () => 'foobar'));
     assertThrows(() => testDpOak.authenticate(new TestStrat(), fakeSerializer, (id, testing) => 'foobar'));
@@ -177,7 +187,8 @@ Deno.test({
 Deno.test({
   name: "authenticate's middleware should throw an error if _dashport object does not exist on ctx.state.",
   fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
     const fakeOakCtx = {
       app: {},
       cookies: {},
@@ -201,7 +212,8 @@ Deno.test({
 Deno.test({
   name: "If ctx.state._dashport.session equals dashport._sId, authenticate should store the deserialized user info on ctx.locals and invoke the 'next' function.",
   async fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
     const fakeOakCtx = {
       app: {},
       cookies: {},
@@ -232,7 +244,8 @@ Deno.test({
 Deno.test({
   name: "If there is no session or session ID does not match, authenticate should call the strategy's router method and begin authentication.",
   async fn(){
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
     const fakeOakCtx = {
       app: {},
       cookies: {},
@@ -269,7 +282,8 @@ Deno.test({
 Deno.test({
   name: "logOut should delete the session property on ctx.state._dashport",
   async fn() {
-    const testDpOak = new DashportOak();
+    const app = new Application();
+    const testDpOak = new DashportOak(app);
     const fakeOakCtx = {
       app: {},
       cookies: {},

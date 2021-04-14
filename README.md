@@ -32,7 +32,11 @@
 - Written in TypeScript.
 
 # Updates
-- Updated from v1.0.1 to v.1.1.0
+
+## v1.1.0 to v1.2.0
+- Require Application instance for Oak to be passed in when instantiating DashportOak, removing the need for developers to manually call app.use(dashport.initialize).
+
+## v1.0.1 to v1.1.0
 - Instead of passing in the name of the server framework being used when Dashport is instantiated, Dashport now has different classes for different server frameworks. This is to support better modularity.
 - Added a Dashport class for Oak, DashportOak.
 - A template Dashport has been provided for any developer to create their own Dashport for a server framework.
@@ -46,37 +50,70 @@ Dashport is a module that simplifies authentication in Deno. Currently, there is
 Dashport was inspired by [Passport](http://www.passportjs.org/), the golden standard of authentication middleware for Node.js.
 
 # Getting Started
-To get started, import Dashport. For easier configuration, import Dashport into its own file.
+Below is an example using the Oak server framework. To get started, import Dashport into the server file.
 
 ```typescript
-// 'dashportConfig.ts' file
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+// 'server.ts' file
+import { DashportOak } from 'https://deno.land/x/dashport/mod.ts';
 ```
 
 In the future, additional Dashports can be imported from the same mod.ts file. For example if Express was supported in Deno:
 
 ```typescript
-import DashportExpress from 'https://deno.land/x/dashport/mod.ts';
+import { DashportExpress } from 'https://deno.land/x/dashport/mod.ts';
 ```
 
-After importing, instantiate Dashport. In order to maintain sessions for users, this specific instance of Dashport will need to be used when calling the methods initialize, authenticate, and logOut.
+After importing Dashport, import Application from Oak and instantiate it.
+
+```typescript
+// 'server.ts' file
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { Application } from "https://deno.land/x/oak/mod.ts";
+
+const app = new Application();
+```
+
+Then instantiate Dashport and pass in the Application instance. This is needed in order to add a Dashport property onto Oak's context object. This specific instance of Dashport will then need to be used when calling the methods authenticate and logOut, so sessions for users can be maintained.
+
+```typescript
+// 'server.ts' file
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { Application } from "https://deno.land/x/oak/mod.ts";
+
+const app = new Application();
+const dashport = new DashportOak(app);
+```
+
+Routes can then be added as needed
+
+```typescript
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
+import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
+
+const app = new Application();
+const router = new Router();
+
+const dashport = new DashportOak(app);
+
+// add routes here
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+app.addEventListener("error", (evt) => {
+  console.log(evt.error);
+});
+
+console.log('running on port', port);
+await app.listen({ port });
+```
+
+In a separate file, add Dashport configurations for a [strategy](#strategies), [serializer](#serializers), and [deserializer](#deserializers). Developers can configure as many strategies, serializers, and deserializers, as they want, as long as they follow the specific rules for each one.
 
 ```typescript
 // 'dashportConfig.ts' file
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
-
-const dashport = new DashportOak();
-```
-
-Then begin adding configurations for a [strategy](#strategies), [serializer](#serializers), and [deserializer](#deserializers). Developers can configure as many strategies, serializers, and deserializers, as they want, as long as they follow the specific rules for each one.
-
-```typescript
-// 'dashportConfig.ts' file
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
 import GoogleStrategy from 'https://deno.land/x/dashport_google/mod.ts';
 import GitHubStrategy from 'https://deno.land/x/dashport_github/mod.ts'
-
-export const dashport = new DashportOak();
 
 export const googStrat = new GoogleStrategy({
   client_id: 'client-id-here',
@@ -125,36 +162,10 @@ export const deserializerB = async (serializedId: (string | number)) => {
 }
 ```
 
-The exported instance of Dashport can now be imported where needed.
+Import these configurations into the server.ts file and Dashport is now ready to authenticate. Dashport's authenticate method acts as middleware, so it can be used like so:
 
 ```typescript
-import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
-import { dashport } from './dashportConfig.ts';
-
-const port = 8000;
-
-const app = new Application();
-const router = new Router();
-
-app.use(dashport.initialize);
-
-// add routes here
-
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-app.addEventListener("error", (evt) => {
-  console.log(evt.error);
-});
-
-console.log('running on port', port);
-await app.listen({ port });
-```
-
-Dashport is now ready to authenticate. Dashport's authenticate method acts as middleware, so it can be used like so:
-
-```typescript
-import { dashport, googStrat, serializerA, deserializerA } from './dashportConfig.ts';
+import { googStrat, serializerA, deserializerA } from './dashportConfig.ts';
 
 router.get('/privatepage', 
   dashport.authenticate(googStrat, serializerA, deserializerA),
@@ -252,34 +263,20 @@ const deserializerA = async (serializedId: (string | number)) => {
 
 # Dashport Methods
 
-## initialize
-- Exact functionality depends on which Dashport class is being used
-- Initialize is a middleware function that creates a persistent Dashport object across multiple HTTP requests.
-- For Oak, Dashport takes advantage of the persistent ctx.state and adds a Dashport key to it. This bypasses the need to monkey patch the HTTP object.
-
-```typescript
-import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
-import DashportOak from 'https://deno.land/x/dashport/mod.ts';
-
-const app = new Application();
-const dashport = new DashportOak();
-
-app.use(dashport.initialize);
-```
-
 ## authenticate
 - Exact functionality depends on which Dashport class is being used
 - Authenticate is the middleware function that powers Dashport. It takes in three arguments: the instantiation of a strategy to be used, a serializer function, and a deserializer function. Authenticate first checks if a session exists. If a session does not exist, it begins the authentication process for the specified strategy.
 
 ```typescript
 // Oak example
+import DashportOak from 'https://deno.land/x/dashport/mod.ts';
 import { Application, Router } from 'https://deno.land/x/oak/mod.ts';
-import { dashport, ghStrat, serializerB, deserializerB } from './dashportConfig.ts';
+import { ghStrat, serializerB, deserializerB } from './dashportConfig.ts';
 
 const app = new Application();
 const router = new Router();
 
-app.use(dashport.initialize);
+const dashport = new DashportOak(app);
 
 app.use(router.routes());
 app.use(router.allowedMethods());
